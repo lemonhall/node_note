@@ -1,12 +1,12 @@
-【目录】
-一、前言
-二、收集系统信息
-三、安装node.js
-四、安装Nginx
-五、配置nginx以及Node.js，express.js，以及socket.io
+#【目录】
+## 一、前言
+## 二、收集系统信息
+## 三、安装node.js
+## 四、安装Nginx
+## 五、配置nginx以及Node.js，express.js，以及socket.io
 
 
-一、【前言】
+# 一、【前言】
 
 二、【收集系统信息】
 0、收集系统信息的目的
