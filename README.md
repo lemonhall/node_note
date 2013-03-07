@@ -1,59 +1,63 @@
 #【目录】
-## 一、前言
-## 二、收集系统信息
-## 三、安装node.js
-## 四、安装Nginx
-## 五、配置nginx以及Node.js，express.js，以及socket.io
+一、前言
+二、收集系统信息
+三、安装node.js
+四、安装Nginx
+五、配置nginx以及Node.js，express.js，以及socket.io
 
 
 # 一、【前言】
 
-二、【收集系统信息】
-0、收集系统信息的目的
-cpu信息直接关系到nginx的配置，磁盘信息多少关系到你的文件存储，raid信息用来搞定系统稳定性问题，内存信息决定了你的应用之后要不要上redis来做缓存，memcached的配置等等....随着这篇文章的深入，可能还要把node与redis，node与memcached，测试，系统调优等等一系列的东西全部加进来。
+# 二、【收集系统信息】
 
-1、cpu信息
+## 0、收集系统信息的目的
+
+cpu信息直接关系到nginx的配置，磁盘信息多少关系到你的文件存储，raid信息用来搞定系统稳定性问题，内存信息决定了你的应用之后要不要上redis来做缓存，memcached的配置等等....
+随着这篇文章的深入，可能还要把node与redis，node与memcached，测试，系统调优等等一系列的东西全部加进来。
+
+## 1、cpu信息
 http://www.cyberciti.biz/faq/linux-get-number-of-cpus-core-command/
 a) nproc
 b) lscpu
 c) less /proc/cpuinfo
 
-2、磁盘信息
+## 2、磁盘信息
 df -h
 
-3、raid信息
+## 3、raid信息
 
-4、内存信息
+## 4、内存信息
 
-==============================================
-三、【安装Node.js】
+# 三、【安装Node.js】
 
-1、确认操作系统版本
+## 1、确认操作系统版本
 yum install vim redhat-lsb -y
 lsb_release  -a
 
-2、确认python版本
+## 2、确认python版本
 python -V
 一定要大于2.6
 
-3、安装编译包
+## 3、安装编译包
 yum install make gcc gcc-c++
 
-4、下载源码包,./confiugre,make,make install
+## 4、下载源码包,./confiugre,make,make install
 
-5、增加用户(cat /etc/group来查看有哪些组)
+## 5、增加用户(cat /etc/group来查看有哪些组)
 http://www.cyberciti.biz/faq/howto-linux-add-user-to-group/
 
 useradd -m -d /home/node node
 usermod -a -G nobody node
 
-6、su node后git部署文件...
+## 6、su node后git部署文件...
 
-7、forever start server.js
+## 7、forever start server.js
 
-8、把forever start server.js加入启动项里去....
+## 8、把forever start server.js加入启动项里去....
 http://hectorcorrea.com/blog/running-a-node-js-web-site-in-production-a-beginners-guide
+
 https://gist.github.com/thehunmonkgroup/2042409
+
 http://drupalcode.org/sandbox/frans/1524436.git/blob/ad7b1a99bf3aefcda353d64a800f5e56f5543e45:/nodejs/node_modules/forever/examples/initd-example
 
 ```bash
@@ -154,18 +158,18 @@ esac
 exit $RETVAL
 ```
 
-===============================
-四、【安装NGINX】
-1、下载并安装依赖包
+#四、【安装NGINX】
+
+## 1、下载并安装依赖包
 http://articles.slicehost.com/2009/2/2/centos-installing-nginx-from-source
 
 wget http://nginx.org/download/nginx-1.3.14.tar.gz
 
 sudo yum install pcre-devel zlib-devel openssl-devel
 
-2、编译安装./configure make install
+## 2、编译安装./configure make install
 
-3、增加系统配置文件
+## 3、增加系统配置文件
 http://articles.slicehost.com/2009/2/2/centos-adding-an-nginx-init-script
 
 vim /etc/init.d/nginx
@@ -295,9 +299,7 @@ Done.
 The script will now be called on a reboot so Nginx will automatically start.
 
 
-=======================================================
-
-五、【配置nginx以及Node.js，express.js，以及socket.io】
+# 五、【配置nginx以及Node.js，express.js，以及socket.io】
 
 https://engineering.gosquared.com/optimising-nginx-node-js-and-networking-for-heavy-workloads
 http://savanne.be/articles/deploying-node-js-with-systemd/
