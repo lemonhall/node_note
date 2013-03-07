@@ -56,6 +56,7 @@ http://hectorcorrea.com/blog/running-a-node-js-web-site-in-production-a-beginner
 https://gist.github.com/thehunmonkgroup/2042409
 http://drupalcode.org/sandbox/frans/1524436.git/blob/ad7b1a99bf3aefcda353d64a800f5e56f5543e45:/nodejs/node_modules/forever/examples/initd-example
 
+```bash
 #!/bin/bash
 #
 # initd-example      Node init.d 
@@ -151,6 +152,8 @@ case "$1" in
         ;;
 esac
 exit $RETVAL
+```
+
 ===============================
 四、【安装NGINX】
 1、下载并安装依赖包
@@ -167,6 +170,7 @@ http://articles.slicehost.com/2009/2/2/centos-adding-an-nginx-init-script
 
 vim /etc/init.d/nginx
 
+```bash
 #!/bin/sh
 #
 # nginx - this script starts and stops the nginx daemin
@@ -273,6 +277,7 @@ case "$1" in
         echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload|configtest}"
         exit 2
 esac
+```
 
 chmod +x /etc/init.d/nginx
 
@@ -298,6 +303,7 @@ https://engineering.gosquared.com/optimising-nginx-node-js-and-networking-for-he
 http://savanne.be/articles/deploying-node-js-with-systemd/
 http://blog.argteam.com/coding/hardening-node-js-for-production-part-2-using-nginx-to-avoid-node-js-load/
 
+```
 location / {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -306,10 +312,11 @@ location / {
       proxy_pass http://127.0.0.1:3000/;
       proxy_redirect off;
     }
-
+```
 
 可以用servername的方式来在80端口监听多个站点....
 
+```
 server {
         listen  80;
         server_name xxx.example.com;
@@ -318,3 +325,4 @@ server {
         listen       80;
         server_name  yyy.example.com;
 }
+```ruby
