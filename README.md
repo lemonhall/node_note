@@ -1,3 +1,6 @@
+怎样写Github上的Markdown？
+https://help.github.com/articles/github-flavored-markdown
+
 #【目录】
 一、前言
 二、收集系统信息
