@@ -13,18 +13,18 @@ https://help.github.com/articles/github-flavored-markdown
 
 # 二、【收集系统信息】
 
-## 0、收集系统信息的目的
+0.收集系统信息的目的
 
 cpu信息直接关系到nginx的配置，磁盘信息多少关系到你的文件存储，raid信息用来搞定系统稳定性问题，内存信息决定了你的应用之后要不要上redis来做缓存，memcached的配置等等....
 随着这篇文章的深入，可能还要把node与redis，node与memcached，测试，系统调优等等一系列的东西全部加进来。
 
-## 1、cpu信息
+1.cpu信息
 http://www.cyberciti.biz/faq/linux-get-number-of-cpus-core-command/
 a) nproc
 b) lscpu
 c) less /proc/cpuinfo
 
-## 2、磁盘信息
+2.磁盘信息
 df -h
 
 ## 3、raid信息
