@@ -2,15 +2,15 @@
 yum install vsftpd
 
 2.	配置用户名和目录
-sudouseraddwukongftp -s /sbin/nologin -d /backup/ftp添加用户
-sudopasswdwukongftp用户密码
+sudo useradd wukongftp -s /sbin/nologin -d /backup/ftp添加用户
+sudo passwd wukongftp 用户密码
 
 3.	vsftpd配置
 sudo vim /etc/vsftpd/vsftpd.conf
-1. anonymous_enable=NO
-2. chroot_local_user=NO
-chroot_list_enable=YES
-chroot_list_file=/etc/vsftpd/chroot_list
+	1. anonymous_enable=NO
+	2. chroot_local_user=NO
+	chroot_list_enable=YES
+	chroot_list_file=/etc/vsftpd/chroot_list
 
 sudo echo wukongftp>/etc/vsftpd/chroot_list
 
