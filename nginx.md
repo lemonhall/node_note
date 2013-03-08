@@ -1,0 +1,137 @@
+## 1、下载并安装依赖包
+http://articles.slicehost.com/2009/2/2/centos-installing-nginx-from-source
+
+wget http://nginx.org/download/nginx-1.3.14.tar.gz
+
+sudo yum install pcre-devel zlib-devel openssl-devel
+
+## 2、编译安装./configure make install
+
+## 3、增加系统配置文件
+http://articles.slicehost.com/2009/2/2/centos-adding-an-nginx-init-script
+
+vim /etc/init.d/nginx
+
+```bash
+#!/bin/sh
+#
+# nginx - this script starts and stops the nginx daemin
+#
+# chkconfig:   - 85 15 
+# description:  Nginx is an HTTP(S) server, HTTP(S) reverse \
+#               proxy and IMAP/POP3 proxy server
+# processname: nginx
+# config:      /usr/local/nginx/conf/nginx.conf
+# pidfile:     /usr/local/nginx/logs/nginx.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "$NETWORKING" = "no" ] && exit 0
+
+nginx="/usr/local/nginx/sbin/nginx"
+prog=$(basename $nginx)
+
+NGINX_CONF_FILE="/usr/local/nginx/conf/nginx.conf"
+
+lockfile=/var/lock/subsys/nginx
+
+start() {
+    [ -x $nginx ] || exit 5
+    [ -f $NGINX_CONF_FILE ] || exit 6
+    echo -n $"Starting $prog: "
+    daemon $nginx -c $NGINX_CONF_FILE
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog -QUIT
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+restart() {
+    configtest || return $?
+    stop
+    start
+}
+
+reload() {
+    configtest || return $?
+    echo -n $"Reloading $prog: "
+    killproc $nginx -HUP
+    RETVAL=$?
+    echo
+}
+
+force_reload() {
+    restart
+}
+
+configtest() {
+  $nginx -t -c $NGINX_CONF_FILE
+}
+
+rh_status() {
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart|configtest)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+            ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload|configtest}"
+        exit 2
+esac
+```
+
+chmod +x /etc/init.d/nginx
+
+【Chkconfig】
+
+Now we have the base script prepared, we need to add it to the default run levels:
+
+sudo /sbin/chkconfig nginx on
+Let's check our work to confirm:
+
+sudo /sbin/chkconfig --list nginx
+nginx           0:off   1:off   2:on    3:on    4:on    5:on    6:off
+Done.
+
+The script will now be called on a reboot so Nginx will automatically start.
