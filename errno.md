@@ -1,0 +1,1 @@
+printf("Socket Sendto error %d : %s\n", errno, strerror(errno));
