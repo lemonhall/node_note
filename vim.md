@@ -15,3 +15,6 @@ set nu是显示行号....
 5、复制粘贴很少用
 
 6、supertab插件要善用，来检查问题
+
+7、http://www.cnblogs.com/jianyungsun/archive/2011/03/19/1988855.html
+复制粘贴，其实就是按住v进入v模式，y是复制。。p是粘贴........d是剪切
