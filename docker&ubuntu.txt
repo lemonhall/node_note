@@ -1,0 +1,14 @@
+1、安装docker.io
+apt-get install docker.io
+
+2、迁移目录，防止撑爆硬盘
+service docker.io stop
+mv /var/lib/docker /docker/
+ln -s /docker/docker /var/lib/docker
+service docker.io start
+
+3、拉取centos
+docker pull centos7
+
+4、运行
+docker run -t -i centos:centos7 /bin/bash

@@ -1,0 +1,12 @@
+1、mahout
+hadoop
+spark
+
+2、predictionIO
+
+3、书
+
+4、热/冷
+
+============================
+MAP-REDUCE。。。推荐

@@ -1,0 +1,30 @@
+需要2核4G的机器，内存稍大才可以编译成功
+
+git clone https://github.com/alibaba/dubbo.git
+mvn clean install -Dmaven.test.skip
+export MAVEN_OPTS="-Xms512m -Xmx1024m"
+
+1、启动zk
+cd /opt/zk/conf
+cp zoo_sample.cfg zoo.cfg
+cd ../bin
+./zkServer.sh start
+
+2、启动admin
+cd ~/dubbo/dubbo-admin
+target里面的war包丢到tomcat的webapps目录下面去
+然后bin/statup.sh
+启动之后8080端口即可以向外服务
+http://xxxx:8080/dubbo-admin/
+会提示你输入用户名和密码，root,root......
+
+
+3、启动monitor
+cd ~/dubbo/dubbo-simple/dubbo-monitor-simple/target
+./start.sh
+vi dubbo.properties
+   - edit: dubbo.registry.adddress=dubbo://127.0.0.1:9090
+cd ../bin
+./restart.sh
+
+

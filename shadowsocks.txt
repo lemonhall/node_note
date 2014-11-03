@@ -1,0 +1,5 @@
+apt-get install golang git mercurial
+export GOPATH=/root
+go get github.com/shadowsocks/shadowsocks-go/cmd/shadowsocks-server
+cd bin
+./shadowsocks-server -p 8388 -k xxxxxxxxxxxx -m aes-128-cfb -c config.json -t 120 -d

@@ -1,0 +1,175 @@
+1、下载
+wget http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.21.tar.gz
+
+2、依赖
+yum -y install  gcc gcc-c++ gcc-g77 autoconf automake zlib* fiex* libxml* ncurses-devel libmcrypt* libtool-ltdl-devel* make cmake
+
+3、加用户和组
+groupadd mysql
+useradd -r -g mysql mysql
+
+4、编译
+cmake .
+make && make install
+
+5、安装脚本
+chown -R mysql.mysql /usr/local/mysql
+cd /usr/local/mysql/scripts
+./mysql_install_db --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
+cd /usr/local/mysql/support-files
+cp mysql.server /etc/rc.d/init.d/mysql
+cp my-default.cnf /etc/my.cnf
+chkconfig --add mysql
+chkconfig mysql on
+service mysql start
+
+6、设置root密码
+mysqladmin -u root password
+
+7、设置脚本
+
+SELECT User, Host FROM mysql.user WHERE Host <> 'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.8.1' IDENTIFIED BY '123456' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+service mariadb restart
+
+8、连接管理
+show full processlist;
+show variables like 'max_connections';(查可以看当前的最大连接数)
+默认的是151
+
+9、迁移数据库
+9.1 扩容硬盘
+加载硬盘
+fdisk -l
+
+对硬盘进行分区:
+
+# fdisk /dev/sdc
+然后根据提示，依次输入 n, p, 1, 以及两次回车，然后是 wq，完成保存。 这样再次通过 fdisk -l 查看时，你可以看到新建的分区 /dev/sdc1
+
+
+分区后要进行格式化，例如格式化为 ext4 格式
+
+# mkfs -t ext4 /dev/sdc1
+
+mkdir -p /data && mount -t ext4 /dev/sdc1 /data
+
+自动挂载
+
+blkid /dev/sdc1
+/dev/sdc1: UUID="d2daff67-5fde-4b6d-bec9-1ca421ce8389" TYPE="ext4"
+
+改写/etc/fstab
+UUID=4e91c46a-8dc6-4267-b90d-6f86f47d5dab /data ext4 defaults 0 2
+
+报错，因为权限问题
+chown -hR mysql:mysql /data
+
+9.2 迁移mysql数据库
+service mariadb stop
+vim /etc/my.cnf
+
+---------------------------
+
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+# Settings user and group are ignored when systemd is used.
+# If you need to run mysqld under a different user or group,
+# customize your systemd unit file for mariadb according to the
+# instructions in http://fedoraproject.org/wiki/Systemd
+
+[mysqld_safe]
+log-error=/var/log/mariadb/mariadb.log
+pid-file=/var/run/mariadb/mariadb.pid
+
+#
+# include all files from the config directory
+#
+!includedir /etc/my.cnf.d
+
+---------------------------
+
+[mysqld]
+datadir=/data/lib/mysql
+socket=/data/lib/mysql/mysql.sock
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+# Settings user and group are ignored when systemd is used.
+# If you need to run mysqld under a different user or group,
+# customize your systemd unit file for mariadb according to the
+# instructions in http://fedoraproject.org/wiki/Systemd
+
+[mysqld_safe]
+log-error=/data/log/mariadb/mariadb.log
+pid-file=/data/run/mariadb/mariadb.pid
+
+#
+# include all files from the config directory
+#
+!includedir /etc/my.cnf.d
+
+---------------------------
+然后建立目录
+mkdir /data/lib
+mkdir /data/log
+mkdir /data/run
+mkdir /data/lib/mysql
+mkdir /data/log/mariadb
+mkdir /data/run/mariadb
+chown -hR mysql:mysql /data
+
+---------------------------
+service mariadb start
+
+---------------------------
+[root@i-06csjvbm mysql]# service mariadb start
+Redirecting to /bin/systemctl start  mariadb.service
+Job for mariadb.service failed. See 'systemctl status mariadb.service' and 'journalctl -xn' for details.
+[root@i-06csjvbm mysql]# systemctl status mariadb.service
+mariadb.service - MariaDB database server
+   Loaded: loaded (/usr/lib/systemd/system/mariadb.service; disabled)
+   Active: failed (Result: exit-code) since Fri 2014-10-17 09:51:33 CST; 11s ago
+  Process: 1645 ExecStartPost=/usr/libexec/mariadb-wait-ready $MAINPID (code=exited, status=0/SUCCESS)
+  Process: 1644 ExecStart=/usr/bin/mysqld_safe --basedir=/usr (code=exited, status=1/FAILURE)
+  Process: 7624 ExecStartPre=/usr/libexec/mariadb-prepare-db-dir %n (code=exited, status=1/FAILURE)
+ Main PID: 1644 (code=exited, status=1/FAILURE)
+
+Oct 17 09:51:33 i-06csjvbm mariadb-prepare-db-dir[7624]: chmod: changing permissions of ‘/data/mysql’: Operation not permitted
+Oct 17 09:51:33 i-06csjvbm mariadb-prepare-db-dir[7624]: Initializing MySQL database
+Oct 17 09:51:33 i-06csjvbm mariadb-prepare-db-dir[7624]: chown: changing ownership of ‘/data/mysql’: Operation not permitted
+Oct 17 09:51:33 i-06csjvbm mariadb-prepare-db-dir[7624]: Cannot change ownership of the database directories to the 'mysql'
+Oct 17 09:51:33 i-06csjvbm mariadb-prepare-db-dir[7624]: user.  Check that you have the necessary permissions and try again.
+Oct 17 09:51:33 i-06csjvbm mariadb-prepare-db-dir[7624]: Initialization of MySQL database failed.
+Oct 17 09:51:33 i-06csjvbm mariadb-prepare-db-dir[7624]: Perhaps /etc/my.cnf is misconfigured.
+Oct 17 09:51:33 i-06csjvbm systemd[1]: mariadb.service: control process exited, code=exited status=1
+Oct 17 09:51:33 i-06csjvbm systemd[1]: Failed to start MariaDB database server.
+Oct 17 09:51:33 i-06csjvbm systemd[1]: Unit mariadb.service entered failed state.
+
+-----------------------------------
+报错，因为权限问题
+拷贝/var/lib/mysql的目录到data，然后还是要修改权限
+chown -hR mysql:mysql /data
+
+
+-----------------------------------
+修改客户端的sock地址
+vim /etc/my.cnf.d/client.cnf
+[client]
+socket=/data/lib/mysql/mysql.sock
+
+service mariadb start
+
+OK，迁移完成
+
+
+
+==========================================================================
+
+
+2、下载
+http://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-utilities-1.5.2.zip

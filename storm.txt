@@ -1,0 +1,13 @@
+git clone git://github.com/apache/incubator-storm.git
+
+cd /incubator-storm/
+
+git checkout v0.9.2-incubating
+
+mvn clean install -DskipTests=true
+
+mvn compile exec:java -Dstorm.topology=storm.starter.ExclamationTopology
+
+
+mvn compile exec:java -Dstorm.topology=storm.kafka.kafkaTopology
+

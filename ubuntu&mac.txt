@@ -1,0 +1,36 @@
+在mac上制作Ubuntu U盘启动盘
+这几天把久的电脑拿出来用，里面乱七八糟的看着就烦，直接重装吧。下载Ubuntu 13.04，完了以后想做启动盘，发现Mac的磁盘工具不能把ISO文件直接恢复到U盘中。然后又不想装那些乱七八糟的软件（有点儿软件洁癖）。如果你跟我一样就用下面这种方法吧。
+1.用hdiutil将ISO转dmg
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+#路径大家自己注意一下咯
+hdiutil convert -format UDRW -o ubuntu-13.04-desktop-i386.img ubuntu-13.04-desktop-i386.iso
+正在读取Master Boot Record（MBR：0）…
+正在读取Ubuntu 13.04 i386               （Apple_ISO：1）…
+正在读取（Windows_NTFS_Hidden：2）…
+.........................................................................................
+经过时间：23.620s
+速度：33.6M 字节/秒
+节省：0.0%
+created: /Users/clyde/Downloads/ubuntu-13.04-desktop-i386.img.dmg
+这个时候我们就得到了一个.dmg硬盘镜像文件。
+
+现在我们插入U盘用diskutil list查看U盘，记住路径通常为/dev/disk2这个就自己看啦反正就长这个样子的，记住它。
+2.卸载U盘考入镜像
+1
+diskutil unmountDisk /dev/disk2
+这个地方直接用磁盘工具，卸载也可以，但注意是卸载不要退出或者弹出之类的。不做这部的话后面dd进去的时候会出现没有权限，磁盘正在被使用一类的提示。
+
+然后现在就拷入镜像。
+1
+sudo dd if=/Users/clyde/Downloads/ubuntu-13.04-desktop-i386.img.dmg of=/dev/rdisk2 bs=1m
+完成！！最后diskutil eject /dev/disk2推出U盘，拿去用吧骚年
+哦哦最后送个网站http://repogen.simplylinux.ch/这个网站可以自动帮助你生成源。

@@ -1,0 +1,81 @@
+1、centos下rabbitmq
+
+yum install epel-release
+yum update
+yum install rabbitmq-server
+
+
+2、搞定服务
+service rabbitmq-server status
+service rabbitmq-server start
+
+
+3、打开插件
+/usr/lib/rabbitmq/lib/rabbitmq_server-3.1.5/sbin/rabbitmq-plugins enable rabbitmq_management
+The following plugins have been enabled:
+  mochiweb
+  webmachine
+  rabbitmq_web_dispatch
+  amqp_client
+  rabbitmq_management_agent
+  rabbitmq_management
+Plugin configuration has changed. Restart RabbitMQ for changes to take effect.
+
+重启服务：
+service rabbitmq-server restart
+
+
+4、权限管理
+rabbitmqctl add_user admin pwd
+rabbitmqctl set_user_tags admin administrator
+
+
+5、然后进入管理界面的admin那一栏
+
+给刚加的amdin加上“/”---vh的访问权限
+
+
+6、压测
+https://www.rabbitmq.com/java-tools.html
+
+https://www.rabbitmq.com/java-client.html
+下载java客户端
+
+解压之后
+./runjava.sh com.rabbitmq.examples.PerfTest --help
+
+./runjava.sh com.rabbitmq.examples.PerfTest -a
+Send transient messages without acknowledgement, 1 producer and 1 consumer.
+
+./runjava.sh com.rabbitmq.examples.PerfTest -c 1000
+Similar, but with acknowledgments and confirms.
+
+./runjava.sh com.rabbitmq.examples.PerfTest -c 1000 -f persistent
+...with acknowledgments, confirms and persistence.
+
+./runjava.sh com.rabbitmq.examples.PerfTest -y0 -p -u my-queue -s 1000 -C 1000000
+Fill a pre-declared queue with 1M transient messages of 1kB each
+
+./runjava.sh com.rabbitmq.examples.PerfTest -x0 -y10 -p -u another-queue
+Start 10 consumers from a predeclared queue, and no producers.
+
+压测结果：
+a.1个生产者一个消费者，3.8w到4w左右
+b.需要ack和确认，1.6w左右每秒
+c.需要ack和确认以及落地到硬盘，则7000左右
+
+基线测试：
+http://www.rabbitmq.com/blog/2012/04/25/rabbitmq-performance-measurements-part-2/
+
+7、分析器
+
+./runjava.sh com.rabbitmq.tools.Tracer
+
+8、DEMO
+spring.rabbitmq.examples.SpringRabbitmqDemo
+http://projects.spring.io/spring-amqp/#quick-start
+https://github.com/lemonhall/SpringRabbitmqDemo
+直接clone github上的例子之后就可以开始工作了
+
+
+

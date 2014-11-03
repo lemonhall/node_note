@@ -1,0 +1,124 @@
+apt-get install keepalived
+apt-get install redis-server redis-tools
+apt-get install nginx
+apt-get install mysql-server
+
+1、每个节点
+apt-get install mha4mysql-node
+
+
+配置keepalived
+==========================================================
+
+vim /etc/keepalived/keepalived.conf
+
+第一台机器：
+
+global_defs {  
+   notification_email {  
+     lemonhall2012@qq.com
+   }  
+   notification_email_from 192.168.10.2@xiaomi.com  
+   smtp_server 127.0.0.1  
+   smtp_connect_timeout 30  
+   router_id  NodeA  
+}  
+  
+vrrp_instance VI_1 {  
+    state MASTER  
+    interface eth0  
+    virtual_router_id 82  
+    nopreempt  
+    priority 100  
+    advert_int 1  
+    authentication {  
+        auth_type PASS  
+        auth_pass 1111  
+    }  
+    virtual_ipaddress {  
+        192.168.10.50/24  
+    }  
+} 
+
+
+==========================================================
+第二台机器：
+
+global_defs {  
+   notification_email {  
+     lemonhall2012@qq.com
+   }  
+   notification_email_from 192.168.10.3@xiaomi.com  
+   smtp_server 127.0.0.1  
+   smtp_connect_timeout 30  
+   router_id  NodeA  
+}  
+  
+vrrp_instance VI_1 {  
+    state BACKUP  
+    interface eth0  
+    virtual_router_id 83  
+    nopreempt  
+    priority 50  
+    advert_int 1  
+    authentication {  
+        auth_type PASS  
+        auth_pass 1111  
+    }  
+    virtual_ipaddress {  
+        192.168.10.50/24  
+    }  
+} 
+
+==========================================================
+
+重启服务：
+service keepalived restart
+
+
+2、manger服务器
+
+apt-get install mha4mysql-manager
+
+
+编辑默认配置文件：
+
+vim /etc/masterha_default.cnf
+
+[server default]
+user=root
+password=123456
+ssh_user=root
+repl_user=repl
+repl_password=qwert
+master_binlog_dir= /app/mysql
+remote_workdir=/app/mha
+secondary_check_script= masterha_secondary_check -s 192.168.12.234 -s 192.168.12.232
+ping_interval=1
+master_ip_failover_script=/scripts/master_ip_failover
+#shutdown_script=/scripts/power_manager
+report_script= /scripts/send_report
+master_ip_online_change_script= /scripts/master_ip_online_change
+
+
+============================================
+
+编辑应用特制文件：
+/usr/local/masterha/conf/app1.cnf
+
+[server default]
+manager_workdir=/app/mha
+manager_log=/app/mha/manager.log
+
+[server1]
+hostname=192.168.8.120
+candidate_master=1
+
+[server2]
+hostname=192.168.8.121
+candidate_master=1
+
+[server3]
+hostname=192.168.8.122
+no_master=1
+

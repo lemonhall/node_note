@@ -1,0 +1,224 @@
+
+1、安装epel源
+sudo yum install epel-release
+
+验证：
+yum repolist
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.btte.net
+ * epel: mirrors.yun-idc.com
+ * extras: mirrors.yun-idc.com
+ * updates: mirrors.yun-idc.com
+repo id                                                                repo name                                                                                            status
+base/7/x86_64                                                          CentOS-7 - Base                                                                                      8,465
+epel/x86_64                                                            Extra Packages for Enterprise Linux 7 - x86_64                                                       5,922
+extras/7/x86_64                                                        CentOS-7 - Extras                                                                                       44
+updates/7/x86_64                                                       CentOS-7 - Updates                                                                                     995
+repolist: 15,426
+
+============================================================
+2、制作最小系统：
+
+2.1 debootstrap
+通过debootstrap安装Debian
+
+Debian 的工具debootstrap可以用于在系统的某个目录中安装一套基本系统，这个基本系统除了一些配置项外，与Debian安装程序在安装的第一阶段安装的内容基本相同。这项功能有许多有趣的功能，例如，你可以从某个定制版本的Debian Live光盘上通过这个命令快速的在硬盘上安装Debian而不需要Debian的安装程序，也可以把创建在硬盘上的基本系统目录作为某些涉及系统安全性服务的chroot运行环境，通过chroot进入该目录并调试和运行一些可能修改系统配置的应用程序，作为定制小型系统模板等等。
+
+Debootstrap必需以root身份来运行，如果当前系统中没有这个工具，可以通过下面的命令来安装：
+CODE:
+root@debian ~# apt-get install debootstrap
+
+下面我们来看一下，如何在当前Debian系统中某个目录里安装一个Debian的基本系统。假设我们将基本系统安装到 /root/chroot_env 目录下，只需要通过下面的命令即可完成安装过程：
+CODE:
+root@debian ~# mkdir /root/chroot_env
+root@debian ~# debootstrap sarge /root/chroot_env http://debian.cn99.com/debian
+I: Retrieving Release
+I: Retrieving Packages
+I: Validating Packages
+I: Resolving dependencies of required packages...
+I: Resolving dependencies of base packages...
+I: Found additional required dependencies: libtext-iconv-perl zlib1g
+I: Checking component main on http://debian.cn99.com/debian...
+I: Retrieving adduser
+I: Validating adduser
+I: Retrieving apt
+I: Validating apt
+....
+I: Installing core packages...
+I: Unpacking required packages...
+I: Configuring required packages...
+I: Installing base packages...
+I: Base system installed successfully.
+root@debian ~#
+
+几分种后（取决于你选取的Debian镜像和网络速度等），安装过程结束，在目录 /root/chroot_env中已经有一个全新安装的Debian基本系统。我们可以通过chroot命令来进入到该基本系统环境：
+CODE:
+root@debian ~# chroot /root/chroot_env
+root@debian /# ls
+bin dev home lib mnt proc sbin sys usr
+boot etc initrd media opt root srv tmp var
+root@debian /# apt-get clean
+root@debian /# du -sh
+111M .
+
+基本系统大约110M左右。如果希望在基本系统中执行一些与系统相关的命令，应当先在该基本系统中加载proc文件系统，并且其反映的一些信息都是当前系统的信息。
+CODE:
+root@debian /# mount -t proc proc /proc
+root@debian /# ps -aef # 将显示主机的所有进程
+...
+root@debian /# hostname # 将显示当前主机名而非新系统主机名
+redice
+
+如果上述过程中，/root/chroot_env目录挂接了一个硬盘分区的话，新的系统将可以通过Lilo，grub等作为根分区来引导系统。这时，需要进行一些必要的配置，如/etc/hosts，/etc/hostname，/etc/network/interfaces文件等都需要进行适当的修改。另外，由于通过debootstrap进行安装时，无法确知硬盘的分区情况，因此，还必需手工修改/etc/fstab文件。
+
+============================================================
+
+2.2 febootstrap
+实际上就是Fedroa版本的debootstrap的。
+
+git clone https://github.com/libguestfs/supermin.git
+cd supermin
+git checkout 3.9
+
+yum install ocaml ocaml-findlib gawk gcc e2fsprogs rpm yum yum-utils
+
+Requirements
+------------
+
+  ocaml
+
+  ocaml findlib ("ocamlfind" program)
+
+  perldoc
+    - This is just used to generate the manpage.
+
+  bash
+
+  gcc
+
+  gawk
+
+  libcom_err
+  libext2fs
+  /sbin/mke2fs
+    - These are part of e2fsprogs.
+
+For Fedora/RHEL:
+
+  rpm
+  yum
+  yumdownloader
+
+For Debian/Ubuntu:
+
+  dpkg
+  aptitude
+
+========================================================
+2.3 febootstrap
+
+最后放弃了，使用6.5的centos做一个镜像出来就好了
+
+febootstrap -i bash -i wget -i yum -i iputils -i iproute -i man -i vim-minimal -i openssh-server -i openssh-clients centos6 centos6-image http://mirrors.aliyun.com/centos/7/os/x86_64/
+
+cd centos6
+
+tar -c .|docker import - centos7-bash
+docker run -t -i centos7-bash /bin/bash
+
+退出后
+
+docker ps -a
+
+[admin@localhost root]$ docker ps -a
+ CONTAINER ID        IMAGE                  COMMAND            CREATED            STATUS                    PORTS              NAMES
+ 14c9afaf2f06        centos63-bash:latest  /bin/bash          7 minutes ago      Exited (0) 6 minutes ago                      insane_lalande     
+
+启动刚才创建的容器：
+
+docker start 14c9afaf2f06
+
+进入启动后的容器：
+
+docker attach 14c9afaf2f06
+
+一个简单的镜像就制作完成了。
+
+导出镜像和导入镜像方便分享镜像文件
+
+导出镜像： 
+docker save centos7-bash | bzip2 -9 -c >centos7-bash.tar.bz2
+
+导入镜像(换一台机器)： 
+bzip2 -d -c <centos7-bash.tar.bz2 | docker load
+
+[参考链接]
+http://www.bkjia.com/Linux/884121.html
+
+===========================================================
+
+2、安装docker
+yum install docker
+service docker start
+
+
+3、安装私有仓库类套件
+yum install docker-registry
+service docker-registry start
+然后registry就在5000端口开始运行监听着了
+
+supermin --names bash wget yum iputils iproute man vim-minimal openssh-server openssh-clients -o centos7 http://mirrors.aliyun.com/centos/7/os/x86_64/
+
+rm -rf centos7
+mkdir centos7
+supermin -v --names bash wget yum iputils iproute man vim-minimal openssh-server openssh-clients -o centos7
+
+rm -rf centos7
+mkdir centos7
+supermin-helper --copy-kernel
+
+bash,vim,openssh-server,openssh-clients
+
+febootstrap 
+
+
+Docker使用系列一我们把镜像源改为了阿里云的，方便后续的操作。
+
+执行这个命令就把源地址改为阿里的：
+
+curl https://git.oschina.net/feedao/Docker_shell/raw/start/ali-centos.sh | sh
+第一安装Docker：
+
+yum -y install docker-io
+第二 启动Docker：
+
+service docker start
+第三安装制作CentOS镜像的工具：
+
+yum -y install febootstrap
+第四 制作CentOS镜像文件centos6-image目录
+
+febootstrap -i bash -i wget -i yum -i iputils -i iproute -i man -i vim-minimal -i openssh-server -i openssh-clients centos6 centos6-image http://mirrors.aliyun.com/centos/6/os/x86_64/
+
+第五制作Docker镜像，镜像名字是centos6-base， 最后的点是必须要的
+
+cd centos6-image && docker build -t centos6-base .
+第六制作可以ssh登陆的Docker镜像，名字是centos6-ssh
+
+docker build -t centos6-ssh https://git.oschina.net/feedao/Docker_shell/raw/start/Dockerfile
+经过前面的六个步骤，一个可以登陆的本地docker镜像就制作好了。
+
+用户名是：root，密码是：123456
+
+体验步骤：
+
+创建容器：
+
+docker run -d -p 127.0.0.1:33301:22 centos6-ssh
+ssh登陆容器：
+
+ssh root@127.0.0.1 -p 33301
+输入密码后就可以开始折腾了。
+
+通过授信无密码登陆请看第三篇。 

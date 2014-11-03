@@ -1,0 +1,48 @@
+cobar
+
+https://github.com/alibaba/cobar
+
+1、安装
+git clone https://github.com/alibaba/cobar
+
+2、cobar的三个组件：
+a.cobar-server组件，作为一个数据库中间件，其实就是一个proxy了，负责解析SQL，分发
+b.cobar-manger，其实就是一个war包，用来监控的
+c.driver，特殊化的jdbc？驱动？，似乎是针对cobar-server做了高度的优化
+
+3、编译
+不建议自己编译了，直接下载二进制包
+https://github.com/alibaba/cobar/wiki/%E4%B8%8B%E8%BD%BD
+
+
+4、SQL脚本
+mysql
+
+drop database if exists dbtest1; 
+create database dbtest1; 
+use dbtest1; 
+
+create table tb1(
+id int not null,
+gmt datetime);
+
+drop database if exists dbtest2;
+create database dbtest2;
+use dbtest2; 
+
+create table tb2(
+id int not null,
+val varchar(256));
+
+drop database if exists dbtest3; 
+create database dbtest3; 
+use dbtest3; 
+
+create table tb2(
+id int not null,
+val varchar(256));
+
+5、修改schemel.xml里的数据库链接IP，PORT，用户名和密码即可
+
+6、测试
+mysql -h127.0.0.1 -utest -ptest -P8066 -Ddbtest

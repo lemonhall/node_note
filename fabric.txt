@@ -1,0 +1,1238 @@
+【安装mysql本身】
+
+1、下载
+wget http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.21.tar.gz
+
+2、依赖
+yum -y install  gcc gcc-c++ gcc-g77 autoconf automake zlib* fiex* libxml* ncurses-devel libmcrypt* libtool-ltdl-devel* make cmake
+
+3、加用户和组
+groupadd mysql
+useradd -r -g mysql mysql
+
+4、编译
+cmake .
+make && make install
+
+5、安装脚本
+chown -R mysql.mysql /usr/local/mysql
+cd /usr/local/mysql/scripts
+./mysql_install_db --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
+cd /usr/local/mysql/support-files
+cp mysql.server /etc/rc.d/init.d/mysql
+cp my-default.cnf /etc/my.cnf
+chkconfig --add mysql
+chkconfig mysql on
+service mysql start
+
+==========================================================================
+
+【安装fabric】
+===============================================================
+
+1、下载
+wget http://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-utilities-1.5.2.tar.gz
+
+===============================================================
+
+
+2、安装
+解压，看到setup.py之后，直接
+python setup.py build
+python setup.py install
+即完成安装
+
+其实就是一个pyhton的程序，centos7下的python没有任何问题，这个东西向系统内装了诸多的mysql运维工具
+另外就是安装好了python的连接器
+
+似乎for java的连接器，是java里自带的，支持hibernate
+
+mysqlfabric
+运行mysqlfabric命令，来验证是否安装成功
+
+===============================================================
+
+3、配置
+
+3.1 配置管理账户以及数据库访问权限
+CREATE USER 'fabric'@'localhost' IDENTIFIED BY '123456';
+GRANT ALL ON fabric.* TO 'fabric'@'localhost';
+
+
+3.2 初始化管理数据库
+mysqlfabric manage setup --param=storage.user=fabric --param=storage.password=123456
+[INFO] 1413169324.764115 - MainThread - Initializing persister: user (fabric), server (localhost:3306), database (fabric).
+Finishing initial setup
+=======================
+Password for admin user is not yet set.
+Password for admin/xmlrpc:
+Repeat Password:
+Password set.
+Password set.
+No result returned
+
+
+3.3 修改配置文件
+
+fabric.cfg被拷贝到了/etc/mysql之下去，具体可能会不一样，还得grep，python setup.py install的输出即可找到
+或者用yum install mlocate,updatedb之后，用locate命令来locate这个文件：fabric.cfg
+
+官方建议只修改storage一节即可，当然，我看了看，还是得校验各个配置是否正确的
+配置的细节在这里：
+http://dev.mysql.com/doc/mysql-utilities/1.4/en/fabric-cfgref.html
+
+-------------------------------
+
+[DEFAULT]
+prefix = /usr/local
+sysconfdir = /usr/local/etc
+logdir = /var/log
+
+[storage]
+address = localhost:3306
+user = fabric
+password = secret
+database = fabric
+auth_plugin = mysql_native_password
+connection_timeout = 6
+connection_attempts = 6
+connection_delay = 1
+
+[servers]
+user = fabric
+password = 
+
+[protocol.xmlrpc]
+address = localhost:32274
+threads = 5
+user = admin
+password = 
+disable_authentication = no
+realm = MySQL Fabric
+ssl_ca = 
+ssl_cert = 
+ssl_key = 
+
+[executor]
+executors = 5
+
+[logging]
+level = INFO
+url = file:///var/log/fabric.log
+
+[sharding]
+mysqldump_program = /usr/bin/mysqldump
+mysqlclient_program = /usr/bin/mysql
+
+[statistics]
+prune_time = 3600
+
+[failure_tracking]
+notifications = 300
+notification_clients = 50
+notification_interval = 60
+failover_interval = 0
+detections = 3
+detection_interval = 6
+detection_timeout = 1
+prune_time = 3600
+
+[connector]
+ttl = 1
+
+[client]
+password = 
+
+--------------------------------------------------------------
+3.2 概念解析
+
+fabric需要一个mysql数据库作为管理配置的存储，所以需要在一个mysql里setup出来一个
+
+=====================================================
+4、启动
+
+mysqlfabric manage start
+[INFO] 1413164834.951766 - MainThread - Initializing persister: user (fabric), server (localhost:3306), database (fabric).
+Error: Invalid database connection.
+
+未正确配置，启动会报错
+
+生产环境下可以使用--daemonize来启动，deamon化
+
+
+正确启动的输出：
+root@i-eqevsxb3 scripts]# mysqlfabric manage start
+[INFO] 1413169394.018625 - MainThread - Initializing persister: user (fabric), server (localhost:3306), database (fabric).
+[INFO] 1413169394.030047 - MainThread - Loading Services.
+[INFO] 1413169394.041426 - MainThread - MySQL-RPC protocol server started, listening on localhost:32275
+[INFO] 1413169394.054119 - MainThread - Fabric node starting.
+[INFO] 1413169394.057673 - MainThread - Starting Executor.
+[INFO] 1413169394.057850 - MainThread - Setting 5 executor(s).
+[INFO] 1413169394.058291 - Executor-0 - Started.
+[INFO] 1413169394.059358 - Executor-1 - Started.
+[INFO] 1413169394.061436 - Executor-2 - Started.
+[INFO] 1413169394.065324 - Executor-3 - Started.
+[INFO] 1413169394.067257 - MainThread - Executor started.
+[INFO] 1413169394.068227 - Executor-4 - Started.
+[INFO] 1413169394.075754 - MainThread - Starting failure detector.
+[INFO] 1413169394.077049 - XML-RPC-Server - XML-RPC protocol server ('127.0.0.1', 32274) started.
+[INFO] 1413169394.077726 - XML-RPC-Server - Setting 1 XML-RPC session(s).
+[INFO] 1413169394.078359 - XML-RPC-Session-0 - Started XML-RPC-Session.
+
+=====================================================
+
+5、测试python的链接？
+
+http://dev.mysql.com/doc/mysql-utilities/1.4/en/connector-python-fabric-installation.html
+
+http://dev.mysql.com/get/Downloads/Connector-Python/mysql-connector-python-2.0.1.tar.gz
+解压
+python setup.py install
+
+python setup.py install
+running install
+running build
+running build_py
+creating build
+creating build/lib
+creating build/lib/mysql
+copying lib/mysql/__init__.py -> build/lib/mysql
+creating build/lib/mysql/connector
+copying lib/mysql/connector/version.py -> build/lib/mysql/connector
+copying lib/mysql/connector/connection.py -> build/lib/mysql/connector
+copying lib/mysql/connector/authentication.py -> build/lib/mysql/connector
+copying lib/mysql/connector/optionfiles.py -> build/lib/mysql/connector
+copying lib/mysql/connector/errors.py -> build/lib/mysql/connector
+copying lib/mysql/connector/constants.py -> build/lib/mysql/connector
+copying lib/mysql/connector/__init__.py -> build/lib/mysql/connector
+copying lib/mysql/connector/dbapi.py -> build/lib/mysql/connector
+copying lib/mysql/connector/utils.py -> build/lib/mysql/connector
+copying lib/mysql/connector/conversion.py -> build/lib/mysql/connector
+copying lib/mysql/connector/protocol.py -> build/lib/mysql/connector
+copying lib/mysql/connector/catch23.py -> build/lib/mysql/connector
+copying lib/mysql/connector/network.py -> build/lib/mysql/connector
+copying lib/mysql/connector/custom_types.py -> build/lib/mysql/connector
+copying lib/mysql/connector/charsets.py -> build/lib/mysql/connector
+copying lib/mysql/connector/cursor.py -> build/lib/mysql/connector
+copying lib/mysql/connector/pooling.py -> build/lib/mysql/connector
+copying lib/mysql/connector/errorcode.py -> build/lib/mysql/connector
+creating build/lib/mysql/connector/locales
+copying lib/mysql/connector/locales/__init__.py -> build/lib/mysql/connector/locales
+creating build/lib/mysql/connector/locales/eng
+copying lib/mysql/connector/locales/eng/__init__.py -> build/lib/mysql/connector/locales/eng
+copying lib/mysql/connector/locales/eng/client_error.py -> build/lib/mysql/connector/locales/eng
+creating build/lib/mysql/connector/django
+copying lib/mysql/connector/django/base.py -> build/lib/mysql/connector/django
+copying lib/mysql/connector/django/client.py -> build/lib/mysql/connector/django
+copying lib/mysql/connector/django/schema.py -> build/lib/mysql/connector/django
+copying lib/mysql/connector/django/creation.py -> build/lib/mysql/connector/django
+copying lib/mysql/connector/django/validation.py -> build/lib/mysql/connector/django
+copying lib/mysql/connector/django/__init__.py -> build/lib/mysql/connector/django
+copying lib/mysql/connector/django/introspection.py -> build/lib/mysql/connector/django
+copying lib/mysql/connector/django/compiler.py -> build/lib/mysql/connector/django
+creating build/lib/mysql/connector/fabric
+copying lib/mysql/connector/fabric/connection.py -> build/lib/mysql/connector/fabric
+copying lib/mysql/connector/fabric/__init__.py -> build/lib/mysql/connector/fabric
+copying lib/mysql/connector/fabric/balancing.py -> build/lib/mysql/connector/fabric
+copying lib/mysql/connector/fabric/caching.py -> build/lib/mysql/connector/fabric
+running install_lib
+running install_egg_info
+Writing /usr/lib/python2.7/site-packages/mysql_connector_python-2.0.1-py2.7.egg-info
+
+--------------------------------------------------
+
+
+mysqlfabric help commands
+statistics node             Retrieve statistics on the Fabric node.
+statistics group            Retrieve statistics on Procedures.
+statistics procedure        Retrieve statistics on Procedures.
+group activate              Activate failure detector for server(s) in a group.
+group description           Update group's description.
+group deactivate            Deactivate failure detector for server(s) in a group.
+group create                Create a group.
+group remove                Remove a server from a group.
+group add                   Add a server into group.
+group health                Check if any server within a group has failed and report health
+                            information.
+group lookup_servers        Return information on existing server(s) in a group.
+group destroy               Remove a group.
+group demote                Demote the current master if there is one.
+group promote               Promote a server into master.
+group lookup_groups         Return information on existing group(s).
+dump fabric_nodes           Return a list of Fabric servers.
+dump shard_index            Return information about the index for all mappings matching any of
+                            the patterns provided.
+dump sharding_information   Return all the sharding information about the tables passed as
+                            patterns.
+dump servers                Return information about servers.
+dump shard_tables           Return information about all tables belonging to mappings matching any
+                            of the provided patterns.
+dump shard_maps             Return information about all shard mappings matching any of the
+                            provided patterns.
+manage teardown             Teardown Fabric Storage System.
+manage stop                 Stop the Fabric server.
+manage setup                Setup Fabric Storage System.
+manage ping                 Check whether Fabric server is running or not.
+manage start                Start the Fabric server.
+manage logging_level        Set logging level.
+server set_weight           Set a server's weight.
+server clone                Clone the objects of a given server into a destination server.
+server lookup_uuid          Return server's uuid.
+server set_mode             Set a server's mode.
+server set_status           Set a server's status.
+machine destroy             Destroy a virtual machine instance.
+machine create              Create a virtual machine instance:  mysqlfabric machine create
+                            provider --image name=image-mysql
+                            --flavor name=vm-template --meta db=mysql
+                            --meta version=5.
+machine list                Return information on existing machine(s) created by a provider.
+role list                   List roles and associated permissions
+user roles                  Change roles for a Fabric user  * protocol: Protocol of the user (for
+                            example 'xmlrpc') * roles: Comma separated
+                            list of roles, IDs or names (see `role
+                            list`)
+user usercommand            Base class for all user commands
+user list                   List users and their roles
+user add                    Add a new Fabric user.
+user password               Change password of a Fabric user.
+user delete                 Delete a Fabric user.
+threat report_error         Report a server error.
+threat report_failure       Report with certantity that a server has failed or is unreachable.
+provider unregister         Unregister a provider.
+provider register           Register a provider.
+provider list               Return information on existing provider(s).
+sharding list_definitions   Lists all the shard mapping definitions.
+sharding remove_definition  Remove the shard mapping definition represented by the Shard Mapping
+                            ID.
+sharding move_shard         Move the shard represented by the shard_id to the destination group.
+sharding disable_shard      Disable a shard.
+sharding remove_table       Remove the shard mapping represented by the Shard Mapping object.
+sharding split_shard        Split the shard represented by the shard_id into the destination
+                            group.
+sharding create_definition  Define a shard mapping.
+sharding add_shard          Add a shard.
+sharding add_table          Add a table to a shard mapping.
+sharding lookup_table       Fetch the shard specification mapping for the given table
+sharding enable_shard       Enable a shard.
+sharding remove_shard       Remove a Shard.
+sharding list_tables        Returns all the shard mappings of a particular sharding_type.
+sharding prune_shard        Given the table name prune the tables according to the defined
+                            sharding specification for the table.
+sharding lookup_servers     Lookup a shard based on the give sharding key.
+snapshot destroy            Destroy snapshot images associated to a machine.
+snapshot create             Create a snapshot image from a machine.
+event trigger               Trigger an event.
+event wait_for_procedures   Wait until procedures, which are identified through their uuid in a
+                            list and separated by comma, finish their
+                            execution.
+
+
+========================================================
+
+6、JAVA链接
+6.1 下载
+http://dev.mysql.com/downloads/connector/j/
+
+6.2 maven
+http://www.mvnrepository.com/artifact/mysql/mysql-connector-java/5.1.33
+
+<dependency>
+	<groupId>mysql</groupId>
+	<artifactId>mysql-connector-java</artifactId>
+	<version>5.1.33</version>
+</dependency>
+
+6.3 链接
+jdbc:mysql:fabric://fabrichost:32274/database
+
+jdbc:mysql:fabric://fabrichost:32274/database?fabricUsername=admin&fabricPassword=secret
+
+// provide the server group as a connection property
+Connection conn = DriverManager.getConnection(
+        "jdbc:mysql:fabric://fabrichost:32274/database?fabricServerGroup=myGroup");
+
+// provide the shard table as a connection property
+Connection conn = DriverManager.getConnection(
+        "jdbc:mysql:fabric://fabrichost:32274/database?fabricShardTable=employees.employees");
+
+
+========================================================
+
+
+========================================================
+【参考链接】
+http://www.2cto.com/database/201407/315633.html
+http://blog.csdn.net/njchenyi/article/details/38739779
+
+========================================================
+MySQL原生HA方案 – Fabric体验之旅
+分类： 数据库 2014-08-21 22:49 227人阅读 评论(1) 收藏 举报
+摘要：众所周知，Fabric能提供MySQL的HA和Sharding方案，但是并没有具体的介绍其具体的表现和搭建部署流程。笔者所在团队亲身体验了此过程，虽然过程简单但是却充满着无穷的乐趣，也为未来的应用带来了福音。
+还在为MySQL HA方案的选型头疼吗？现在不用了，自从2014年5月28日Oracle发布Fabric之后，一切都变得如此简单。因为是原生的官方产品，可以放心使用，由于这款产品大力的增强了HA效率，可以看出Oracle对云计算的支持力度，说明Oracle这个大象也可跳舞，而且还挺灵活的。
+
+官方对Fabric的介绍主要是它提供了MySQL的HA和Sharding方案，本文主要讨论Fabric在MySQL HA方面的表现以及搭建部署流程。我的团队试着搭建了一下，简直无法再简单了，这对于DBA来说绝对是一个大福音，这个产品在接下来的几年中必然会被大量应用到生产环境中去，我的团队对这个产品的未来充满信心。
+
+接下来我们将循序渐进的带领大家感受Fabric带来的乐趣。
+
+一、实验环境
+
+本例的实验环境是在一台CentOS主机中做的，机器上有3个MySQL实例，分别是3306、3691和3692，我们要做的就是用这3个实例达成HA效果
+
+ 
+二、下载
+
+Fabric目前是被打包到了MySQL Utilities中，所以大家下载MySQL Utilities就可以了，下载地址是：http://dev.mysql.com/downloads/utilities/，目前版本是：1.4.4，在本例中我们下载的是 mysql-utilities-1.4.4-1.el6.noarch.rpm。
+
+三、安装MySQL Utilities
+
+rpm包的安装还是挺简单的，具体如下：
+
+rpm -ivh mysql-utilities-1.4.4-1.el6.noarch.rpm
+Preparing...                ########################################### [100%]
+    1:mysql-utilities        ########################################### [100%]
+[root@<span style="font-size: 12px;">
+装完后执行
+
+mysqlfabric
+如果有回显说明安装完毕。
+
+四、建立Backing Store帐号
+
+Backing Store用于存储整个HA集群的服务器等相关配置，它需要一个MySQL实例来存储这些信息，这个实例的版本需要跟其它在HA中的MySQL实例版本保持一致，而且必须是5.6.10及更高的版本，我们在本例中选择3306实例来使用。
+
+首先，你需要一个帐号来连接Backing Store的MySQL实例，这个帐号需要有对fabric数据库的管理员级权限，我们在3306端口的实例上建帐号，具体如下：
+
+CREATE USER 'fabric'@'10.165.17.175' IDENTIFIED BY 'secret';
+GRANT ALL ON fabric.* TO 'fabric'@'10.165.17.175';
+五、Fabric配置文件
+
+Fabric配置文件默认位置是：/etc/mysql/fabric.cfg
+
+修改其中的[storage]部分，具体如下：
+
+[storage]
+auth_plugin = mysql_native_password
+database = fabric
+user = fabric
+address = 10.165.17.175:3306
+connection_delay = 1
+connection_timeout = 6
+password = secret
+connection_attempts = 6
+其中address = 10.165.17.175:3306是Backing Store的MySQL实例，password = secret是上一步中建立连接fabric数据库的用户密码。
+
+修改其中的[servers]部分，具体如下：
+
+[servers]
+password = secret 
+user = fabric
+其中是password = secret 是HA环境中各实例的连接密码。
+
+六、填充Backing Store信息
+
+我们通过Fabric来填充3306端口实例中的fabric数据库，具体如下：
+
+mysqlfabric manage setup
+[INFO] 1408115689.486792 - MainThread - Initializing persister: user (fabric), server (10.165.17.175:3306), database (fabric).
+Finishing initial setup
+=======================
+Password for admin user is not yet set.
+Password for admin/xmlrpc: 
+Repeat Password: 
+Password set.
+操作期间会提示Fabric的管理员帐户admin没有设置密码，咱们按提示将密码设置成admin就可以了。
+
+我们再查看3306端口的实例里面发生了什么变化，具体如下：
+
+mysql> show databases;
++--------------------+
+| Database    		|
++--------------------+
+| information_schema 	|
+| 51linux.net        	|
+| fabric             	|
+| mysql              |
+| performance_schema |
++--------------------+
+5 rows in set (0.00 sec)
+
+mysql>
+可以看到多了一个fabric数据库，它里面存储的就是Fabric的一些配置信息。
+
+七、配置HA中主从MySQL节点帐号
+
+本例中3691和3692实例是需要做成HA的，它们也要建个管理员权限的帐号，注意，帐号名也要跟3306实例保持一致，也需要是fabric，具体如下：
+
+CREATE USER 'fabric'@'10.165.17.175' IDENTIFIED BY 'secret';
+GRANT ALL ON *.* TO 'fabric'@'10.165.17.175';
+同时，由于fabric是基于GTID主从复制，所以这些实例中必须要启用GTID，它们的配置文件要有这些参数：
+
+log-bin
+gtid-mode=ON
+enforce-gtid-consistency
+log_slave_updates
+八、启动fabric
+
+我们用下面的命令来启动fabric：
+
+mysqlfabric manage start
+[INFO] 1408116209.229260 - MainThread - Initializing persister: user (fabric), server (10.165.17.175:3306), database (fabric).
+[INFO] 1408116209.233982 - MainThread - Loading Services.
+[INFO] 1408116209.253620 - MainThread - Fabric node starting.
+[INFO] 1408116209.261853 - MainThread - Starting Executor.
+[INFO] 1408116209.262001 - MainThread - Setting 5 executor(s).
+[INFO] 1408116209.262691 - Executor-0 - Started.
+[INFO] 1408116209.264825 - Executor-1 - Started.
+[INFO] 1408116209.266648 - Executor-2 - Started.
+[INFO] 1408116209.268395 - Executor-3 - Started.
+[INFO] 1408116209.269961 - MainThread - Executor started.
+[INFO] 1408116209.273374 - MainThread - Starting failure detector.
+[INFO] 1408116209.274144 - Executor-4 - Started.
+[INFO] 1408116209.275816 - XML-RPC-Server - XML-RPC protocol server ('127.0.0.1', 32274) started.
+[INFO] 1408116209.276112 - XML-RPC-Server - Setting 5 XML-RPC session(s).
+[INFO] 1408116209.276654 - XML-RPC-Session-0 - Started XML-RPC-Session.
+[INFO] 1408116209.278426 - XML-RPC-Session-1 - Started XML-RPC-Session.
+[INFO] 1408116209.280368 - XML-RPC-Session-2 - Started XML-RPC-Session.
+[INFO] 1408116209.281599 - XML-RPC-Session-3 - Started XML-RPC-Session.
+[INFO] 1408116209.282699 - XML-RPC-Session-4 - Started XML-RPC-Session.
+九、建立HA服务器组
+
+这个HA服务器组，用于把参与HA的所有MySQL实例都填加进来：
+
+mysqlfabric group create my_group
+Password for admin: 
+Procedure :
+{ uuid        = 292621fd-cddc-4cbb-8c0d-d8a264156679,
+  finished    = True,
+  success     = True,
+  return      = True,
+  activities  = 
+}
+这样我们就创建了一个组名为my_group的HA服务器组。
+
+十、填加HA组的成员
+
+我们首先填加3691，具体如下：
+
+mysqlfabric group add my_group 10.165.17.175:3691
+Password for admin: 
+Procedure :
+{ uuid        = 8d1c11f8-adc4-4321-8307-6296caeb07c1,
+  finished    = True,
+  success     = True,
+  return      = True,
+  activities  = 
+}
+接下来填3692，具体如下：
+
+mysqlfabric group add my_group 10.165.17.175:3692
+Password for admin: 
+Procedure :
+{ uuid        = b1fa3cb9-b86f-4b1a-88cb-e84babb2ab02,
+  finished    = True,
+  success     = True,
+  return      = True,
+  activities  = 
+}
+如果屏幕回显示无error，那么说明成功填加了成员。我们也可以查看一下my_group里面的成员信息，具体如下：
+
+mysqlfabric group lookup_servers my_group
+Password for admin: 
+Command :
+{ success     = True
+  return      = [{'status': 'SECONDARY', 'server_uuid': '6914a176-2370-11e4-af48-00163e004141', 'mode': 'READ_ONLY', 'weight': 1.0, 'address': '10.165.17.175:3691'}, {'status': 'SECONDARY', 'server_uuid': 'a8a69428-2366-11e4-af09-00163e004141', 'mode': 'READ_ONLY', 'weight': 1.0, 'address': '10.165.17.175:3692'}]
+  activities  = 
+}
+大家可以看到，这2个实例都不是PRIMARY，说明刚刚搭建完的环境，系统是不会选举出PRIMARY的。
+
+十一、选举一个主库
+
+选举的方法也非常简单，具体如下：
+
+mysqlfabric group promote my_group
+Password for admin: 
+Procedure :
+{ uuid        = 529380b9-10ef-409f-a1a9-9430ab9845a3,
+  finished    = True,
+  success     = True,
+  return      = True,
+  activities  = 
+}
+可见执行成功了，并没有返回error。
+
+接下来我们再次验证一下HA集群中各服务器情况。
+
+mysqlfabric group lookup_servers my_group
+Password for admin: 
+Command :
+{ success     = True
+  return      = [{'status': 'SECONDARY', 'server_uuid': '6914a176-2370-11e4-af48-00163e004141', 'mode': 'READ_ONLY', 'weight': 1.0, 'address': '10.165.17.175:3691, {'status': 'PRIMARY', 'server_uuid': 'a8a69428-2366-11e4-af09-00163e004141', 'mode': 'READ_WRITE', 'weight': 1.0, 'address': '10.165.17.175:3692}]
+  activities  = 
+}
+可见Fabric已经随机选举了一个Master角色。
+
+十二、激活故障自动切换
+
+即使Fabric选出了Master角色，但当这个Master宕机时，Fabric并不会自动将Secondary角色切换成Master角色，所以我们需要将HA配置成可以自动切换角色的样子，具体如下：
+
+mysqlfabric group activate my_group
+Password for admin: 
+Procedure :
+{ uuid        = 518b7dad-06a4-45a8-bfd5-241396706b88,
+  finished    = True,
+  success     = True,
+  return      = True,
+  activities  = 
+}
+ 当然，我们也可以依据具体需求取消Fabric故障自动切换。
+
+十三、测试HA
+
+在这个实验中，我们将3691实例停止，再看看Fabric的状态：
+
+mysqlfabric group lookup_servers my_group
+Password for admin: 
+Command :
+{ success     = True
+  return      = [{'status': 'PRIMARY', 'server_uuid': '6914a176-2370-11e4-af48-00163e004141', 'mode': 'READ_WRITE', 'weight': 1.0, 'address': '10.165.17.175:3691}, {'status': 'FAULTY', 'server_uuid': 'a8a69428-2366-11e4-af09-00163e004141', 'mode': 'READ_WRITE', 'weight': 1.0, 'address': '10.165.17.175:3692}]
+  activities  = 
+}
+其中3692实例的状态已经变成了“FAULTY”，可以看出Fabric自动检测到了这个故障，并且选举了slave重新当了primary角色。我不得不说就是这个功能，是它吸引我的原因之一。
+
+ 十四、后续学习
+
+关于后续的学习，大家要看看官网的用户手册，里面还有很多HA维护的方法，如增减节点等问题，同时目前Fabric也提供了phtyon和Java的API，可以供软件开发人员直接使用，以后的软件开发人员，不是再直接连接到MySQL实例，而是连接到Fabric，由Fabric来统一分发请求，这有些象MySQL Proxy，但它的应用前景要比MySQL Proxy更宽更广。
+
+=================================================
+
+架构描述：
+
+一台主机上安装4个MySQL 服务，其中一个MySQL服务用于存储MySQL Fabric后台数据；另外3个MySQL服务用于主从架构测试。一个主+两个从。
+
+第一部分：二进制方式安装MySQL 5.6.19
+
+1. 操作系统
+
+CentOS release 6.2 (Final)
+
+2. 创建用户和组
+
+[root@mymaster1 ~]# groupadd mysql
+
+[root@mymaster1 ~]# useradd -r -g mysqlmysql
+
+3. 解压安装包（解压到你想存储数据库数据的地方）
+
+[root@mymaster1 ~]# cd /data
+
+[root@mymaster1 data]# tar -xzvf/root/mysql_soft/mysql-5.6.19-linux-glibc2.5-x86_64.tar.gz
+
+[root@mymaster1 data]# ln -smysql-5.6.19-linux-glibc2.5-x86_64 mysql
+
+4. 查看解压情况
+
+[root@mymaster1 data]# ll
+
+总用量 20
+
+lrwxrwxrwx. 1 root root 34 6月 27 15:31 mysql -> mysql-5.6.19-linux-glibc2.5-x86_64
+
+drwxr-xr-x. 13 rootroot 4096 6月 27 15:31 mysql-5.6.19-linux-glibc2.5-x86_64
+
+5. 修改文件夹所属用户和组为mysql：
+
+[root@mymaster1 data]# cd mysql
+
+[root@mymaster1 mysql]# chown -R mysql:mysql.
+
+6. 安装数据库
+
+[root@mymaster1 mysql]#scripts/mysql_install_db --user=mysql --basedir=/data/mysql--datadir=/data/mysql/data
+
+WARNING: The host'mymaster1.localdomain' could not be looked up with /data/mysql/bin/resolveip.
+
+This probably means thatyour libc libraries are not 100 % compatible
+
+with this binary MySQLversion. The MySQL daemon, mysqld, should work
+
+normally with theexception that host name resolving will not work.
+
+This means that youshould use IP addresses instead of hostnames
+
+when specifying MySQLprivileges !
+
+当出现上面警告时，解决方法是：在/etc/hosts配置文件中增加IP地址和主机名的映射
+
+如
+
+[root@mymaster1 Packages]# cat /etc/hosts
+
+127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4
+
+::1 localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+IP地址 mymaster1.localdomain
+
+正确的提示信息如下：
+
+[root@mymaster1 mysql]#scripts/mysql_install_db --user=mysql --basedir=/data/mysql--datadir=/data/mysql/data
+
+Installing MySQL system tables...2014-06-2716:02:45 0 [Warning] TIMESTAMP with implicit DEFAULT value is deprecated.Please use --explicit_defaults_for_timestamp server option (see documentationfor more details).
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Using atomics to ref count buffer pool pages
+
+2014-06-27 16:02:45 2134 [Note] InnoDB: TheInnoDB memory heap is disabled
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Mutexes and rw_locks use GCC atomic builtins
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Compressed tables use zlib 1.2.3
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Using Linux native AIO
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Using CPU crc32 instructions
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Initializing buffer pool, size = 128.0M
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Completed initialization of buffer pool
+
+2014-06-27 16:02:45 2134 [Note] InnoDB: Thefirst specified data file ./ibdata1 did not exist: a new database to becreated!
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Setting file ./ibdata1 size to 12 MB
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Database physically writes the file full: wait...
+
+2014-06-27 16:02:45 2134 [Note] InnoDB:Setting log file ./ib_logfile101 size to 48 MB
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:Setting log file ./ib_logfile1 size to 48 MB
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:Renaming log file ./ib_logfile101 to ./ib_logfile0
+
+2014-06-27 16:02:46 2134 [Warning] InnoDB:New log files created, LSN=45781
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:Doublewrite buffer not found: creating new
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:Doublewrite buffer created
+
+2014-06-27 16:02:46 2134 [Note] InnoDB: 128rollback segment(s) are active.
+
+2014-06-27 16:02:46 2134 [Warning] InnoDB:Creating foreign key constraint system tables.
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:Foreign key constraint system tables created
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:Creating tablespace and datafile system tables.
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:Tablespace and datafile system tables created.
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:Waiting for purge to start
+
+2014-06-27 16:02:46 2134 [Note] InnoDB:5.6.19 started; log sequence number 0
+
+2014-06-27 16:02:47 2134 [Note] Binlog end
+
+2014-06-27 16:02:47 2134 [Note] InnoDB: FTSoptimize thread exiting.
+
+2014-06-27 16:02:47 2134 [Note] InnoDB:Starting shutdown...
+
+2014-06-27 16:02:48 2134 [Note] InnoDB:Shutdown completed; log sequence number 1625977
+
+OK
+
+Filling help tables...2014-06-27 16:02:48 0[Warning] TIMESTAMP with implicit DEFAULT value is deprecated. Please use--explicit_defaults_for_timestamp server option (see documentation for moredetails).
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Using atomics to ref count buffer pool pages
+
+2014-06-27 16:02:48 2157 [Note] InnoDB: TheInnoDB memory heap is disabled
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Mutexes and rw_locks use GCC atomic builtins
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Compressed tables use zlib 1.2.3
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Using Linux native AIO
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Using CPU crc32 instructions
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Initializing buffer pool, size = 128.0M
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Completed initialization of buffer pool
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Highest supported file format is Barracuda.
+
+2014-06-27 16:02:48 2157 [Note] InnoDB: 128rollback segment(s) are active.
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Waiting for purge to start
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:5.6.19 started; log sequence number 1625977
+
+2014-06-27 16:02:48 2157 [Note] Binlog end
+
+2014-06-27 16:02:48 2157 [Note] InnoDB: FTSoptimize thread exiting.
+
+2014-06-27 16:02:48 2157 [Note] InnoDB:Starting shutdown...
+
+2014-06-27 16:02:50 2157 [Note] InnoDB:Shutdown completed; log sequence number 1625987
+
+OK
+
+To start mysqld at boot time you have tocopy
+
+support-files/mysql.server to the rightplace for your system
+
+PLEASE REMEMBER TO SET A PASSWORD FOR THEMySQL root USER !
+
+To do so, start the server, then issue thefollowing commands:
+
+/data/mysql/bin/mysqladmin -u root password 'new-password'
+
+/data/mysql/bin/mysqladmin -u root -h mymaster1.localdomain password'new-password'
+
+Alternatively you can run:
+
+/data/mysql/bin/mysql_secure_installation
+
+which will also give you the option ofremoving the test
+
+databases and anonymous user created bydefault. This is
+
+strongly recommended for productionservers.
+
+See the manual for more instructions.
+
+You can start the MySQL daemon with:
+
+cd. ; /data/mysql/bin/mysqld_safe &
+
+You can test the MySQL daemon withmysql-test-run.pl
+
+cdmysql-test ; perl mysql-test-run.pl 
+
+Please report any problems athttp://bugs.mysql.com/ 
+
+The latest information about MySQL isavailable on the web at 
+
+http://www.mysql.com 
+
+Support MySQL by buying support/licenses athttp://shop.mysql.com 
+
+New default config file was created as/data/mysql/my.cnf and
+
+will be used by default by the server whenyou start it.
+
+You may edit this file to change serversettings 
+
+7. 修改相关目录权限，提高安全性：
+
+[root@mymaster1 mysql]# chown -R root .
+
+[root@mymaster1 mysql]# chown -R mysql data 
+
+8. 配置MySQL服务为主机服务，即能用service mysql start启动服务
+
+[root@mymaster1 mysql]# cpsupport-files/mysql.server /etc/init.d/mysql
+
+[root@mymaster1 mysql]# vi +46 /etc/init.d/mysql
+
+把下面的
+
+basedir=
+
+datadir=
+
+修改为
+
+basedir=/data/mysql
+
+datadir=/data/mysql/data 
+
+【备注】另外三个mysql服务，可以在这里复制为如下形式：
+
+[root@mymaster1 mysql]#cp support-files/mysql.server /etc/init.d/mysql.3001
+
+[root@mymaster1 mysql]#vi +46 /etc/init.d/mysql.3001 
+
+9. 修改配置文件
+
+[root@mysqlfabric mysql_3001]# cd/opt/mysql
+
+[root@mysqlfabric mysql]# vi my.cnf
+
+修改相应的端口号：
+
+[mysqld]
+
+character-set-server=gbk
+
+lower_case_table_names=1
+
+default_storage_engine=myisam
+
+port=3306 
+
+gtid_mode=ON
+
+log-bin
+
+log-slave-updates
+
+enforce-gtid-consistency
+
+server_id=1 #【不同的MySQL服务，修改为不同的id】
+
+【备注】：上面的蓝色字体是用于开启GTID复制参数 
+
+10. 启动数据库
+
+[root@mymaster1 mysql]# service mysql start
+
+Starting MySQL[确定] 
+
+11. 修改数据库root密码
+
+[root@mymaster1 mysql]#/data/mysql/bin/mysqladmin -u root password 'root'
+
+[root@mymaster1 mysql]#/data/mysql/bin/mysqladmin -u root -h mymaster1.localdomain password ' root' 
+
+12. 修改环境变量，把mysql执行文件路径添加到环境变量中
+
+[root@mymaster1 mysql]# vi /etc/profile
+
+PATH=$PATH:/data/mysql/bin
+
+export PATH 
+
+13. 测试登录
+
+[root@mymaster1 mysql]# mysql -u root -p
+
+Enter password:
+
+Welcome to the MySQL monitor. Commands end with ; or \g.
+
+Your MySQL connection id is 5
+
+Server version: 5.6.19 MySQL CommunityServer (GPL) 
+
+Copyright (c) 2000, 2014, Oracle and/or itsaffiliates. All rights reserved. 
+
+Oracle is a registered trademark of OracleCorporation and/or its
+
+affiliates. Other names may be trademarksof their respective
+
+owners. 
+
+Type 'help;' or '\h' for help. Type '\c' toclear the current input statement. 
+
+mysql> 
+
+mysql> show variables like '%data%';
+
++-------------------------------+------------------------+
+
+| Variable_name | Value |
+
++-------------------------------+------------------------+
+
+| character_set_database | latin1 |
+
+| collation_database | latin1_swedish_ci |
+
+| datadir | /data/mysql/data/ 
+
+14. 添加用于复制的用户（3001上）
+
+mysql> CREATE USER 'repl'@'%' IDENTIFIEDBY 'repl';
+
+Query OK, 0 rows affected (0.03 sec) 
+
+mysql> GRANT REPLICATION SLAVE ON *.* TO'repl'@'%';
+
+Query OK, 0 rows affected (0.00 sec) 
+
+15. 开启复制（3002，3003上）
+
+使用change master to 命令开启复制
+
+mysql> start slave; 
+
+mysql> show slave status\G
+
+下面是重要步骤，安装Fabric
+
+第二部分：安装MySQL Fabric
+
+1. 安装Connector/Python
+
+[root@mysqlfabric soft]# rpm -ivhmysql-connector-python-1.2.2-1.el6.noarch.rpm
+
+注：MySQL Fabric使用Connector/Python来连接MySQL，所以必须安装这个连接器 
+
+2. 安装Fabric
+
+由于Fabric包含在mysql-utilities，所以只需要安装mysql-utilities就可以了。
+
+[root@mysqlfabric soft]# rpm -ivh mysql-utilities-1.4.3-1.el6.noarch.rpm
+
+Preparing... ########################################### [100%]
+
+1:mysql-utilities ########################################### [100%] 
+
+3. 配置MySQL Fabric
+
+配置MySQL Fabric需要创建MySQL用户，创建启动配置文件和安装Fabric数据存储
+
+l 创建用户
+
+登录端口号为3306的mysql 服务【作为Fabric后台数据存储】
+
+[root@mysqlfabric soft]# mysql -u root -P3306 -p –h mysqlfabric.localdomain
+
+【注】上面登录时需要加主机名，因为一台服务器安装了多个mysql服务
+
+mysql> CREATE USER 'fabric'@'mysqlfabric.localdomain'IDENTIFIED BY 'fabric';
+
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> GRANT ALL ON fabric.* TO'fabric'@'mysqlfabric.localdomain';
+
+Query OK, 0 rows affected (0.00 sec) 
+
+l 在另外三台MySQL 服务下创建下面的用户，用于连接被管理的MySQL服务
+
+[root@mysqlfabric mysql_3003]# mysql -uroot-P3001 -p -h mysqlfabric.localdomain
+
+mysql> GRANT ALL ON *.* TO 'fabric'@' mysqlfabric.localdomain';
+
+Query OK, 0 rows affected (0.00 sec) 
+
+mysql> SET PASSWORD FOR 'fabric'@' mysqlfabric.localdomain' = PASSWORD('fabric');
+
+Query OK, 0 rows affected (0.00 sec) 
+
+[root@mysqlfabric mysql_3003]# mysql -uroot-P3002 -p -h mysqlfabric.localdomain 
+
+mysql> GRANT ALL ON *.* TO 'fabric'@' mysqlfabric.localdomain';
+
+Query OK, 0 rows affected (0.00 sec) 
+
+mysql> SET PASSWORD FOR 'fabric'@' mysqlfabric.localdomain' = PASSWORD('fabric');
+
+Query OK, 0 rows affected (0.00 sec)
+
+[root@mysqlfabric mysql_3003]# mysql -uroot-P3003 -p -h mysqlfabric.localdomain 
+
+mysql> GRANT ALL ON *.* TO 'fabric'@' mysqlfabric.localdomain';
+
+Query OK, 0 rows affected (0.00 sec) 
+
+mysql> SET PASSWORD FOR 'fabric'@' mysqlfabric.localdomain' = PASSWORD('fabric');
+
+Query OK, 0 rows affected (0.00 sec) 
+
+l 配置文件
+
+打开配置文件/etc/mysql/fabric.cfg
+
+[root@mysqlfabric soft]# vi/etc/mysql/fabric.cfg
+
+修改[storage]部分信息：
+
+[storage]
+
+auth_plugin = mysql_native_password
+
+database = fabric
+
+user = fabric
+
+address = mysqlfabric.localdomain:3306
+
+connection_delay = 1
+
+connection_timeout = 6
+
+password =fabric
+
+connection_attempts = 6 
+
+[sharding]
+
+mysqldump_program =/opt/mysql/bin/mysqldump
+
+mysqlclient_program =/opt/mysql/bin/mysql 
+
+4. 填充MySQL Fabric后台存储数据（创建库和表）
+
+[root@mysqlfabric mysql]# mysqlfabric manage setup--param=storage.user=fabric --param=storage.password=fabric
+
+[INFO] 1404205520.480905 - MainThread -Initializing persister: user (fabric), server (mysqlfabric.localdomain:3306),database (fabric).
+
+Finishing initial setup
+
+=======================
+
+Password for admin user is not yet set.
+Password for admin/xmlrpc:
+Repeat Password: admin
+Password set.admin
+
+5. 启动MySQL Fabric节点
+
+[root@mysqlfabric ~]# mysqlfabric managestart
+如果想在后台运行，可以加上—daemonize选项 
+
+停止方式：
+[root@mysqlfabric ~]# mysqlfabric managestop 
+
+6. 配置MySQL Fabric用于主从复制
+
+l 创建组
+
+[root@mysqlfabric ~]# mysqlfabric groupcreate my_group
+Password for admin:
+
+Procedure :
+
+{ uuid = d7d4581c-a819-47c2-ad31-37c5390e93bd,
+finished = True,
+success = True,
+return = True,
+activities =
+} 
+
+l 把MySQL服务添加到组
+
+错误信息：
+
+[root@mysqlfabric ~]# mysqlfabric group addmy_group mysqlfabric.localdomain:3001
+
+Procedure :
+
+{ uuid = 5c373b82-d369-413d-a2e0-5b4c60d506c0,
+finished = True,
+success = False,
+return = ServerError: Server (be642e20-00d3-11e4-8d96-0050568f7be4)does not have the binary log or gtid enabled.,
+activities =
+} 
+
+正确信息：
+
+[root@mysqlfabric mysql_3003]# mysqlfabricgroup add my_group mysqlfabric.localdomain:3001
+
+Procedure :
+
+{ uuid = baafd4d2-dba8-4863-9a76-74a3e6153065,
+finished = True,
+success = True,
+return = True,
+activities =
+} 
+
+[root@mysqlfabric mysql_3003]# mysqlfabric group add my_groupmysqlfabric.localdomain:3002
+
+Procedure :
+
+{ uuid = 2f336426-b12d-4bd2-ab71-0b6c9d513466,
+finished = True,
+success = True,
+return = True,
+activities =
+} 
+
+[root@mysqlfabric mysql_3003]# mysqlfabric group add my_groupmysqlfabric.localdomain:3003
+
+Procedure :
+
+{ uuid = 844eba0a-a7bc-4e67-8359-3ab53d0520c7,
+finished = True,
+success = True,
+return = True,
+activities =
+}
+
+l 把组内一个MySQL服务提升为一个master:
+
+添加MySQL服务到组后，Fabric不会意识到任何主从复制的架构，必须提升组内任何一个MySQL服务为主master,其它服务设置为slave。提升命令如下：
+
+[root@mysqlfabric ~]# mysqlfabric grouppromote my_group 
+
+当组内有一个主master时，新添加到组内的新MySQL服务将自动成为slave。
+
+也可以使用同样的命令使组内的master降级为slave，另选一个slave为master 
+
+l 查看my_group组Mysql服务的信息：
+
+[root@mysqlfabric ~]# mysqlfabric grouplookup_servers my_group
+
+Command :
+
+{ success = True
+return = [{'status':'SECONDARY', 'server_uuid': 'be642e20-00d3-11e4-8d96-0050568f7be4', 'mode':'READ_ONLY', 'weight': 1.0, 'address': 'mysqlfabric.localdomain:3001'},{'status': 'SECONDARY', 'server_uuid': 'c696a608-00d5-11e4-8da3-0050568f7be4','mode': 'READ_ONLY', 'weight': 1.0, 'address': 'mysqlfabric.localdomain:3002'},{'status': 'PRIMARY', 'server_uuid': '1230c8cb-00d7-11e4-8dac-0050568f7be4','mode': 'READ_WRITE', 'weight': 1.0, 'address':'mysqlfabric.localdomain:3003'}]
+activities =
+} 
+
+l 查看my_group组MySQL服务健康状态信息：
+
+[root@mysqlfabric ~]# mysqlfabric grouphealth my_group
+
+Command :
+
+{ success = True
+return ={'1230c8cb-00d7-11e4-8dac-0050568f7be4': {'status': 'PRIMARY', 'is_alive':True, 'threads': {}}, 'be642e20-00d3-11e4-8d96-0050568f7be4': {'status':'SECONDARY', 'is_alive': True, 'threads': {}},'c696a608-00d5-11e4-8da3-0050568f7be4': {'status': 'SECONDARY', 'is_alive':True, 'threads': {}}}
+activities =
+} 
+
+l 自动检测组内MySQL服务故障：
+
+如果想在primary失败时，secondary能自动提升为primary，执行下面步骤：
+
+[root@mysqlfabric ~]# mysqlfabric group activate my_group
+
+Procedure :
+
+{ uuid = 4ee1bd23-0fab-46f0-a336-9e4731117370,
+finished = True,
+success = True,
+return = True,
+activities =
+} 
+
+【备注】如果不想让fabric自动检测故障，可以取消自动监控功能：
+[root@mysqlfabric ~]# mysqlfabric group deactivate my_group
+
+7. 故障测试
+
+[root@mysqlfabric ~]# service mysql.3003 stop
+[root@mysqlfabric ~]# mysqlfabric group lookup_servers my_group
+
+Command :
+
+{ success = True
+return = [{'status':'SECONDARY', 'server_uuid': 'be642e20-00d3-11e4-8d96-0050568f7be4', 'mode':'READ_ONLY', 'weight': 1.0, 'address': 'mysqlfabric.localdomain:3001'}, {'status': 'PRIMARY', 'server_uuid':'c696a608-00d5-11e4-8da3-0050568f7be4', 'mode': 'READ_WRITE', 'weight': 1.0,'address': 'mysqlfabric.localdomain:3002'}, {'status': 'FAULTY','server_uuid': '1230c8cb-00d7-11e4-8dac-0050568f7be4', 'mode': 'READ_WRITE','weight': 1.0, 'address': 'mysqlfabric.localdomain:3003'}]
+activities =
+} 
+
+说明已经把3002提升为primary
+
+
+8. Mysqlfabric相关命令：
+
+l 把一个MySQL服务移出组：
+
+mysqlfabric group remove my_groupserver_uuid
+
+如：
+
+[root@mysqlfabric ~]#mysqlfabric groupremove my_group 1230c8cb-00d7-11e4-8dac-0050568f7be4 
+
+master不能被移出组，必须disablemaster后才可以移出：
+
+mysqlfabric group demote my_group 
+
+l 删除组(组内已经没有MySQL服务)
+
+mysqlfabric group destroy my_group 
+
+l 强制删除组（组内有MySQL服务）
+
+mysqlfabric group destroy my_group --force
+
+奋斗的路非常幸苦，部署到此介绍，再接再厉。。。。

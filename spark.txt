@@ -1,0 +1,158 @@
+cat /etc/passwd |cut -f 1
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+sys:x:3:3:sys:/dev:/bin/sh
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/bin/sh
+man:x:6:12:man:/var/cache/man:/bin/sh
+lp:x:7:7:lp:/var/spool/lpd:/bin/sh
+mail:x:8:8:mail:/var/mail:/bin/sh
+news:x:9:9:news:/var/spool/news:/bin/sh
+uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh
+proxy:x:13:13:proxy:/bin:/bin/sh
+www-data:x:33:33:www-data:/var/www:/bin/sh
+backup:x:34:34:backup:/var/backups:/bin/sh
+list:x:38:38:Mailing List Manager:/var/list:/bin/sh
+irc:x:39:39:ircd:/var/run/ircd:/bin/sh
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh
+nobody:x:65534:65534:nobody:/nonexistent:/bin/sh
+libuuid:x:100:101::/var/lib/libuuid:/bin/sh
+syslog:x:101:103::/home/syslog:/bin/false
+messagebus:x:102:105::/var/run/dbus:/bin/false
+whoopsie:x:103:106::/nonexistent:/bin/false
+landscape:x:104:109::/var/lib/landscape:/bin/false
+sshd:x:105:65534::/var/run/sshd:/usr/sbin/nologin
+lemonhall:x:1000:1000:lemonhall,,,:/home/lemonhall:/bin/bash
+cloudera-scm:x:106:113:Cloudera Manager,,,:/var/run/cloudera-scm-server:/bin/nologin
+flume:x:999:998:Flume:/var/lib/flume-ng:/bin/false
+hdfs:x:998:997:Hadoop HDFS:/var/lib/hadoop-hdfs:/bin/bash
+zookeeper:x:997:996:ZooKeeper:/var/run/zookeeper:/bin/false
+llama:x:996:995:Llama:/var/run/llama:/bin/bash
+httpfs:x:995:994:Hadoop HTTPFS:/var/run/hadoop-httpfs:/bin/bash
+mapred:x:994:993:Hadoop MapReduce:/var/lib/hadoop-mapreduce:/bin/bash
+sqoop:x:993:992:Sqoop:/var/lib/sqoop:/bin/false
+yarn:x:992:991:Hadoop Yarn:/var/lib/hadoop-yarn:/bin/bash
+solr:x:991:990:Solr:/var/run/solr:/sbin/nologin
+hive:x:990:989:Hive:/var/lib/hive:/bin/false
+sqoop2:x:989:988:Sqoop 2 User:/var/run/sqoop2:/sbin/nologin
+oozie:x:988:987:Oozie User:/var/lib/oozie:/bin/false
+hbase:x:987:986:HBase:/var/run/hbase:/bin/false
+impala:x:986:985:Impala:/var/run/impala:/bin/bash
+spark:x:985:984:Spark:/var/lib/spark:/sbin/nologin
+hue:x:984:983:Hue:/usr/lib/hue:/bin/false
+
+
+http://spark.apache.org/docs/latest/running-on-yarn.html
+http://www.bkjia.com/yjs/778935.html
+==================================================================
+
+1、设置环境变量
+export JAVA_HOME=/usr/lib/jvm/j2sdk1.6-oracle/
+#设置SPARK所需的环境变量
+SPARK_YARN_USER_ENV="JAVA_HOME=/usr/lib/jvm/j2sdk1.6-oracle/"
+
+#设置SPARK的JAR包地址，可以是hdfs上
+export SPARK_JAR=hdfs:///some/path
+
+#HADOOP_CONF_DIR
+HADOOP_CONF_DIR=/etc/hadoop/
+
+#YARN_CONF_DIR
+YARN_CONF_DIR=/etc/hadoop/conf.cloudera.yarn
+
+2、运行---集群模式
+./bin/spark-submit --class path.to.your.Class --master yarn-cluster [options] <app jar> [app options]
+
+$ ./bin/spark-submit --class org.apache.spark.examples.SparkPi \
+    --master yarn-cluster \
+    --num-executors 3 \
+    --driver-memory 4g \
+    --executor-memory 2g \
+    --executor-cores 1
+    lib/spark-examples*.jar \
+    10
+
+3、运行---客户端模式
+
+$ ./bin/spark-submit --class org.apache.spark.examples.SparkPi \
+    --master yarn-client \
+    --num-executors 3 \
+    --driver-memory 4g \
+    --executor-memory 2g \
+    --executor-cores 1
+    lib/spark-examples*.jar \
+    10
+
+4、spark-shell模式
+./bin/spark-shell --master yarn-client
+
+5、其它的jar包依赖
+
+$ ./bin/spark-submit --class my.main.Class \
+    --master yarn-cluster \
+    --jars my-other-jar.jar,my-other-other-jar.jar
+    my-main-jar.jar
+    app_arg1 app_arg2
+
+
+6、debug
+
+yarn logs -applicationId <app ID>
+
+
+==================================================================
+参考CDH默认的spark0.9的配置
+
+/etc/spark/conf/spark_env.conf
+
+export SPARK_HOME=/OPT/cloudera/parcels/CHD-5.0.2-1.CDH5.0.2.P0.13/lib/spark
+export STANDALONE_SPARK_MASTER_HOST=dataNode01
+export SPRAK_MASTER_PORT=7077
+exprot DEFAULT_HADOOP_HOME=/opt/cloudera/parcels/CHD-5.0.2-1.CDH5.0.2.P0.13/lib/hadoop
+
+
+#HDFS上的sparkjar包地址
+export SPARK_JAR_HDFS_PATH=/user/spark/share/lib/spark-assembly.jar
+
+#不使用scala，使用jvm来跑
+export SPARK_LAUNCE_WITH_SCALA =0
+export SPARK_LIBRARY_PATH=${SPARK_HOME}/lib
+export SCALA_LIBRARY_PATH=${SPARK_HOME}/lib
+export SPARK_MASTER_IP=$STANDALONE_SPARK_MASTER_HOST
+
+export HADOOP_HOME=${HADOOP_HOME:-DEFAULT_HADOOP_HOME}
+
+if [-n "$HOADOOP_HOME" ]; then
+  export SPARK_LIBRARY_PATH=$SPARK_LIBRARY_PATH:${HADOOP_HOME}/lib/native
+fi
+
+==================================================================
+
+CHD5
+1、下载源码
+wget http://d3kbcqa49mib13.cloudfront.net/spark-1.0.0.tgz
+
+#设置heap的大小
+export MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=512m"
+mvn -Pyarn -Dhadoop.version=2.3.0 -Dyarn.version=2.3.0 -DskipTests clean package
+
+#要先设置一下SCALA_HOME环境变量，打包成tgz包以供部署
+./make-distribution.sh --hadoop 2.3.0 --with-yarn --with-hive --tgz
+
+#另外，因为需要与CDH上的JAVA配合，所以需要JAVA6的JDK
+./make-distribution.sh --hadoop 2.3.0 --with-yarn --with-hive --tgz
+***NOTE***: JAVA_HOME is not set to a JDK 6 installation. The resulting
+            distribution may not work well with PySpark and will not run
+            with Java 6 (See SPARK-1703 and SPARK-1911).
+            This test can be disabled by adding --skip-java-test.
+Output from 'java -version' was:
+java version "1.7.0_51"
+Java(TM) SE Runtime Environment (build 1.7.0_51-b13)
+Java HotSpot(TM) 64-Bit Server VM (build 24.51-b03, mixed mode)
+Would you like to continue anyways? [y,n]:
+
+
+/Users/nixiephoebe/spark/spark-1.0.0/assembly/target/scala-2.10/spark-assembly-1.0.0-hadoop2.3.0.jar
+
+
