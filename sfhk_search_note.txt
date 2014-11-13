@@ -1,0 +1,930 @@
+0、安装node.js
+wget http://nodejs.org/dist/v0.11.14/node-v0.11.14.tar.gz
+tar zxvf node-v0.11.14.tar.gz
+cd node-v0.11.14
+./confingure
+make
+make install
+
+选用不稳定的11版本的原因是，只有0.11版本的才支持harmony选项，可以开启co
+
+
+===============================================================
+1、创建工程
+mkdir hkssearch
+
+vim package.json
+{
+  "name": "sf-hk-search",
+  "version": "0.0.1",
+  "description": "sf express",
+  "dependencies": {},
+  "license": "MIT",
+  "repository": {
+    "type": "git"
+  },
+  "readmeFilename": "Readme.md",
+  "bugs": {
+    "url": "https://github.com/visionmedia/co/issues"
+  },
+  "homepage": "https://github.com/visionmedia/co"
+}
+
+===============================================================
+
+2、命令行当中输入
+npm install express --save
+npm install body-parser --save
+npm install log4js --save
+npm install node-dev --save
+
+
+===============================================================
+
+3、server的模板
+var express     = require('express');
+var bodyParser  = require('body-parser');
+var app         = express();
+
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+app.use(express.static('public'));
+
+
+var todo  = {};
+
+var todos = [];
+
+// app.get('/', function(req, res){
+//        res.send('hello world');
+// });
+
+app.get("/",function(req,res){
+        res.redirect('search.html');
+});
+
+
+app.listen(3000);
+
+===================================================================
+4、安装nginx
+apt-get install nginx
+
+
+vim /etc/nginx/sites-enabled/default
+
+加入：
+
+    location / {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-NginX-Proxy true;
+            proxy_pass http://127.0.0.1:3000/;
+            proxy_redirect off;
+    }
+
+===================================================================
+
+5、新建一个启动测试用脚本
+
+/root/hksearch/node_modules/node-dev/bin/node-dev server.js
+
+
+===================================================================
+
+6、mysql链接池
+
+npm install mysql --save
+
+参考：http://blog.fens.me/nodejs-mysql-intro/
+
+--------------------------------------
+
+var mysql = require('mysql');
+
+var pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '123456',
+    database: 'heike_product',
+    port: 3306
+});
+
+var selectSQL = 'select * from product limit 1';
+
+pool.getConnection(function (err, conn) {
+    if (err) console.log("POOL ==> " + err);
+
+        conn.query(selectSQL, function (err2, rows) {
+            if (err2) console.log(err2);
+
+            console.log("SELECT ==> ");
+            for (var i in rows) {
+                console.log(rows[i]);
+            }
+
+            conn.release();
+        });
+});
+
+----------------------------------------
+之后package.json文件的内容变成：
+
+{
+  "name": "sf-hk-search",
+  "version": "0.0.1",
+  "description": "sf express",
+  "dependencies": {
+    "body-parser": "^1.9.2",
+    "express": "^4.10.1",
+    "log4js": "^0.6.21",
+    "mysql": "^2.5.3",
+    "node-dev": "^2.6.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git"
+  },
+  "readmeFilename": "Readme.md",
+  "bugs": {
+    "url": "https://github.com/visionmedia/co/issues"
+  },
+  "homepage": "https://github.com/visionmedia/co"
+}
+
+--------------------------------------
+
+===================================================================
+
+7、mysql的链接组件
+https://github.com/felixge/node-mysql
+
+池化、自动重连、cluster化都支持
+
+
+===================================================================
+
+8、优化mysql本身的配置
+
+
+
+===================================================================
+
+9、数据库的字段
+
+DB for Heike product:
+-- database: heike_product
+-- user: heike
+-- password: 123456
+
+There are 2 tables in db heike_product:
+product
+templateblobfield
+
+What you need to display on the search result page are,
+---------------------------------------------------------------------------------
+| TABLE                 | FIELD                 | DISPLAY                       |
+---------------------------------------------------------------------------------
+| product               | product_name          | product name                  |
+| product               | unit_price            | the heike price               |
+| product               | list_price            | market price                  |
+| product               | app_usercount         | comment counts                |
+| product               | visit_count           | customer care counts          |
+| product               | product_id            | used for the product link     |
+| templateblobfield     | field_smallvalue      | small-size pic relative path  |
+| templateblobfield     | field_centervalue     | median-size pic relative path |
+---------------------------------------------------------------------------------
+
+Rule for picture url: http://hkimg.sf-express.com/<relative path stored in db>
+Rule for product page url: http://www.sfheike.com/p_<product_id>.htm
+
+Table templateblobfield use field "PRODUCT_ID" to associate with table product.
+
+Search fields: product_name & searchkey
+
+Sorting:
+-- Default: by create_time desc;
+-- Popularity: by visit_count;
+-- Price: by unit_price.
+
+===================================================================
+10、数据库的字段
+
+product表：
+{ PRODUCT_NAME: '健司KENJI 健康时刻瑞士高山牛乳脆片  160g',
+  UNIT_PRICE: 12.9,
+  LIST_PRICE: 22,
+  APP_USERCOUNT: 0,
+  VISITCOUNT: 0,
+  PRODUCT_ID: '002a41857' 
+}
+
+templateblobfield表:
+{ ID: '8aefac984978d6be01498155d4996998',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214164241.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214164241.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214164241.jpg' }
+{ ID: '8aefac984978d6be01498155d4ef6999',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214163826.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214163826.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214163826.jpg' }
+{ ID: '8aefac984978d6be01498155d68d699a',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214164811.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214164811.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214164811.jpg' }
+{ ID: '8aefac984978d6be01498155d6b9699b',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214164466.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214164466.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214164466.jpg' }
+{ ID: '8aefac984978d6be01498155d85c699c',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214165301.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214165301.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214165301.jpg' }
+{ ID: '8aefac984978d6be01498155d8c8699d',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214164980.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214164980.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214164980.jpg' }
+{ ID: '8aefac984978d6be01498155da18699e',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214165748.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214165748.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214165748.jpg' }
+{ ID: '8aefac984978d6be01498155dabe699f',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214165507.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214165507.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214165507.jpg' }
+{ ID: '8aefac984978d6be01498155dbe069a0',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214166188.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214166188.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214166188.jpg' }
+{ ID: '8aefac984978d6be01498155dc7969a1',
+  FIELD_ID: '',
+  FIELD_VALUE: 'userfiles/product/img/20141106/big/big_big_1415214165936.jpg',
+  PRODUCT_ID: '002a41857',
+  FIELD_SMALLVALUE: 'userfiles/product/img/20141106/small/small_big_1415214165936.jpg',
+  FIELD_CENTERVALUE: 'userfiles/product/img/20141106/center/center_big_1415214165936.jpg' }
+
+product表：
+{ PRODUCT_ID: '002a41857',
+  PRODUCT_NAME: '健司KENJI 健康时刻瑞士高山牛乳脆片  160g',
+  UNIT_PRICE: 12.9,
+  LIST_PRICE: 22,
+  QUANTITY: 5,
+  BRAND: '8aefac9b497114ef01497a2cfa7b3e31',
+  MODEL: '',
+  SPEC: '',
+  UNIT: '盒',
+  MANUFACTORY: '',
+  RESELLER: '',
+  PRODUCINGAREA: '',
+  DESCRIPTION: '<img src="http://p.sfbest.com/web/decba728/decba7281ece1ee210997f242fb66893.gif"><p style="text-align: center;"><img src="http://p01.sfbest.com/1700027803/1700027803_1.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_2.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_3.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_4.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_5.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_6.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_7.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_8.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_9.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_10.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_11.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_12.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_13.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_14.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_15.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_16.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_17.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_18.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_19.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_20.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_21.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_22.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_23.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_24.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_25.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_26.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_27.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_28.jpg" style="margin:0;" alt="" /><div style="{display:none}"></div> <img src="http://p01.sfbest.com/1700027803/1700027803_29.jpg" style="margin:0;" alt="" /></p>',
+  UPDATE_TIME: '2014-11-06 13:02:02',
+  SMALL_PICTURE: 'userfiles/product/img/20141106/small/1415214128626_1415214166482.jpg',
+  CENTER_PICTURE: 'userfiles/product/img/20141106/center/1415214128566_1415214166482.jpg',
+  BIG_PICTURE: 'userfiles/product/img/20141105/big/1415214166482.jpg',
+  NOTE: '健司KENJI 健康时刻瑞士高山牛乳脆片  160g',
+  INTRO: '',
+  SEARCHKEY: '',
+  TEMPLATE_ID: '101',
+  STATUS: 1,
+  CREATE_TIME: '2014-11-04 17:40:10',
+  MAIN_CATEGORY: '4vfi3265',
+  SORTINDEX: 0,
+  CORPID: '',
+  POP_PICTURE: 'userfiles/product/img/20141106/pop/1415214128651_1415214166482.jpg',
+  LINKURL: '',
+  EXT_FIELD1: '北京、嘉兴、广州、常温',
+  EXT_FIELD2: '',
+  DISPLAYID: '',
+  SPEC_NAME1: '',
+  SPEC_NAME2: '',
+  SPEC_VALUE1: '',
+  SPEC_VALUE2: '',
+  POP_TYPE: '',
+  PRODUCT_NO: '100026572',
+  SID: '002a41857',
+  TAG: '盒',
+  VISITCOUNT: 0,
+  TYPE: 0,
+  STARTTIME: '',
+  ENDTIME: '',
+  EXTFILELD3: '',
+  EXTFILELD4: '',
+  OWNER_ROLE: '',
+  CREATOR: '',
+  REFER_PRICE: 0,
+  PARENT_ID: '',
+  ISCONFIG: 0,
+  SHORT_NAME: '',
+  EXT_FILELD20: '',
+  EXT_FILELD19: '',
+  EXT_FILELD18: '',
+  EXT_FILELD17: '',
+  EXT_FILELD16: '',
+  EXT_FILELD15: '',
+  EXT_FILELD14: '',
+  EXT_FILELD13: '',
+  EXT_FILELD12: '',
+  EXT_FILELD11: '',
+  EXT_FILELD10: '',
+  EXT_FILELD9: '',
+  EXT_FILELD8: '',
+  EXT_FILELD7: '',
+  EXT_FILELD6: '',
+  EXT_FILELD5: '',
+  DB_STATUS: '',
+  DEL_TIME: '',
+  CUSTOM_IMAGE: 0,
+  APP_USERCOUNT: 0,
+  BUY_TOTALCOUNT: 0,
+  APP_TOTALCOUNT: 0,
+  POP_PICTURE1: 'userfiles/product/img/20141106/pop/002a418571/pop11415214128674_14152141664821.jpg',
+  POP_PICTURE2: 'userfiles/product/img/20141106/pop/002a418572/pop21415214128697_14152141664822.jpg',
+  POP_PICTURE3: 'userfiles/product/img/20141106/pop/002a418573/pop31415214128724_14152141664823.jpg',
+  POP_PICTURE4: 'userfiles/product/img/20141106/pop/002a418574/pop41415214128746_14152141664824.jpg',
+  POP_PICTURE5: 'userfiles/product/img/20141106/pop/002a418575/pop51415214128770_14152141664825.jpg',
+  weight: 200,
+  INTEGRAL: 0,
+  IS_USERPRICE: 1,
+  SHORT_NAME_COLOR: '',
+  SHORT_NAME_BOLD: 0,
+  P_COLOR: '',
+  P_COLOR_PIC: '',
+  INTEGRAL_COUNT: 0,
+  BASE_PRICE: 0,
+  STORE_ID: '1111110002',
+  STOCK_WARNING: 0,
+  SUPPLIER_ID: '',
+  STOCK_WARNING2: 0,
+  SHIP_TYPE: '',
+  CHARGES_FLAG: 0,
+  BOOKINGS: 0,
+  CHECK_STATUS: '0',
+  CHECK_MAN: '',
+  CHECKED_NOTE: '',
+  CHECK_TIME: '2014-11-04 17:40:10',
+  ESALESNO: '',
+  CLASSTYPE: '',
+  GAME_TYPE: '0',
+  EACH_BUY_COUNT: 0,
+  LIMIT_BUY_COUNT: 0,
+  START_LIMIT_TIME: '',
+  CHANNEL_FLAG: '0',
+  END_LIMIT_TIME: '',
+  ORGID: '|1|',
+  PIFANUM0: 0,
+  PIFANUM1: 0,
+  PIFANUM2: 0,
+  PIFANUM3: 0,
+  PIFANUM4: 0,
+  PFPRICE1: 0,
+  PFPRICE2: 0,
+  PFPRICE3: 0,
+  PFPRICE4: 0,
+  INFORMATION_SOURCE: '卖家添加',
+  ISNEW: 1,
+  FLAG: 0,
+  ISUPDATE: 0,
+  EXT_FILELD21: '',
+  EXT_FILELD22: '',
+  EXT_FILELD23: '',
+  EXT_FILELD24: '',
+  EXT_FILELD25: '',
+  EXT_FILELD26: '',
+  EXT_FILELD27: '',
+  EXT_FILELD28: '',
+  EXT_FILELD29: '',
+  EXT_FILELD30: '',
+  EXT_FILELD31: '',
+  EXT_FILELD32: '',
+  EXT_FILELD33: '',
+  EXT_FILELD34: '',
+  EXT_FILELD35: '',
+  EXT_FILELD36: '',
+  EXT_FILELD37: '',
+  EXT_FILELD38: '',
+  EXT_FILELD39: '',
+  EXT_FILELD40: '',
+  BARCODE: '',
+  FACTORY: '',
+  PROVINCE: '',
+  CITY: '',
+  AREA: '',
+  GIFT_CARD_TYPE: '',
+  TW_PARENT_ID: '',
+  WHO_BEAR: 'buyer',
+  TRANSFER_ID: 'ff808081476dd42101477ad88af51803',
+  EMS_TRANSFER_ID: '',
+  NOMAL_TRANSFER_ID: '',
+  TRANSFER_TYPE: '1',
+  PRODUCT_LENGTH: 0,
+  PRODUCT_HEIGHT: 0,
+  FREIGHT_AMOUNT: 0,
+  INTEGRAL_AMOUNT: 0,
+  INTEGRAL_TYPE: '0',
+  INTEGRAL_EXCHANGE_AMOUNT: 0,
+  USE_TRAN_MODEL: '0',
+  PRIVATE_AREAS: '',
+  USER_PRIVATE: '0',
+  USER_LEVEL: '',
+  PRIVATE_USERS: '',
+  AREA_PRIVATE: '0',
+  MODEL_NO: '',
+  TP_SPEC_VALUE1: '',
+  TP_SPEC_VALUE2: '',
+  SUPPORT_STORE_BUY: '1',
+  RAPID_REPLENISHMENT: '0',
+  SPECIAL_SERVICE: '',
+  IS_SALESPROMOTION: '0',
+  PROMOTION_CREATETIME: '',
+  PROMOTION_ENDTIME: '',
+  PROMOTION_QUANTITY: 0,
+  PROMOTION_PRICE: 0,
+  PROMOTION_TYPE: '',
+  PROMOTION_BUY_COUNT: 0,
+  PROMOTION_GIFT_NOTE: '',
+  PROMOTION_CHECK_STATUS: '0',
+  PROMOTION_CHECK_NOTE: '',
+  YDPRICE: 0,
+  TQYD_DAYS: 0,
+  TV_NOTE: '',
+  MOBILE_NOTE: '',
+  VD_ID1: '',
+  IS_YYPRODUCT: '',
+  SCOPE: '',
+  PROMOTION_IMAGE: '',
+  PRODUCT_WIDTH: 0,
+  VD_ID2: '',
+  VD_ID3: '',
+  VD_ID4: '',
+  VD_ID5: '',
+  premium_percent: 0,
+  shipping_type: '2',
+  piece_price: 0,
+  virtual_buy_totalCount: 0,
+  SHIP_STATUS: '1',
+  COD_STATUS: '1',
+  product_splitRate: 0,
+  storeSalesArea: '8aefac9a48ae02bf0148c43609931c1a',
+  create_man: '',
+  quick_markurl: '',
+  prodcutpropotis: '',
+  store_product_no: '1700027803',
+  product_type_flag: '0',
+  uc_activation_status: '1',
+  uc_status: '1',
+  store_check_status: '1' }
+
+===================================================================
+
+11、对应的模板
+
+<li class="">
+<div class="y_bigpic">
+  <div>
+      <a target="_blank" href="http://www.sfheike.com/p_{{PRODUCT_ID}}.htm" title="{{PRODUCT_NAME}}"><img data-url="http://hkimg.sf-express.com/{{FIELD_CENTERVALUE}}" src="http://hkimg.sf-express.com/{{FIELD_CENTERVALUE}}" alt="{{PRODUCT_NAME}}}" width="208" height="208"></a>
+  </div>
+</div>
+<div class="y_smpicli">
+    <span class="y_cur"><img src="./search_files/small_1410766518833.jpg" alt="{{PRODUCT_NAME}}"></span>
+</div>
+    <p class="price"><span>￥{{UNIT_PRICE}}</span><del>{{LIST_PRICE}}</del></p>
+    <p class="name"><a target="_blank" title="{{PRODUCT_NAME}}" href="http://www.sfheike.com/p_{{PRODUCT_ID}}.htm">{{PRODUCT_NAME}}</a></p>
+    <p class="xl">累计评价:{{APP_USERCOUNT}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;关注：{{VISITCOUNT}}次</p>
+</li>
+
+
+====================================================================
+
+12、模板引擎
+官网：https://github.com/borismoore/jsrender
+示例：http://www.jsviews.com/#samples
+
+
+<ul id="productsList">
+<!-- 大图展示 -->
+<!-- Item 1 -->
+<!-- Templates -->
+<script id="productTemplate" type="text/x-jsrender">
+<li class="">
+<div class="y_bigpic">
+  <div>
+      <a target="_blank" href="http://www.sfheike.com/p_{{PRODUCT_ID}}.htm" title="{{>PRODUCT_NAME}}"><img data-url="http://hkimg.sf-express.com/{{>CENTER_PICTURE}}" src="http://hkimg.sf-express.com/{{>CENTER_PICTURE}}" alt="{{>PRODUCT_NAME}}}" width="208" height="208"></a>
+  </div>
+</div>
+<div class="y_smpicli">
+    <span class="y_cur"><img src="./search_files/small_1410766518833.jpg" alt="{{>PRODUCT_NAME}}"></span>
+</div>
+    <p class="price"><span>￥{{>UNIT_PRICE}}</span><del>{{>LIST_PRICE}}</del></p>
+    <p class="name"><a target="_blank" title="{{>PRODUCT_NAME}}" href="http://www.sfheike.com/p_{{>PRODUCT_ID}}.htm">{{>PRODUCT_NAME}}</a></p>
+    <p class="xl">累计评价:{{>APP_USERCOUNT}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;关注：{{>VISITCOUNT}}次</p>
+</li>
+</script>
+<script type="text/javascript">
+  var products = [
+      { PRODUCT_NAME: '健司KENJI 健康时刻瑞士高山牛乳脆片  160g',
+        UNIT_PRICE: 12.9,
+        LIST_PRICE: 22,
+        APP_USERCOUNT: 0,
+        VISITCOUNT: 0,
+        PRODUCT_ID: '002a41857' }
+  ];
+  $("#productsList").html($("#productTemplate").render(products));
+</script>
+
+====================================================================
+
+13、商品的状态问题
+
+CHECK_STATUS = 1 AND store_check_status =1 AND uc_activation_status =1 AND uc_status = 1
+
+====================================================================
+
+14、对MYSQL的查询加上缓存
+
+加三个依赖：
+npm install co --save
+npm install redis --save
+npm install co-redis --save
+
+var co = require('co');
+var redisClient = require('redis').createClient();
+var wrapper = require('co-redis');
+var redisCo = wrapper(redisClient);
+
+修改mysql.js的缓存机制
+co(function* () {
+      var result = yield redisCo.hgetall('15289475287');
+      var rank   = yield redisCo.zrank("zrevrank","15289475287");
+                   result.rank = rank;
+      res.send(result);
+})();
+
+
+安装redis
+wget http://download.redis.io/releases/redis-2.8.17.tar.gz
+tar zxvf redis-2.8.17.tar.gz
+cd redis-2.8.17
+make
+make install
+
+拷贝特定文件到/etc/下
+修改文件配置：
+# 修改了参数，使之可以daemon化
+daemonize yes
+
+# 关闭了持久化能力
+#
+# save 900 1
+# save 300 10
+# save 60 10000
+
+# 最大内存值----3G
+maxmemory 3221225472
+
+# 打开了lru选项
+#
+maxmemory-policy volatile-lru
+
+====================================================================
+
+15、压力测试
+
+ab -n 10000 -c 300 http://10.80.124.54/getProducts
+
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.80.124.54 (be patient)
+Completed 1000 requests
+Completed 2000 requests
+Completed 3000 requests
+Completed 4000 requests
+Completed 5000 requests
+Completed 6000 requests
+Completed 7000 requests
+Completed 8000 requests
+Completed 9000 requests
+Completed 10000 requests
+Finished 10000 requests
+
+
+Server Software:        nginx/1.4.6
+Server Hostname:        10.80.124.54
+Server Port:            80
+
+Document Path:          /getProducts
+Document Length:        6580 bytes
+
+Concurrency Level:      300
+Time taken for tests:   2.479 seconds
+Complete requests:      10000
+Failed requests:        0
+Total transferred:      68130000 bytes
+HTML transferred:       65800000 bytes
+Requests per second:    4034.62 [#/sec] (mean)
+Time per request:       74.356 [ms] (mean)
+Time per request:       0.248 [ms] (mean, across all concurrent requests)
+Transfer rate:          26843.63 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   1.3      0      10
+Processing:    49   73  27.1     62     202
+Waiting:       49   72  27.1     62     201
+Total:         50   73  27.6     63     207
+
+Percentage of the requests served within a certain time (ms)
+  50%     63
+  66%     68
+  75%     76
+  80%     85
+  90%    120
+  95%    139
+  98%    148
+  99%    177
+ 100%    207 (longest request)
+
+====================================================================
+
+16、内核调参
+参考链接：
+http://www.oschina.net/translate/optimising-nginx-node-js-and-networking-for-heavy-workloads
+
+
+vim /etc/sysctl.conf
+
+net.ipv4.ip_local_port_range=1024 65000
+net.ipv4.tcp_tw_reuse=1
+net.ipv4.tcp_fin_timeout=15
+net.core.netdev_max_backlog=4096
+net.core.rmem_max=16777216
+net.core.somaxconn=4096
+net.core.wmem_max=16777216
+net.ipv4.tcp_max_syn_backlog=20480
+net.ipv4.tcp_max_tw_buckets=400000
+net.ipv4.tcp_no_metrics_save=1
+net.ipv4.tcp_rmem=4096 87380 16777216
+net.ipv4.tcp_syn_retries=2
+net.ipv4.tcp_synack_retries=2
+net.ipv4.tcp_wmem=4096 65536 16777216
+vm.min_free_kbytes=65536
+
+sysctl -p
+
+
+2、修改linux系统参数。vi /etc/security/limits.conf 添加
+
+*　　soft　　nofile　　65536
+*　　hard　　nofile　　65536
+
+修改以后保存，注销当前用户，重新登录，执行ulimit -a ,ok ,参数生效了：
+
+
+修改nginx的配置
+user www-data;
+worker_processes 6;
+pid /run/nginx.pid;
+
+events {
+        worker_connections 1024;
+        # multi_accept on;
+}
+
+
+keepalive_timeout 10;
+
+------------------------------------------
+
+  location / {
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $http_host;
+          proxy_set_header X-NginX-Proxy true;
+          proxy_set_header Connection "";
+          proxy_http_version 1.1;
+          proxy_pass http://127.0.0.1:3000/;
+          proxy_redirect off;
+  }
+
+
+====================================================================
+
+17、稳定性测试
+
+ss -s
+
+
+====================================================================
+
+18、启动顺序
+
+redis-server /etc/redis.conf &
+cd hksearch
+pm2 start server.js -i 6
+根据CPU和nginx自己调
+
+
+
+
+====================================================================
+
+19、压测数据
+
+每台服务器承载300左右的并发量，10台机器可以承受3000的并发访问
+
+每秒可以完成5800的请求，每个请求的响应时间都可以控制在90毫秒以内
+
+带宽需求量过大，需要Gb级别的带宽
+
+当然整个集群的tps量可以达到5.8w
+
+这个量，比设计的量要大一百个数量级，没有什么意义
+
+建议配置2-4台机器，加一台负载均衡器，就可以承受5000的同时访问，并且将tps达到
+
+1.6w这个级别
+=========================================================
+20、防止SQL注入
+Escaping query values
+
+In order to avoid SQL Injection attacks, you should always escape any user provided data before using it inside a SQL query. You can do so using the connection.escape() or pool.escape() methods:
+
+var userId = 'some user provided value';
+var sql    = 'SELECT * FROM users WHERE id = ' + connection.escape(userId);
+connection.query(sql, function(err, results) {
+  // ...
+});
+Alternatively, you can use ? characters as placeholders for values you would like to have escaped like this:
+
+connection.query('SELECT * FROM users WHERE id = ?', [userId], function(err, results) {
+  // ...
+});
+This looks similar to prepared statements in MySQL, however it really just uses the same connection.escape() method internally.
+
+------------------------------------
+
+var selectSQL_product = "select PRODUCT_NAME,UNIT_PRICE,LIST_PRICE,APP_USERCOUNT,VISITCOUNT,PRODUCT_ID,CENTER_PICTURE,SMALL_PICTURE from product where PRODUCT_NAME like ? AND SEARCHKEY like ? AND CHECK_STATUS = 1 AND store_check_status =1 AND uc_activation_status =1 AND uc_status = 1 limit ?,?";
+
+var searchkey = "%大米%";
+var start     = 0;
+var end       = 20;
+
+pool.getConnection(function (err, conn) {
+    if (err) console.log("POOL ==> " + err);
+
+        conn.query(selectSQL_product,[searchkey,searchkey,start,end],function (err2, rows) {
+            if (err2) console.log(err2);
+
+            console.log("SELECT ==> ");
+            for (var i in rows) {
+                console.log(rows[i]);
+            }
+
+            conn.release();
+        });
+});
+====================================================================
+
+1、传参 50%---------------前端向后端传参完成，嘿客向我方跳转待完成
+
+2、搜索框实现 100%---------代码整体替换掉了，用jquery和jsrender替换掉了
+
+3、分页实现 0%-------------SQL部分OK了，需要封装分页的limit实现，找组件？自己写？
+
+4、排序？0% -------------- 打算替换成前端排序，不再与后端进行交互
+
+5、后端缓存优化  0%-------- 热词预加载和redis化
+
+缓存HOT词，预加载
+
+6、监控---- 50%----------- 服务器本机进程监控完成，报警逻辑未完成
+
+
+====================================================================
+
+21、排序修改
+
+2070行左右，添加了五种排序的id
+
+2070 <a id='defaultSort' class="y_cur">默认排序<s></s></a>
+2071 <a id='sortByVisit_count_desc'>人气<s></s></a>
+2072 <a id="sortByVisit_count_asc">人气<s class="up"></s></a>
+2073 <a id="sortByUnit_price_desc">价格<s></s></a>
+2074 <a id="sortByUnit_price_asc">价格<s class="up"></s></a>
+
+
+product表：
+{ PRODUCT_NAME: '健司KENJI 健康时刻瑞士高山牛乳脆片  160g',
+  UNIT_PRICE: 12.9,
+  LIST_PRICE: 22,
+  APP_USERCOUNT: 0,
+  VISITCOUNT: 0,
+  PRODUCT_ID: '002a41857' 
+}
+
+2326         var sortArray = function(parray,sortsub){
+2327                 return parray.sort(sortsub);
+2328         };
+2329
+2330         var render    = function(sorted_products){
+2331                 var t =$("#productTemplate").render(sorted_products);
+2332                        $("#productsList").html(t);
+2333         };
+2334
+2335         $("#defaultSort").click(function(){
+2336
+2337         });
+2338
+2339         $("#sortByVisit_count_desc").click(function(){
+2340                 render(sortArray(products,function(a,b){
+2341                         if (b.VISITCOUNT < a.VISITCOUNT)
+2342                                 return -1;
+2343                         if (b.VISITCOUNT > a.VISITCOUNT)
+2344                                 return 1;
+2345                         return 0;
+2346                 }));
+2347         });
+
+搞定
+
+====================================================================
+
+22、前端识别
+npm install -g express-useragent
+npm install express-useragent --save
+
+
+
+
+====================================================================
+
+23、私网
+MYSQL配置
+用户名: hksearch
+密码:   hK3earch
+
+路由器：rtr-67skwa36  hksearch    活跃  小型  10.80.72.242  119.254.111.177
+公网IP：
+PPTP：----
+用户名:lemonhall
+密码：hK3earch
+
+进入主机:
+ssh root@119.254.111.177
+
+拷贝数据库：
+从search部分，拷贝/data文件下面的，current文件夹部分的sql文件，scp到主机
+之后mysql建库，并source就可以了
+
+安装客户端：
+apt-get install mysql-client-core-5.6
+
+链接青云的数据库主库：
+mysql -h 192.168.60.5 -u hksearch -p
+
+CREATE DATABASE heike_product;
+use heike_product;
+
+
+--------------------
+
+应用层服务器：node1  tcp 81  192.168.60.2  3000
+负载均衡器直接指向路由器的81端口，然后转发到3000端口的pm2上去。
+
+修改系统名称
+vim /etc/hostname
+
+search.sfheike.com
+119.254.102.23
+
+====================================================================
+
+24、接下来做日志聚合
+
+http://www.logstash.net/docs/1.4.2/tutorials/getting-started-with-logstash
+

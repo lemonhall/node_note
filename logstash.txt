@@ -1,0 +1,160 @@
+1、安装JDK
+wget http://119.254.108.84:8080/jdk.tar.gz
+tar zxvf jdk.tar.gz
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+source /etc/profile
+
+验证
+java -version
+
+====================================================================================================
+
+2、logstash
+http://www.logstash.net/docs/1.4.2/
+http://www.logstash.net/docs/1.4.2/tutorials/getting-started-with-logstash
+
+下载：
+wget https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz
+
+解压：
+tar zxvf logstash-1.4.2.tar.gz
+cd logstash-1.4.2
+
+运行：
+bin/logstash -e 'input { stdin { } } output { stdout {} }'
+
+====================================================================================================
+
+3、kibana
+下载：
+wget https://download.elasticsearch.org/kibana/kibana/kibana-3.1.2.tar.gz
+
+解压：
+yum install epel-release
+yum install nginx
+yum install mlocate
+
+vim /etc/nginx/nginx.conf
+
+        listen       8080 default_server;
+        server_name  localhost;
+        root         /usr/share/nginx/kinana;
+
+cp -r kibana-3.1.2 /usr/share/nginx/kinana
+
+service nginx restart
+
+http://119.254.111.177:8080/index.html#/dashboard/file/logstash.json
+
+====================================================================================================
+
+4、logstash和node.js的库配合
+
+https://github.com/nomiddlename/log4js-node/blob/master/examples/logstashUDP.js
+
+var log4js = require('../lib/log4js');
+
+/*
+ Sample logstash config:
+   udp {
+    codec => json
+    port => 10001
+    queue_size => 2
+    workers => 2
+    type => myAppType
+  }
+*/
+
+log4js.configure({
+  "appenders": [
+    {
+      type: "console",
+      category: "myLogger"
+    },
+    {
+      "host": "127.0.0.1",
+      "port": 10001,
+      "type": "logstashUDP",
+      "logType": "myAppType", // Optional, defaults to 'category'
+      "fields": {             // Optional, will be added to the 'fields' object in logstash
+        "field1": "value1",
+        "field2": "value2"
+      },
+      "layout": {
+        "type": "pattern",
+        "pattern": "%m"
+      },
+      "category": "myLogger"
+    }
+  ]
+});
+
+var logger = log4js.getLogger("myLogger");
+logger.info("Test log message %s", "arg1", "arg2");
+
+-----------------------------------------
+http://www.logstash.net/docs/1.4.2/inputs/udp
+
+input {
+  udp {
+    add_field => ... # hash (optional), default: {}
+    buffer_size => ... # number (optional), default: 8192
+    codec => ... # codec (optional), default: "plain"
+    host => ... # string (optional), default: "0.0.0.0"
+    port => ... # number (required)
+    queue_size => ... # number (optional), default: 2000
+    tags => ... # array (optional)
+    type => ... # string (optional)
+    workers => ... # number (optional), default: 2
+  }
+}
+output { 
+	elasticsearch { 
+		host => localhost 
+	}
+}
+
+另存为logstash-simple.conf
+
+bin/logstash -f logstash-simple.conf
+
+
+====================================================================================================
+
+5、elasticsearch的一个错误
+
+[Spectral] Caught exception while handling client http traffic, closing connection [id: 0x6e14c2ea, /113.102.162.224:16640 => /192.168.60.7:9200]
+org.elasticsearch.common.netty.handler.codec.frame.TooLongFrameException: An HTTP line is larger than 4096 bytes.
+	at org.elasticsearch.common.netty.handler.codec.http.HttpMessageDecoder.readLine(HttpMessageDecoder.java:642)
+	at org.elasticsearch.common.netty.handler.codec.http.HttpMessageDecoder.decode(HttpMessageDecoder.java:182)
+	at org.elasticsearch.common.netty.handler.codec.http.HttpMessageDecoder.decode(HttpMessageDecoder.java:101)
+	at org.elasticsearch.common.netty.handler.codec.replay.ReplayingDecoder.callDecode(ReplayingDecoder.java:500)
+	at org.elasticsearch.common.netty.handler.codec.replay.ReplayingDecoder.messageReceived(ReplayingDecoder.java:485)
+	at org.elasticsearch.common.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70)
+	at org.elasticsearch.common.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:564)
+	at org.elasticsearch.common.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:791)
+	at org.elasticsearch.common.netty.OpenChannelsHandler.handleUpstream(OpenChannelsHandler.java:74)
+	at org.elasticsearch.common.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:564)
+	at org.elasticsearch.common.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:559)
+	at org.elasticsearch.common.netty.channel.Channels.fireMessageReceived(Channels.java:268)
+	at org.elasticsearch.common.netty.channel.Channels.fireMessageReceived(Channels.java:255)
+	at org.elasticsearch.common.netty.channel.socket.nio.NioWorker.read(NioWorker.java:88)
+	at org.elasticsearch.common.netty.channel.socket.nio.AbstractNioWorker.process(AbstractNioWorker.java:108)
+	at org.elasticsearch.common.netty.channel.socket.nio.AbstractNioSelector.run(AbstractNioSelector.java:318)
+	at org.elasticsearch.common.netty.channel.socket.nio.AbstractNioWorker.run(AbstractNioWorker.java:89)
+	at org.elasticsearch.common.netty.channel.socket.nio.NioWorker.run(NioWorker.java:178)
+	at org.elasticsearch.common.netty.util.ThreadRenamingRunnable.run(ThreadRenamingRunnable.java:108)
+	at org.elasticsearch.common.netty.util.internal.DeadLockProofWorker$1.run(DeadLockProofWorker.java:42)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)

@@ -1,0 +1,189 @@
+http://docs.prediction.io/0.8.0/install/install-linux.html
+http://docs.prediction.io/0.8.0/tutorials/engines/quickstart.html
+
+安装JDK
+wget http://119.254.108.84:8080/jdk.tar.gz
+tar zxvf jdk.tar.gz
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+export PIO_HOME=/root/PredictionIO-0.8.0
+
+================================================
+
+下载
+
+$ wget http://download.prediction.io/PredictionIO-0.8.0.tar.gz
+$ tar zxvf PredictionIO-0.8.0.tar.gz
+$ cd PredictionIO-0.8.0
+
+
+
+安装依赖
+
+Spark Setup
+Spark安装
+
+Apache Spark is the default processing engine for PredictionIO. Download Apache Spark release 1.1.0 package hadoop2.4. Extract the file, and set the SPARK_HOME configuration in conf/pio-env.sh to the Spark directory.
+
+$ wget http://d3kbcqa49mib13.cloudfront.net/spark-1.1.0-bin-hadoop2.4.tgz
+$ tar zxvf spark-1.1.0-bin-hadoop2.4.tgz
+After that, edit conf/pio-env.sh in your PredictionIO installation directory. For example,
+
+SPARK_HOME=/root/spark-1.1.0-bin-hadoop2.4
+
+================================================
+
+安装存储
+
+Elasticsearch Setup
+By default, PredictionIO uses Elasticsearch at localhost as the data store to store its metadata. Simply install and run Elasticsearch, which looks like this:
+
+$ wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.2.tar.gz
+$ tar zxvf elasticsearch-1.3.2.tar.gz
+$ cd elasticsearch-1.3.2
+$ bin/elasticsearch
+If you are using a shared network, change the network.host line in config/elasticsearch.yml to network.host: 127.0.0.1 because by default, Elasticsearch looks for other machines on the network upon setup and you may run into weird errors if there are other machines that is also running Elasticsearch.
+
+You may change the settings or even use another data store such as MongoDB. For details, please read Changing the Data Store.
+
+================================================
+
+
+HBase安装 
+By default, PredictionIO's Data API uses HBase at localhost as the data store for event data.
+
+$ wget http://archive.apache.org/dist/hbase/hbase-0.98.6/hbase-0.98.6-hadoop2-bin.tar.gz
+$ tar zxvf hbase-0.98.6-hadoop2-bin.tar.gz
+$ cd hbase-0.98.6-hadoop2
+You will need to at least add a minimal configuration to HBase to start it in standalone mode. Details can be found here. Here, we are showing a sample minimal configuration.
+
+For production deployment, run a fully distributed HBase configuration.
+Edit conf/hbase-site.xml and put the following in. You may replace /home/abc with your own home directory.
+
+<configuration>
+  <property>
+    <name>hbase.rootdir</name>
+    <value>file:///home/abc/hbase</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.dataDir</name>
+    <value>/home/abc/zookeeper</value>
+  </property>
+</configuration>
+Check the local.log file under the logs/ directory to make sure it's started correctly.
+
+Now you may start HBase.
+
+$ bin/start-hbase.sh
+Note that even the command returns immediately, you may have to wait for up to a minute before all the initialization is done (and then you can run eventserver).
+
+Now you have installed everything you need to run PredictionIO!
+
+Next: Reading Quick Start
+
+===================================
+
+启动EventServer
+cd /root/PredictionIO-0.8.0
+./pio eventserver --ip 0.0.0.0 &
+
+===================================
+
+$ mkdir quickstartapp
+$ cd quickstartapp
+
+
+sudo apt-get install pip 
+pip install predictionio
+
+import predictionio
+import random
+
+random.seed()
+
+client = predictionio.EventClient(app_id=your_app_id)
+
+# generate 10 users, with user ids 1,2,....,10
+user_ids = [str(i) for i in range(1, 11)]
+for user_id in user_ids:
+  print "Set user", user_id
+  client.set_user(user_id)
+
+# generate 50 items, with item ids 1,2,....,50
+# assign type id 1 to all of them
+item_ids = [str(i) for i in range(1, 51)]
+for item_id in item_ids:
+  print "Set item", item_id
+  client.set_item(item_id, {
+    "pio_itypes" : ['1']
+  })
+
+# each user randomly views 10 items
+for user_id in user_ids:
+  for viewed_item in random.sample(item_ids, 10):
+    print "User", user_id ,"views item", viewed_item
+    client.record_user_action_on_item("view", user_id, viewed_item)
+
+client.close()
+
+=====================
+python import.py
+
+=====================
+注册引擎
+
+$ $PIO_HOME/bin/pio instance io.prediction.engines.itemrank
+$ cd io.prediction.engines.itemrank
+$ $PIO_HOME/bin/pio register
+
+=====================
+
+训练引擎
+
+$ $PIO_HOME/bin/pio train
+...
+2014-09-11 16:25:44,591 INFO  spark.SparkContext - Job finished: collect at Workflow.scala:674, took 0.078664 s
+2014-09-11 16:25:44,737 INFO  workflow.CoreWorkflow$ - Saved engine instance with ID: KxOsC2FRSdGGe1lv0oaHiw
+
+=====================
+部署引擎
+
+$ $PIO_HOME/bin/pio deploy
+...
+[INFO] [09/11/2014 16:26:16.525] [pio-server-akka.actor.default-dispatcher-2] [akka://pio-server/user/IO-HTTP/listener-0] Bound to localhost/127.0.0.1:8000
+[INFO] [09/11/2014 16:26:16.526] [pio-server-akka.actor.default-dispatcher-5] [akka://pio-server/user/master] Bind successful. Ready to serve.
+
+=====================
+
+取回推荐结果
+
+import predictionio
+
+client = predictionio.EngineClient()
+
+# Rank item 1 to 5 for each user
+item_ids = [str(i) for i in range(1, 6)]
+user_ids = [str(x) for x in range(1, 11)]
+for user_id in user_ids:
+  print "Rank item 1 to 5 for user", user_id
+  try:
+    response = client.send_query({
+      "uid": user_id,
+      "iids": item_ids
+    })
+    print response
+  except predictionio.PredictionIOAPIError as e:
+    print 'Caught exception:', e.strerror()
+
+client.close()
+
+pyhton show.py
