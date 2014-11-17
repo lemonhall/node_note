@@ -1,1 +1,20 @@
 http://ofbiz.apache.org/download.html
+
+
+To all:
+ 
+Apache OfBiz开源项目，已经在青云（192.168.8.6）部署并运行。
+ 
+管理后台入口：
+https://119.254.108.204:8443/catalog/control/main
+ 
+前台入口：
+http://119.254.108.204:8080/ecommerce/control/main
+ 
+后台及前台登录帐户/密码统一为：
+admin/ofbiz
+ 
+大家可以试用、研究。
+ 
+PS：项目运行目录及启动命令如下：
+/root/tools/keke/apache-ofbiz-13.07.01/ant start &

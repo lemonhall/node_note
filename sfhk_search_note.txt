@@ -561,6 +561,8 @@ product表：
 
 CHECK_STATUS = 1 AND store_check_status =1 AND uc_activation_status =1 AND uc_status = 1
 
+
+
 ====================================================================
 
 14、对MYSQL的查询加上缓存
@@ -608,6 +610,9 @@ maxmemory 3221225472
 # 打开了lru选项
 #
 maxmemory-policy volatile-lru
+
+
+
 
 ====================================================================
 
@@ -927,4 +932,81 @@ search.sfheike.com
 24、接下来做日志聚合
 
 http://www.logstash.net/docs/1.4.2/tutorials/getting-started-with-logstash
+
+
+====================================================================
+
+25、如果是centos下，则
+
+mariadb
+
+yum install mariadb-server
+service mariadb start
+mysql
+
+
+====================================================================
+
+25、nginx限流
+
+http://www.111cn.net/sys/nginx/56066.htm
+
+
+
+
+====================================================================
+
+26、异地机房容灾
+
+https://github.com/alibaba/otter
+
+
+1、安装JDK
+wget http://119.254.108.84:8080/jdk.tar.gz
+tar zxvf jdk.tar.gz
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+
+===================================================================
+
+2、安装maven
+wget http://mirrors.cnnic.cn/apache/maven/maven-3/3.2.3/binaries/apache-maven-3.2.3-bin.tar.gz
+
+tar zxvf apache-maven-3.2.3-bin.tar.gz
+mv apache-maven-3.2.3-bin /opt/maven
+
+vim /etc/profile
+export M2_HOME=/opt/maven
+export M2=$M2_HOME/bin
+export PATH=$M2:$PATH
+
+
+===================================================================
+
+3、otter
+http://blog.sina.com.cn/s/blog_6f6bc30e0101paw5.html
+
+apt-get install git
+git clone https://github.com/alibaba/otter.git
+
+git checkout otter-4.2.11
+
+mvn clean install -Dmaven.test.skip -Denv=release
+进入目录maven\otter\target，可以看到Jar包
+
+===================================================================
+
+4、下载编译好的包
+wget https://github.com/alibaba/otter/releases/download/otter-4.2.11/node.deployer-4.2.11.tar.gz
+
+wget https://github.com/alibaba/otter/releases/download/otter-4.2.11/manager.deployer-4.2.11.tar.gz
 

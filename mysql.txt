@@ -173,3 +173,6 @@ OK，迁移完成
 
 2、下载
 http://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-utilities-1.5.2.zip
+
+
+
