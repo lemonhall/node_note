@@ -1,0 +1,203 @@
+lemonhall 与2015年1月14日 第一版本
+
+=======================================================================
+TODO：
+
+=======================================================================
+1、需求描述
+查询es时，需要一个可配置的，在runtime可感知的配置管理系统，类似于360的方案或者最早摸索过的淘宝的dimond的方案。
+
+简单地说就是，客户端链接一组zookeeper，然后将配置项目加载到内存当中去，然后利用zk的反向通知机制来修改runtime的查询。
+
+这个方案，其实本来是想用java实现的。
+
+想用在storm消费kafka数据，或者是spark消费kafka数据时做队列消费开关。
+
+想用在各种需要实时可配置不用重启jvm或者node.js的pm2。
+
+不需要改写源代码，即可在热加载状态下搞定这个问题。
+
+本质上es接受的rest接口，无非就是在改变这个东西。
+
+=======================================================================
+
+2、主要的问题点
+
+一个完善的配置管理系统，其实在java已经spring世界当中就是所谓的pro文件，里面一般配置着接口初始化地址，数据库链接的用户米和密码，从安全的角度来说，其实是需要加密的，从管理的角度来说，是需要动态可感知的。
+
+初期的SST会员系统当中，IP白黑名单其实就是用JAVA代码5-10分钟轮询数据库的方式实现的配置管理。
+
+这种方式是一种拉配置方式。
+
+zookeeper因为自带反向通知机制，以及高可用所以要明显优于单一数据库方式。
+
+另外从ISN（互联网可访问区域）到DCN区域（内网区域，与ISN之间有防火墙），因为之前的其它组使用了数据库拉取配置，后者使用单一数据库保持分布式锁的问题，也会造成很多问题。
+
+一种解决方案是用jgroup做组播通讯来搞定分布式锁。
+
+另外通用的配置管理方案，需要考虑到所谓的万一zookeeper失败了该怎么办的问题，需要考虑的细节问题是很多的
+
+OK，node.js这边有一个尚未验证过的解决方案：
+
+https://github.com/flatiron/nconf
+https://github.com/davidburhans/nconf-zookeeper
+
+Hierarchical node.js configuration with files, environment variables, command-line arguments, and atomic object merging.
+
+分层配置管理方案+zookeeper插件
+
+比起dimond以及360的JAVA方案来说，略微简陋，缺少最佳实践，以及后端管理界面。
+
+=======================================================================
+3、安装zookeeper
+
+【参考资料1：http://www.iyunv.com/thread-18609-1-1.html】
+【参考资料2：http://my.oschina.net/u/1866130/blog/287363】
+
+http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/
+zk有依赖于jdk
+
+wget http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
+tar zxvf zookeeper-3.4.6.tar.gz
+mv zookeeper-3.4.6 /opt/zk
+mkdir tools
+mv jdk.tar.gz zookeeper-3.4.6.tar.gz tools/
+
+如果想把一个文件1的内容清空， 文件大小变成0， 又不删除这个文件，可以用：
+cat /dev/null > 文件1
+
+单机启用：
+cd /opt/zk/conf
+cp zoo_sample.cfg zoo.cfg
+cd ../bin
+./zkServer.sh start
+
+配置集群模式：三台机器上分别运行（一定要确保ping三个ip之间是正确的，FQDN的问题）
+
+echo '192.168.60.10  zk1' >>/etc/hosts
+echo '192.168.60.11  zk2' >>/etc/hosts
+echo '192.168.60.12  zk3' >>/etc/hosts
+
+cp /opt/zk/conf/zoo_sample.cfg /opt/zk/conf/zoo.cfg
+echo 'server.1=zk1:2888:3888' >> /opt/zk/conf/zoo.cfg
+echo 'server.2=zk2:2888:3888' >> /opt/zk/conf/zoo.cfg
+echo 'server.3=zk3:2888:3888' >> /opt/zk/conf/zoo.cfg
+
+mkdir /opt/zk/storage
+sed -i "s/\/tmp\/zookeeper/\/opt\/zk\/storage/g" /opt/zk/conf/zoo.cfg
+
+三台机器上分别执行：
+echo "1" > /opt/zk/storage/myid
+echo "2" > /opt/zk/storage/myid
+echo "3" > /opt/zk/storage/myid
+
+三台机器上分别运行：
+/opt/zk/bin/zkServer.sh start
+
+然后检查各个主机的状态是：
+/opt/zk/bin/zkServer.sh status
+
+=======================================================================
+4、侵入到程序当中去
+
+将三台zk的信息发布到search1和search2上面去
+
+echo '192.168.60.10  zk1' >>/etc/hosts
+echo '192.168.60.11  zk2' >>/etc/hosts
+echo '192.168.60.12  zk3' >>/etc/hosts
+
+
+vim package.json
+{
+  "name": "sf-nconf",
+  "version": "0.0.1",
+  "description": "sf express",
+  "dependencies": {},
+  "license": "MIT",
+  "repository": {
+    "type": "git"
+  },
+  "readmeFilename": "Readme.md",
+  "bugs": {
+    "url": "https://github.com/visionmedia/co/issues"
+  },
+  "homepage": "https://github.com/visionmedia/co"
+}
+
+---------------------------------------------------------
+npm install nconf --save
+npm install nconf-zookeeper --save
+---------------------------------------------------------
+源码：
+
+var nconf = require('nconf');
+var require('nconf-zookeeper');
+
+// function to use for update notifications
+function onUpdated() {
+    // apply configuration updates here
+        var example = nconf.get('example');
+    console.log("onUpdated:",example.test); // 3
+}
+
+nconf.use('zookeeper', {
+    host:'zk1,zk2,zk3',           // ZooKeeper host name
+    port: '2181',               // ZooKeeper port
+    rootPath: '/',              // Root path for storing nconf file in ZooKeeper
+    name: 'nconf-zookeeper',    // name of file stored in ZooKeeper at `rootPath`
+
+    autoSave: 0,               // number of milliseconds to wait before autosaving changes to ZooKeeper
+                                // this allows batching updates. disable by setting to less than 0.
+                                // Setting to 0 results in immediate saves. Be careful.
+
+    autoUpdate: true,          // set to true to add a watcher to rootPath/name and auto reload 
+                                // the data when it is changed.
+
+    onUpdated: onUpdated        // if defined, this method will be called when data has been loaded from the store
+                                // using this method combined with autoUpdate, your application can be notified when
+                                // the configuration store has changed
+});
+
+// nconf will not load data from an async source without a `load` being requested
+nconf.load(function(storageData) {
+    // nconf is now initialized with the data contained in 'storageData' from ZooKeeper
+});
+
+nconf.set('example:test', 3);
+var example = nconf.get('example');
+
+console.log(example.test); // 3
+
+// nconf will not automatically persist data to ZooKeeper unless autoSave is enabled in nconf-zookeeper
+nconf.save(function() {
+    // data has now been persisted to ZooKeeper.
+});
+
+---------------------------------------------------------
+验证数据是否存在：
+
+./zkCli.sh
+get /nconf-zookeeper
+
+{"example":{"test":3}}
+cZxid = 0x100000005
+ctime = Thu Jan 15 22:06:10 CST 2015
+mZxid = 0x100000008
+mtime = Thu Jan 15 22:08:49 CST 2015
+pZxid = 0x100000005
+cversion = 0
+dataVersion = 1
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 22
+
+---------------------------------------------------------
+
+改写数据：
+set /nconf-zookeeper {"example":{"test":4}}
+
+输出：
+root@search1:~/test# node example.js
+3
+onUpdated: 3
+onUpdated: 4

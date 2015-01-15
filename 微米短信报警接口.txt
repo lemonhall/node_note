@@ -1,0 +1,53 @@
+1、接口地址：
+http://www.weimi.cc/dev-sms.html
+
+============================================================
+2、接口参数
+名称  类型  是否必须    示例值 描述
+uid String  是   hQuId9Z7YqKC    微米账号的UID代码
+pas String  是   Id9Z7Y9 微米账号的UID密码
+mob String  是   1391*******,138******** 目标手机号码，多个以“,”分隔
+con String  是   【微米】您的验证码是：610912，3分钟内有效。如非您本人操作，可忽略本消息。    短信内容
+isAd    Boolean 否   true    true、广告营销类内容；false、行业内容。默认值为false
+subuid  String  否   h3gIp9Z7Yq7C    微米子账号的UID代码
+timing  String  否   2012-10-11 18:30:00 定时短信任务计划，时间格式：yyyy-MM-dd HH:mm:ss
+type    String  否   json    接口返回类型：json、xml、txt。默认值为txt
+============================================================
+3、示例代码
+var http = require('http');
+var querystring = require('querystring');
+var postData = {
+    uid:'hJzRxVTAYOvg',
+    pas:'hvx6p83e',
+    mob:'15289475287',
+    cid:'ttdYygYhgVIb',
+    type:'json'
+};
+var content = querystring.stringify(postData);
+var options = {
+    host:'api.weimi.cc',
+    path:'/2/sms/send.html',
+    method:'POST',
+    agent:false,
+    rejectUnauthorized : false,
+    headers:{
+        'Content-Type' : 'application/x-www-form-urlencoded', 
+        'Content-Length' :content.length
+    }
+};
+var req = http.request(options,function(res){
+    res.setEncoding('utf8');
+    res.on('data', function (chunk) {
+        console.log(JSON.parse(chunk));
+    });
+    res.on('end',function(){
+        console.log('over');
+    });
+});
+req.write(content);
+req.end();
+
+============================================================
+4、使用短信模板功能
+
+需要传入cid参数：ttdYygYhgVIb

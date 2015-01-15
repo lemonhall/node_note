@@ -1,0 +1,2 @@
+1、logstash报警
+http://storysky.blog.51cto.com/628458/1215366

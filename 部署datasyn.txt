@@ -1,0 +1,384 @@
+文档说明：
+
+lemonhall于2015年1月15日对安装hksearch的datasyn模块的笔记---版本1
+
+=========================================================================
+TODO：
+
+=========================================================================
+
+安装环境：
+lsb_release -a
+		No LSB modules are available.
+		Distributor ID:	Ubuntu
+		Description:	Ubuntu 14.04.1 LTS
+		Release:	14.04
+		Codename:	trusty
+
+=========================================================================
+
+1、更新机器
+apt-get update
+apt-get upgrade
+reboot
+机器
+
+=========================================================================
+
+2、安装JDK 7
+wget http://119.254.108.84:8080/jdk.tar.gz
+tar zxvf jdk.tar.gz
+mv jdk /opt/jdk
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+echo 'export JAVA_HOME=/opt/jdk' >>/etc/profile
+echo 'export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar' >>/etc/profile
+echo 'export PATH=$PATH:$JAVA_HOME/bin' >>/etc/profile
+
+source /etc/profile
+
+验证
+java -version
+=========================================================================
+
+3、安装maven
+wget http://mirror.bit.edu.cn/apache/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+
+tar zxvf apache-maven-3.2.5-bin.tar.gz
+mv apache-maven-3.2.5 /opt/maven
+
+vim /etc/profile
+export M2_HOME=/opt/maven
+export M2=$M2_HOME/bin
+export PATH=$M2:$PATH
+
+export MAVEN_OPTS="-Xms512m -Xmx1024m"
+
+=========================================================================
+
+4、修改主机名
+【参考：http://blog.csdn.net/ichsonx/article/details/39956741】
+
+该小节为青云独享，修改主机名是为了方便管理员识别当前登陆主机，当然从大数据的各种组件以及JAVA来说
+这本身也是一个坑，所以在此用长篇幅累述该问题。
+
+vim /etc/hostname
+
+要保证FQND的一致性
+
+#这三个一定要保证一致
+python -c 'import socket; print socket.getfqdn(), socket.gethostbyname(socket.getfqdn())'
+hostname
+hostname -f
+
+vim /etc/hosts
+
+127.0.0.1       localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+
+# hostname loopback address
+127.0.1.1       i-y9tixusc
+
+会发现127.0.1.1 指向了一个非常奇怪的名字，那是青云自动生成的主机号，改成与/etc/hostname当中一致
+
+比如说search，这样hostname -f的时候才能出来名字
+
+OK，这个时候，才是所谓的FQND完整的
+
+然后是所谓的centos下这个文件在：
+vim /etc/sysconfig/network
+
+=========================================================================
+5、NTP
+【参考：https://help.ubuntu.com/14.04/serverguide/NTP.html】
+
+sudo apt-get install ntp
+
+vim /etc/ntp.conf
+
+看状态：ntpq -p
+
+对一下表，看一下时区：date
+sudo service ntp reload
+
+=========================================================================
+
+6、node.js的开机自启动
+【参考：https://www.npmjs.com/package/pm2】
+
+pm2 startup ubuntu
+
+PM2本身即开机自启动了，然后就是：
+
+pm2 save 就可以存下来当前启动的列表了
+
+之后reboot之后你会发觉需要的进程被自动重启了
+
+=========================================================================
+
+7、安装node.js
+wget http://nodejs.org/dist/v0.11.14/node-v0.11.14.tar.gz
+tar zxvf node-v0.11.14.tar.gz
+cd node-v0.11.14
+./configure
+make
+make install
+
+选用不稳定的11版本的原因是，只有0.11版本的才支持harmony选项，可以开启co
+
+=========================================================================
+
+8、安装zookeeper
+【参考资料1：http://www.iyunv.com/thread-18609-1-1.html】
+【参考资料2：http://my.oschina.net/u/1866130/blog/287363】
+
+http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/
+zk有依赖于jdk
+
+wget http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
+tar zxvf zookeeper-3.4.6.tar.gz
+mv zookeeper-3.4.6 /opt/zk
+mkdir tools
+mv jdk.tar.gz zookeeper-3.4.6.tar.gz tools/
+
+如果想把一个文件1的内容清空， 文件大小变成0， 又不删除这个文件，可以用：
+cat /dev/null > 文件1
+
+单机启用：
+cd /opt/zk/conf
+cp zoo_sample.cfg zoo.cfg
+cd ../bin
+./zkServer.sh start
+
+配置集群模式：三台机器上分别运行（一定要确保ping三个ip之间是正确的，FQDN的问题）
+
+echo '192.168.60.10  zk1' >>/etc/hosts
+echo '192.168.60.11  zk2' >>/etc/hosts
+echo '192.168.60.12  zk3' >>/etc/hosts
+
+cp /opt/zk/conf/zoo_sample.cfg /opt/zk/conf/zoo.cfg
+echo 'server.1=zk1:2888:3888' >> /opt/zk/conf/zoo.cfg
+echo 'server.2=zk2:2888:3888' >> /opt/zk/conf/zoo.cfg
+echo 'server.3=zk3:2888:3888' >> /opt/zk/conf/zoo.cfg
+
+mkdir /opt/zk/storage
+sed -i "s/\/tmp\/zookeeper/\/opt\/zk\/storage/g" /opt/zk/conf/zoo.cfg
+
+三台机器上分别执行：
+echo "1" > /opt/zk/storage/myid
+echo "2" > /opt/zk/storage/myid
+echo "3" > /opt/zk/storage/myid
+
+三台机器上分别运行：
+/opt/zk/bin/zkServer.sh start
+
+然后检查各个主机的状态是：
+/opt/zk/bin/zkServer.sh status
+
+----------------------------------------------------------------------------
+
+安装exhibitor：
+https://github.com/Netflix/exhibitor/wiki
+
+
+
+=========================================================================
+9、安装elasticsearch以及river
+
+wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.4.deb
+curl -o mysql-connector-java-5.1.33.zip -L 'http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.33.zip/from/http://cdn.mysql.com/'
+dpkg -i elasticsearch-1.3.4.deb
+unzip mysql-connector-java-5.1.33.zip
+
+cd /usr/share/elasticsearch/bin/
+./plugin --install jdbc --url http://xbib.org/repository/org/xbib/elasticsearch/plugin/elasticsearch-river-jdbc/1.3.4.4/elasticsearch-river-jdbc-1.3.4.4-plugin.zip
+cd ~
+cd mysql-connector-java-5.1.33/
+cp mysql-connector-java-5.1.33-bin.jar /usr/share/elasticsearch/plugins/jdbc/
+cd /usr/share/elasticsearch/plugins/jdbc/
+chmod 644 *
+sudo /etc/init.d/elasticsearch restart
+
+9.1 安装head插件
+tail -f /var/log/elasticsearch/elasticsearch.log
+cd /usr/share/elasticsearch/bin/
+./plugin -install mobz/elasticsearch-head
+
+http://192.168.60.9:9200/_plugin/head/
+
+9.2 卸载
+service elasticsearch stop
+apt-get remove elasticsearch
+
+9.3 清理所有残余
+cd /var/lib/elasticsearch/elasticsearch
+
+彻底清理掉es的所有残余
+apt-get remove elasticsearch
+rm -rf /var/lib/elasticsearch
+rm -rf /usr/share/elasticsearch/plugins
+
+
+=========================================================================
+
+10、迁移日志文件目录到一个大磁盘上去
+
+扩容硬盘
+
+加载硬盘
+fdisk -l
+
+对硬盘进行分区:
+
+# fdisk /dev/sdc
+然后根据提示，依次输入 n, p, 1, 以及两次回车，然后是 wq，完成保存。 这样再次通过 fdisk -l 查看时，你可以看到新建的分区 /dev/sdc1
+
+
+分区后要进行格式化，例如格式化为 ext4 格式
+
+# mkfs -t ext4 /dev/sdc1
+
+mkdir -p /mnt/es_data && mount -t ext4 /dev/sdc1 /mnt/es_data
+
+自动挂载
+
+blkid /dev/sdc1
+/dev/sdc1: UUID="1c47c8f6-7d70-4586-8592-8e2fe905efd8" TYPE="ext4"
+
+改写/etc/fstab
+UUID=1c47c8f6-7d70-4586-8592-8e2fe905efd8 /mnt/es_data    ext4    defaults          0       2
+
+----------------------------------------------------------------------------
+
+修改目录链接
+service elasticsearch stop
+rm -rf /var/log/elasticsearch
+mkdir /mnt/es_data/logs
+ln -s /mnt/es_data/logs /var/log/elasticsearch
+
+chown -hR elasticsearch:elasticsearch /var/log/elasticsearch
+chown -hR elasticsearch:elasticsearch /mnt/es_data/logs
+
+service elasticsearch start
+
+
+=========================================================================
+
+11、部署配置中心？
+
+将三台zk的信息发布到search1和search2上面去
+
+echo '192.168.60.10  zk1' >>/etc/hosts
+echo '192.168.60.11  zk2' >>/etc/hosts
+echo '192.168.60.12  zk3' >>/etc/hosts
+
+
+vim package.json
+{
+  "name": "sf-nconf",
+  "version": "0.0.1",
+  "description": "sf express",
+  "dependencies": {},
+  "license": "MIT",
+  "repository": {
+    "type": "git"
+  },
+  "readmeFilename": "Readme.md",
+  "bugs": {
+    "url": "https://github.com/visionmedia/co/issues"
+  },
+  "homepage": "https://github.com/visionmedia/co"
+}
+
+---------------------------------------------------------
+npm install nconf --save
+npm install nconf-zookeeper --save
+
+---------------------------------------------------------
+
+
+var nconf = require('nconf');
+var require('nconf-zookeeper');
+
+// function to use for update notifications
+function onUpdated() {
+    // apply configuration updates here
+	var example = nconf.get('example');
+    console.log("onUpdated:",example.test); // 3
+}
+
+nconf.use('zookeeper', {
+    host:'zk1,zk2,zk3',           // ZooKeeper host name
+    port: '2181',               // ZooKeeper port
+    rootPath: '/',              // Root path for storing nconf file in ZooKeeper
+    name: 'nconf-zookeeper',    // name of file stored in ZooKeeper at `rootPath`
+
+    autoSave: 0,               // number of milliseconds to wait before autosaving changes to ZooKeeper
+                                // this allows batching updates. disable by setting to less than 0.
+                                // Setting to 0 results in immediate saves. Be careful.
+
+    autoUpdate: true,          // set to true to add a watcher to rootPath/name and auto reload 
+                                // the data when it is changed.
+
+    onUpdated: onUpdated        // if defined, this method will be called when data has been loaded from the store
+                                // using this method combined with autoUpdate, your application can be notified when
+                                // the configuration store has changed
+});
+
+// nconf will not load data from an async source without a `load` being requested
+nconf.load(function(storageData) {
+    // nconf is now initialized with the data contained in 'storageData' from ZooKeeper
+});
+
+nconf.set('example:test', 3);
+var example = nconf.get('example');
+
+console.log(example.test); // 3
+
+// nconf will not automatically persist data to ZooKeeper unless autoSave is enabled in nconf-zookeeper
+nconf.save(function() {
+    // data has now been persisted to ZooKeeper.
+});
+
+---------------------------------------------------------
+验证数据是否存在：
+
+./zkCli.sh
+get /nconf-zookeeper
+
+{"example":{"test":3}}
+cZxid = 0x100000005
+ctime = Thu Jan 15 22:06:10 CST 2015
+mZxid = 0x100000008
+mtime = Thu Jan 15 22:08:49 CST 2015
+pZxid = 0x100000005
+cversion = 0
+dataVersion = 1
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 22
+
+---------------------------------------------------------
+
+改写数据：
+set /nconf-zookeeper {"example":{"test":4}}
+
+输出：
+root@search1:~/test# node example.js
+3
+onUpdated: 3
+onUpdated: 4

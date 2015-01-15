@@ -1,0 +1,635 @@
+文档说明：
+
+lemonhall于2015年1月4日对安装小米chronos服务的安装笔记---版本1
+lemonhall于2015年1月6日对安装小米chronos服务的安装笔记---版本2
+
+=========================================================================
+
+安装环境：
+lsb_release -a
+		No LSB modules are available.
+		Distributor ID:	Ubuntu
+		Description:	Ubuntu 14.04.1 LTS
+		Release:	14.04
+		Codename:	trusty
+
+
+=========================================================================
+0、TODO
+   *将这份文档对应的docker机上的项目fork到我自己本地，然后详细化所有的文档和细节
+   *补充ruby部分的安装以及逻辑文档
+   *详细化chronos时间生成规则的文档
+   *将调用链和关系的VISO图补充出来
+
+=========================================================================
+
+1、chronos
+参考文档：
+https://github.com/XiaoMi/chronos
+
+
+
+=========================================================================
+
+2、安装JAVA
+wget http://119.254.108.84:8080/jdk.tar.gz
+tar zxvf jdk.tar.gz
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+source /etc/profile
+
+验证
+java -version
+
+
+=========================================================================
+3、安装maven
+
+wget http://mirror.bit.edu.cn/apache/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+
+tar zxvf apache-maven-3.2.5-bin.tar.gz
+mv apache-maven-3.2.5 /opt/maven
+
+vim /etc/profile
+export M2_HOME=/opt/maven
+export M2=$M2_HOME/bin
+export PATH=$M2:$PATH
+
+export MAVEN_OPTS="-Xms512m -Xmx1024m"
+
+=========================================================================
+
+
+4、安装zookeeper
+http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/
+zk有依赖于jdk
+
+wget http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
+tar zxvf zookeeper-3.4.6.tar.gz
+mv zookeeper-3.4.6 /opt/zk
+mkdir tools
+mv jdk.tar.gz zookeeper-3.4.6.tar.gz tools/
+
+如果想把一个文件1的内容清空， 文件大小变成0， 又不删除这个文件，可以用：
+cat /dev/null > 文件1
+
+=========================================================================
+
+5、启动zookeeper
+cd /opt/zk/conf
+cp zoo_sample.cfg zoo.cfg
+cd ../bin
+./zkServer.sh start
+
+
+=========================================================================
+
+6、编译服务端
+
+cd chronos/chronos-server
+
+mvn clean package -DskipTests
+
+会失败，需要在根目录的pom文件里加入属性
+
+【参考：】
+http://stackoverflow.com/questions/14712384/source-1-3-use-source-5-or-higher-to-enable-generics
+
+<properties>
+    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.6</maven.compiler.source>
+</properties>
+
+
+然后在根目录下编译：
+mvn clean package -DskipTests
+
+官方文档拼写有错误，应该是package而不是packge
+
+[INFO] Reactor Summary:
+[INFO]
+[INFO] chronos ........................................... SUCCESS [0.226s]
+[INFO] chronos-server .................................... SUCCESS [10.856s]
+[INFO] chronos-client .................................... FAILURE [1.527s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 12.815s
+[INFO] Finished at: Sun Jan 04 10:31:41 CST 2015
+[INFO] Final Memory: 27M/301M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Plugin org.apache.thrift.tools:maven-thrift-plugin:0.1.10 or one of its dependencies could not be resolved: Failed to read artifact descriptor for org.apache.thrift.tools:maven-thrift-plugin:jar:0.1.10: Could not find artifact org.apache.thrift.tools:maven-thrift-plugin:pom:0.1.10 in central (http://repo.maven.apache.org/maven2) -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginResolutionException
+
+报错了，因为有一个依赖没有安装，中心库当中找不到thrift
+
+=========================================================================
+
+7、thrift问题解决
+
+[ERROR] Plugin org.apache.thrift.tools:maven-thrift-plugin:0.1.10 or one of its dependencies could not be resolved: Failed to read artifact descriptor for org.apache.thrift.tools:maven-thrift-plugin:jar:0.1.10: Failure to find org.apache.thrift.tools:maven-thrift-plugin:pom:0.1.10 in http://repo.maven.apache.org/maven2 was cached in the local repository, resolution will not be reattempted until the update interval of central has elapsed or updates are forced -> [Help 1]
+
+【参考资料：】
+https://github.com/dtrott/maven-thrift-plugin
+
+
+-----------------------------------------------------
+
+【安装thrift：】
+thrift -version
+The program 'thrift' is currently not installed. You can install it by typing:
+apt-get install thrift-compiler
+
+
+-----------------------------------------------------
+【确认版本号：】
+thrift -version
+Thrift version 0.9.0
+
+-----------------------------------------------------
+【更新maven的配置：】
+You may also need to add the following to your settings.xml to download the
+plugin:
+
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>dtrott</id>
+                    <url>http://maven.davidtrott.com/repository</url>
+                </pluginRepository>
+            </pluginRepositories>
+
+那么问题来了，怎么找maven的配置文件呢？
+答案是使用locate命令，那么locate的命令怎么安装呢？一般来说
+需要用apt-cache search来搜索 locate包，centos下叫做mlocate，mac下类似，但是需要root权限
+安装好之后还需要更新文件索引的数据库，命令是：locate settings.xml
+
+/etc/maven/settings.xml
+/opt/jdk/lib/visualvm/platform/config/Modules/org-netbeans-modules-settings.xml
+/opt/jdk/lib/visualvm/platform/update_tracking/org-netbeans-modules-settings.xml
+/root/jdk/lib/visualvm/platform/config/Modules/org-netbeans-modules-settings.xml
+/root/jdk/lib/visualvm/platform/update_tracking/org-netbeans-modules-settings.xml
+/root/jdk1.8.0_25/lib/visualvm/platform/config/Modules/org-netbeans-modules-settings.xml
+/root/jdk1.8.0_25/lib/visualvm/platform/update_tracking/org-netbeans-modules-settings.xml
+/root/zk/ivysettings.xml
+/root/zookeeper-3.3.6/ivysettings.xml
+/usr/share/mime/application/x-cisco-vpn-settings.xml
+
+OK，结果得到了，打开
+vim /etc/maven/settings.xml
+按住shift，敲击gg（即输入大写的GG，让VIM跳转到文档末尾），在<settings>标签之前加入：
+
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>dtrott</id>
+                    <url>http://maven.davidtrott.com/repository</url>
+                </pluginRepository>
+            </pluginRepositories>
+
+直接粘贴会乱码，所以需要提前进入粘贴模式：
+进入vim的esc模式之后，敲冒号，set paste
+然后进入VIM的INSERT模式
+
+
+-----------------------------------------------------
+
+OK，接下来跳回步骤6
+
+mvn clean package -DskipTests
+
+尼玛，仍旧失败。好吧
+
+进入到cd chronos-client/子目录，将
+
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>dtrott</id>
+                    <url>http://maven.davidtrott.com/repository</url>
+                </pluginRepository>
+            </pluginRepositories>
+
+加入到client的pom文件当中去
+
+然后再来一次：
+
+-----------------------------------------------------
+
+然后尼玛仍旧失败：
+
+[ERROR] Failed to execute goal on project chronos-client: Could not resolve dependencies for project com.xiaomi.infra:chronos-client:jar:1.2.0-thrift0.8.0-SNAPSHOT: The following artifacts could not be resolved: javax.jms:jms:jar:1.1, com.sun.jdmk:jmxtools:jar:1.2.1, com.sun.jmx:jmxri:jar:1.2.1: Could not transfer artifact javax.jms:jms:jar:1.1 from/to java.net (https://maven-repository.dev.java.net/nonav/repository): No connector available to access repository java.net (https://maven-repository.dev.java.net/nonav/repository) of type legacy using the available factories WagonRepositoryConnectorFactory -> [Help 1]
+
+
+-----------------------------------------------------
+
+配置maven的仓库：
+
+【参考资料：】
+http://juvenshun.iteye.com/blog/359256
+
+  <repositories>  
+    <repository>  
+      <id>maven-net-cn</id>  
+      <name>Maven China Mirror</name>  
+      <url>http://maven.net.cn/content/groups/public/</url>  
+      <releases>  
+        <enabled>true</enabled>  
+      </releases>  
+      <snapshots>  
+        <enabled>false</enabled>  
+      </snapshots>  
+    </repository>  
+  </repositories>
+
+-----------------------------------------------------
+
+经过搜索：
+http://mvnrepository.com/artifact/javax.jms/jms/1.1
+
+中央仓库应该是有这个构件的：
+
+在settings.xml直接加这些配置貌似不行，因为maven的settings.xml是全局配置，需要一个什么profile，具体看本文档的213行左右的maven仓库配置参考资料。
+
+ok，关键时刻还是需要stackoverflow
+【参考资料：】
+http://stackoverflow.com/questions/20611991/pom-xml-shows-multiple-errors-on-including-log4j-dependency
+
+<repositories>
+    <repository>
+        <id>repository.jboss.org-public</id>
+        <name>JBoss.org Maven repository</name>
+        <url>https://repository.jboss.org/nexus/content/groups/public</url>
+    </repository>
+</repositories>
+
+
+
+那三个依赖库在server版本当中的pom文件被exclusion掉了
+主要还是client当中zookeeper是ok的
+
+-----------------------------------------------------
+
+结果开始他妈的没解决，好吧，该死的maven
+
+11：42了，下午继续整，已经花了我2个小时了
+
+-----------------------------------------------------
+
+OK，1月6号，从断点开始解决，下午2:31
+
+首先发觉应该去看看client下面的READEME文档，这些写文档的人一点都不考虑别人的感受
+
+需要根据所使用的thrift软件的版本号，修改pom，另外zookeeper客户端的版本，也需要去决定。
+
+thrift -version
+Thrift version 0.9.0
+
+好的，是0.9.0版本的，所以需要修改pom，然后我顺手修改了server版本的pom
+
+然后在根目录下编译：
+mvn clean package -DskipTests
+
+报错了，最后证明thrift不能到0.9
+
+*记录入已知问题，必须是0.8，服务端和客户端的pom文件里
+
+-----------------------------------------------------
+
+最后经过认真的statckoverflow之后你会发觉
+http://stackoverflow.com/questions/4908651/the-following-artifacts-could-not-be-resolved-javax-jmsjmsjar1-1
+
+好吧，这三个报错库：
+[ERROR] Failed to execute goal on project chronos-client: Could not resolve dependencies for project com.xiaomi.infra:chronos-client:jar:1.2.0-thrift0.8.0-SNAPSHOT: The following artifacts could not be resolved: com.sun.jdmk:jmxtools:jar:1.2.1, com.sun.jmx:jmxri:jar:1.2.1: Could not transfer artifact com.sun.jdmk:jmxtools:jar:1.2.1 from/to java.net (https://maven-repository.dev.java.net/nonav/repository): No connector available to access repository java.net (https://maven-repository.dev.java.net/nonav/repository) of type legacy using the available factories WagonRepositoryConnectorFactory -> [Help 1]
+
+因为版权问题被移除了，npm从来就没有这种问题好不好
+
+
+好吧，结果将client库当中的这三个库去掉，还是会报错
+
+
+-----------------------------------------------------
+
+然后我决定升级zk的jar包到3.4.6
+
+cd /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated
+
+编译后依旧报错：
+
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:2.0.2:compile (default-compile) on project chronos-client: Compilation failure: Compilation failure:
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:[629,38] error: cannot find symbol
+[ERROR]
+[ERROR] could not parse error message:   symbol:   method clearBit(byte,int)
+[ERROR] location: class EncodingUtils
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:634: error: cannot find symbol
+[ERROR] return EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
+[ERROR] ^
+[ERROR]
+[ERROR] could not parse error message:   symbol:   method testBit(byte,int)
+[ERROR] location: class EncodingUtils
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:638: error: cannot find symbol
+[ERROR] __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __SUCCESS_ISSET_ID, value);
+[ERROR] ^
+[ERROR]
+[ERROR] could not parse error message:   symbol:   method setBit(byte,int,boolean)
+[ERROR] location: class EncodingUtils
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:990: error: cannot find symbol
+[ERROR] __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __RANGE_ISSET_ID);
+[ERROR] ^
+[ERROR]
+[ERROR] could not parse error message:   symbol:   method clearBit(byte,int)
+[ERROR] location: class EncodingUtils
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:995: error: cannot find symbol
+[ERROR] return EncodingUtils.testBit(__isset_bitfield, __RANGE_ISSET_ID);
+[ERROR] ^
+[ERROR]
+[ERROR] could not parse error message:   symbol:   method testBit(byte,int)
+[ERROR] location: class EncodingUtils
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:999: error: cannot find symbol
+[ERROR] __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __RANGE_ISSET_ID, value);
+[ERROR] ^
+[ERROR]
+[ERROR] could not parse error message:   symbol:   method setBit(byte,int,boolean)
+[ERROR] location: class EncodingUtils
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:1349: error: cannot find symbol
+[ERROR] __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
+[ERROR] ^
+[ERROR]
+[ERROR] could not parse error message:   symbol:   method clearBit(byte,int)
+[ERROR] location: class EncodingUtils
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:1354: error: cannot find symbol
+[ERROR] return EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
+[ERROR] ^
+[ERROR]
+[ERROR] could not parse error message:   symbol:   method testBit(byte,int)
+[ERROR] location: class EncodingUtils
+[ERROR] /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated/ChronosService.java:1358: error: cannot find symbol
+[ERROR] __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __SUCCESS_ISSET_ID, value);
+[ERROR] ^
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR]
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <goals> -rf :chronos-client
+
+
+
+------------------------------------
+
+cd /root/chronos/chronos-client/src/generated/java/com/xiaomi/infra/chronos/generated
+
+ChronosService.java
+
+OK，这么多错误，貌似主要是因为找不到符号方法。。。。那么问题看来还是和thrift的版本号相关
+
+------------------------------------
+
+OK，在修改了客户端的pom文件，zk依赖到了3.4.6，libthrift为0.9.0之后
+在根目录下maven之后，终于OK了
+
+进入到
+/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/bin目录下面去
+sh chronos.sh
+
+即可启用服务器，在这之前需要修改conf
+
+确定zk在运行：
+netstat -nlp | grep 2181
+tcp6       0      0 :::2181                 :::*                    LISTEN      3860/java
+
+------------------------------------
+【启动chronos的server】
+
+sh chronos.sh
+2015-01-06 16:23:41,748 INFO  [main] chronos.ChronosServer(154): Load chronos.cfg configuration from class path
+2015-01-06 16:23:41,751 INFO  [main] chronos.ChronosServer(165): Init chronos server and connect ZooKeeper
+2015-01-06 16:23:41,756 INFO  [main] zookeeper.FailoverWatcher(95): Connecting ZooKeeper 127.0.0.1:2181
+2015-01-06 16:23:41,783 INFO  [main] zookeeper.Environment(100): Client environment:zookeeper.version=3.4.6-1569965, built on 02/20/2014 09:09 GMT
+2015-01-06 16:23:41,786 INFO  [main] zookeeper.Environment(100): Client environment:host.name=i-5ygfjuik
+2015-01-06 16:23:41,786 INFO  [main] zookeeper.Environment(100): Client environment:java.version=1.7.0_60
+2015-01-06 16:23:41,786 INFO  [main] zookeeper.Environment(100): Client environment:java.vendor=Oracle Corporation
+2015-01-06 16:23:41,787 INFO  [main] zookeeper.Environment(100): Client environment:java.home=/root/jdk/jre
+2015-01-06 16:23:41,787 INFO  [main] zookeeper.Environment(100): Client environment:java.class.path=:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/conf:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/slf4j-api-1.7.5.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/libthrift-0.8.0.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/commons-lang-2.5.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/httpclient-4.1.2.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/httpcore-4.1.3.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/zookeeper-3.4.6.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/slf4j-log4j12-1.6.1.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/log4j-1.2.16.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/jline-0.9.94.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/netty-3.7.0.Final.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/commons-codec-1.4.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/commons-logging-1.1.1.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/netty-3.2.4.Final.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/activation-1.1.jar:/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/lib/chronos-server-1.2.0-SNAPSHOT.jar
+2015-01-06 16:23:41,787 INFO  [main] zookeeper.Environment(100): Client environment:java.library.path=/root/protobuf-2.5.0:/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib
+2015-01-06 16:23:41,787 INFO  [main] zookeeper.Environment(100): Client environment:java.io.tmpdir=/tmp
+2015-01-06 16:23:41,787 INFO  [main] zookeeper.Environment(100): Client environment:java.compiler=<NA>
+2015-01-06 16:23:41,788 INFO  [main] zookeeper.Environment(100): Client environment:os.name=Linux
+2015-01-06 16:23:41,788 INFO  [main] zookeeper.Environment(100): Client environment:os.arch=amd64
+2015-01-06 16:23:41,788 INFO  [main] zookeeper.Environment(100): Client environment:os.version=3.13.0-36-generic
+2015-01-06 16:23:41,788 INFO  [main] zookeeper.Environment(100): Client environment:user.name=root
+2015-01-06 16:23:41,791 INFO  [main] zookeeper.Environment(100): Client environment:user.home=/root
+2015-01-06 16:23:41,791 INFO  [main] zookeeper.Environment(100): Client environment:user.dir=/root/chronos/chronos-server/target/chronos-server-1.2.0-SNAPSHOT/bin
+2015-01-06 16:23:41,792 INFO  [main] zookeeper.ZooKeeper(438): Initiating client connection, connectString=127.0.0.1:2181 sessionTimeout=3000 watcher=com.xiaomi.infra.chronos.ChronosServerWatcher@3abd477a
+2015-01-06 16:23:41,820 INFO  [main] zookeeper.ZooKeeperUtil(164): Try to create persistent znode /chronos
+2015-01-06 16:23:41,822 INFO  [main-SendThread(127.0.0.1:2181)] zookeeper.ClientCnxn$SendThread(975): Opening socket connection to server 127.0.0.1/127.0.0.1:2181. Will not attempt to authenticate using SASL (unknown error)
+2015-01-06 16:23:41,827 INFO  [main-SendThread(127.0.0.1:2181)] zookeeper.ClientCnxn$SendThread(852): Socket connection established to 127.0.0.1/127.0.0.1:2181, initiating session
+2015-01-06 16:23:41,837 INFO  [main-SendThread(127.0.0.1:2181)] zookeeper.ClientCnxn$SendThread(1235): Session establishment complete on server 127.0.0.1/127.0.0.1:2181, sessionid = 0x14a9aefef000004, negotiated timeout = 6000
+2015-01-06 16:23:41,840 DEBUG [main-EventThread] zookeeper.FailoverWatcher(132): Received ZooKeeper Event, type=None, state=SyncConnected, path=null
+2015-01-06 16:23:41,841 INFO  [main-EventThread] zookeeper.FailoverWatcher(170): 127.0.0.1_7911 sync connect from ZooKeeper
+2015-01-06 16:23:41,843 INFO  [main] zookeeper.ZooKeeperUtil(164): Try to create persistent znode /chronos/default-cluster
+2015-01-06 16:23:41,844 INFO  [main] zookeeper.ZooKeeperUtil(164): Try to create persistent znode /chronos/default-cluster/backup-servers
+2015-01-06 16:23:41,845 INFO  [main] zookeeper.ZooKeeperUtil(164): Try to create persistent znode /chronos/default-cluster/persistent-timestamp
+2015-01-06 16:23:41,846 INFO  [main] chronos.ChronosServer(56): Init thrift server in 127.0.0.1_7911
+2015-01-06 16:23:41,863 INFO  [main] zookeeper.FailoverServer(60): The server runs and prepares for leader election
+2015-01-06 16:23:41,863 INFO  [main] zookeeper.ZooKeeperUtil(50): Try to create emphemeral znode /chronos/default-cluster/master
+2015-01-06 16:23:41,872 INFO  [main] zookeeper.FailoverWatcher(274): Deleting ZNode for /chronos/default-cluster/backup-servers/127.0.0.1_7911 from backup master directory
+2015-01-06 16:23:41,886 INFO  [main] zookeeper.FailoverWatcher(281): Become active master in 127.0.0.1_7911
+2015-01-06 16:23:41,886 INFO  [main] zookeeper.FailoverServer(62): The server becomes active master and prepare to do business logic
+2015-01-06 16:23:41,886 INFO  [main] chronos.ChronosServer(116): As active master, init timestamp from ZooKeeper
+2015-01-06 16:23:41,889 DEBUG [main] zookeeper.ZooKeeperUtil(140): Retrieved 8 byte(s) of data from znode /chronos/default-cluster/persistent-timestamp
+2015-01-06 16:23:41,890 DEBUG [main] chronos.ChronosServerWatcher(94): Return persistent timestamp 26214400000 to timestamp server
+2015-01-06 16:23:41,890 DEBUG [main] chronos.ChronosServerWatcher(122): Setting persistent timestamp 52428800000 in ZooKeeper
+2015-01-06 16:23:41,894 DEBUG [main-EventThread] zookeeper.FailoverWatcher(132): Received ZooKeeper Event, type=NodeDataChanged, state=SyncConnected, path=/chronos/default-cluster/persistent-timestamp
+2015-01-06 16:23:41,894 INFO  [main] chronos.ChronosImplement(135): Get persistent timestamp 26214400000 and set 52428800000 in ZooKeeper
+2015-01-06 16:23:41,894 INFO  [main] chronos.ChronosServer(125): Start to accept thrift request
+
+
+7911端口可用于服务
+------------------------------------
+
+然后。。。。呵呵呵呵呵
+
+client需要自己写
+
+
+/root/chronos/chronos-client/readme.md
+
+OK,可以进入client的目录：
+mvn exec:java -Dexec.mainClass="com.xiaomi.infra.chronos.client.ChronosClient" -Dexec.args="$zkQuorum $clusterName"
+
+直接调用对方的main程序
+
+呵呵呵呵；
+[ERROR] Failed to execute goal on project chronos-client: Could not resolve dependencies for project com.xiaomi.infra:chronos-client:jar:1.2.0-thrift0.8.0-SNAPSHOT: Could not find artifact com.xiaomi.infra:chronos-server:jar:1.2.0-SNAPSHOT in repository.jboss.org-public (https://repository.jboss.org/nexus/content/groups/public) -> [Help 1]
+
+然后报错，jboss的包里木有这个包，OK
+
+两个解决方案，一是修改pom文件的repos地址，二是把编译好的jar包扔到本地库，又或者是私库。
+
+------------------------------------
+
+方案一试错：
+
+修改pom文件当中的repos，删掉，然后重新执行
+
+mvn exec:java -Dexec.mainClass="com.xiaomi.infra.chronos.client.ChronosClient" -Dexec.args="$zkQuorum $clusterName"
+
+------------------------------------
+
+OK，知道是什么错了，是在报错server不在仓库里，那么好吧，先去server的子目录去
+mvn clean install
+
+然后再回到client的目录执行：
+mvn exec:java -Dexec.mainClass="com.xiaomi.infra.chronos.client.ChronosClient" -Dexec.args="127.0.0.1 default-cluster"
+
+====================================
+
+OK，运行成功了~~~
+
+mvn exec:java -Dexec.mainClass="com.xiaomi.infra.chronos.client.ChronosClient" -Dexec.args="127.0.0.1 default-cluster"
+[WARNING]
+[WARNING] Some problems were encountered while building the effective settings
+[WARNING] Unrecognised tag: 'pluginRepositories' (position: START_TAG seen ...</activeProfiles>\n  -->\n            <pluginRepositories>... @257:33)  @ /usr/share/maven/conf/settings.xml, line 257, column 33
+[WARNING]
+[INFO] Scanning for projects...
+[WARNING]
+[WARNING] Some problems were encountered while building the effective model for com.xiaomi.infra:chronos-client:jar:1.2.0-thrift0.8.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 104, column 15
+[WARNING] 'build.plugins.plugin.version' for org.codehaus.mojo:build-helper-maven-plugin is missing. @ line 141, column 15
+[WARNING]
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING]
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING]
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building chronos-client 1.2.0-thrift0.8.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]
+[INFO] --- exec-maven-plugin:1.3.2:java (default-cli) @ chronos-client ---
+[WARNING] Warning: killAfter is now deprecated. Do you need it ? Please comment on MEXEC-6.
+log4j:WARN No appenders could be found for logger (org.apache.zookeeper.ZooKeeper).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
+Get timestamp 372384478667735040
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2.279s
+[INFO] Finished at: Tue Jan 06 16:47:32 CST 2015
+[INFO] Final Memory: 11M/177M
+[INFO] ------------------------------------------------------------------------
+root@i-5ygfjuik:~/chronos/chronos-client#
+
+
+
+==============================================
+【POM文件里有两个警告】
+
+[WARNING] Some problems were encountered while building the effective model for com.xiaomi.infra:chronos-client:jar:1.2.0-thrift0.8.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 104, column 15
+[WARNING] 'build.plugins.plugin.version' for org.codehaus.mojo:build-helper-maven-plugin is missing. @ line 141, column 15
+[WARNING]
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+
+==============================================
+【客户端的构造函】
+
+  /**
+   * Construct ChronosClient just with ZkQuorum and clusterName, use default properties.
+   * 
+   * @param zkQuorum the ZooKeeper quorum string
+   * @throws IOException when error to construct ChronosClientWatcher
+   */
+  public ChronosClient(String zkQuorum, String clusterName) throws IOException {
+    Properties properties = new Properties();
+    properties.setProperty(ZK_QUORUM, zkQuorum);
+    properties.setProperty(CLUSTER_NAME, clusterName);
+    properties.setProperty(SESSION_TIMEOUT, String.valueOf(30000));
+    properties.setProperty(CONNECT_RETRY_TIMES, String.valueOf(10));
+    this.chronosClientWatcher = new ChronosClientWatcher(properties);
+  }
+
+==============================================
+【客户端的常量配置】
+
+  public static final String ZK_QUORUM = "zkQuorum";
+  public static final String CLUSTER_NAME = "clusterName";
+  public static final String SESSION_TIMEOUT = "sessionTimeout";
+  public static final String CONNECT_RETRY_TIMES = "connectRetryTimes";
+
+
+==============================================
+
+[WARNING] Warning: killAfter is now deprecated. Do you need it ? Please comment on MEXEC-6.
+log4j:WARN No appenders could be found for logger (org.apache.zookeeper.ZooKeeper).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
+
+Get timestamp 372384478667735040
+
+==============================================
+【minos里关于实际部署的文档】
+
+https://github.com/XiaoMi/minos
+
+
+==============================================
+
+【分发构件至远程仓库】
+
+mvn install 会将项目生成的构件安装到本地Maven仓库，mvn deploy 用来将项目生成的构件分发到远程Maven仓库。本地Maven仓库的构件只能供当前用户使用，在分发到远程Maven仓库之后，所有能访问该仓库的用户都能使用你的构件。
+我们需要配置POM的distributionManagement来指定Maven分发构件的位置，如下：
+Xml代码  收藏代码
+<project>    
+  ...    
+  <distributionManagement>    
+    <repository>    
+      <id>nexus-releases</id>    
+      <name>Nexus Release Repository</name>    
+      <url>http://127.0.0.1:8080/nexus/content/repositories/releases/</url>    
+    </repository>    
+    <snapshotRepository>    
+      <id>nexus-snapshots</id>    
+      <name>Nexus Snapshot Repository</name>    
+      <url>http://127.0.0.1:8080/nexus/content/repositories/snapshots/</url>    
+    </snapshotRepository>    
+  </distributionManagement>    
+  ...    
+</project>    
+Maven区别对待release版本的构件和snapshot版本的构件，snapshot为开发过程中的版本，实时，但不稳定，release版本则比较稳定。Maven会根据你项目的版本来判断将构件分发到哪个仓库。
+一般来说，分发构件到远程仓库需要认证，如果你没有配置任何认证信息，你往往会得到401错误。这个时候，如下在settings.xml中配置认证信息：
+Xml代码  收藏代码
+<settings>    
+  ...    
+  <servers>    
+    <server>    
+      <id>nexus-releases</id>    
+      <username>admin</username>    
+      <password>admin123</password>    
+    </server>    
+    <server>    
+      <id>nexus-snapshots</id>    
+      <username>admin</username>    
+      <password>admin123</password>    
+    </server>      
+  </servers>    
+  ...    
+</settings>  
+需要注意的是，settings.xml中server元素下id的值必须与POM中repository或snapshotRepository下id的值完全一致。将认证信息放到settings下而非POM中，是因为POM往往是它人可见的，而settings.xml是本地的。

@@ -125,6 +125,9 @@ http://wiki.apache.org/cassandra/ClientOptions
 node.js这边有且只有一个选择，今天是：2014-12-10号，就是官方驱动
 项目地址：https://github.com/datastax/nodejs-driver
 
+示例工程位置：ssh root@119.254.110.72
+之后上传到github上去
+
 mkdir node_cassandra
 
 vim package.json
@@ -181,3 +184,34 @@ client.on('log', function(level, className, message, furtherInfo) {
   console.log('log event: %s -- %s', level, message);
 });
 
+===================================================================
+
+8、监控预警
+
+http://sematext.com/spm/
+
+服务很强大，但是。。。。。收费，基于云
+
+
+===================================================================
+
+9、生态环境
+参考链接：http://wiki.apache.org/cassandra/IntegrationPoints
+
+http://esper.codehaus.org/
+
+
+===================================================================
+
+10、硬件配置
+
+内存：4G最小，32G也OK
+CPU：8核心
+硬盘：最好是2块以上，不包括操作系统本身的那部分
+
+===================================================================
+
+11、总体评价
+
+功能上，可以提供原生的二级索引，有CQL可用，用户界面相当友好，无中心节点，可配置的一致性级别，非常强健
+但是问题在于国内应用较少，HBase也很好用，但是缺少cassandra的不少功能

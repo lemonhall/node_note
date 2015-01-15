@@ -1,0 +1,6 @@
+1、新的文档地址
+https://iojs.org/api/index.html
+
+
+2、新增的模块
+io.js 第一个版本今天发布了...看了看 doc 多了几个 module (smalloc, v8 ) ,也增加了一些 api ( util 里有很多新的 )...这个 v8 module 好像可以在内部控制 v8 引擎的 options ...

@@ -1,0 +1,4 @@
+1、下载elasticesearch
+
+2、下载插件
+https://github.com/dadoonet/fsriver

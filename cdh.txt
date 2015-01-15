@@ -1,0 +1,315 @@
+1、硬件配置
+a.启动一台2核心、4G内存左右的机器，作为manger机器，安装最终7180端口暴露的manger
+这个上面还需要一个postgrel数据库，我是选用了它自带的，没去折腾自己的数据库
+
+b.zookeeper最少要三个实例，而HDFS也最少要三个DataNode，其实说白了就是，要有三个NameNode、三个Zookeeper、如果是Hbase的话，最好也是有三个ResourceManger，如果要跑spark的话，其实Master机器也都是这种配置级别
+
+集群里有三台机器，都属于管理机，其实manger也应该做高可用的。所以光所谓的管理机器就是，3+2=5台左右，加上内网所需要的DNS、yum的内部仓库、数据库的主从等等高可用问题，其实最好的配置是6台机器来做。
+
+c.接下来是各种工作机器，DataNode、Worker等等干活儿的机器，10台左右，跑impala和spark都是16G内存起为好
+
+==================================================
+
+2、前置准备
+
+有几点一定需要注意
+a.FQDN
+b.ipv6
+c.ntp
+d.selinux
+e.本地仓库化
+
+基本上把以上五点搞定，安装应该会相当顺利。
+
+分点描述：
+==================================================
+a.FQDN
+这个东西之前在独立安装HADOOP，也遇到了这个问题，具体来说就是需要一个DNS。如果不用DNS的情况下就只能：
+
+vim /etc/hosts
+
+192.168.9.3 manger
+192.168.9.2 master
+
+vim /etc/sysconfig/network
+HOSTNAME=hadoop.master1‘
+
+就是FQDN这个东西，这个坑十分巨大，一定要在安装任何CDH的组件，甚至是JAVA的组件之前就搞定。
+==================================================
+b.ipv6确定关掉
+关闭IPV6
+
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+
+vim /etc/sysctl.conf
+
+#disable IPv6
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+
+==================================================
+c.selinux确定关闭
+
+默认没有安装这个
+==================================================
+c.1 resolv.conf
+
+search sf-express.com db.sfdc.com.cn mq.sfdc.com.cn
+nameserver 10.111.113.6
+nameserver 10.111.113.7
+
+==================================================
+d.ntp
+
+yum install ntp
+
+chkconfig --list ntpd
+chkconfig ntpd on
+
+cat >> /etc/ntp.conf <<EOF
+server 0.north-america.pool.ntp.org
+server 1.north-america.pool.ntp.org
+server 2.north-america.pool.ntp.org
+server 3.north-america.pool.ntp.org
+EOF
+
+cat >> /etc/ntp/step-tickers <<EOF
+0.north-america.pool.ntp.org
+1.north-america.pool.ntp.org
+2.north-america.pool.ntp.org
+3.north-america.pool.ntp.org
+EOF
+
+ntpdate -db 0.north-america.pool.ntp.org
+ntpdate -db skdcn-ntp.sf-express.com
+
+==================================================
+
+e.本地仓库化
+
+yum install httpd
+service httpd start 
+chkconfig httpd on
+
+
+本地化parcels
+
+1、CDH
+mkdir cdh5
+cd cdh5
+wget http://archive.cloudera.com/cdh5/parcels/latest/CDH-5.0.2-1.cdh5.0.2.p0.13-precise.parcel
+wget http://archive.cloudera.com/cdh5/parcels/latest/manifest.json
+mkdir /var/www/html/cdh5.1
+cp manifest.json /var/www/html/cdh5.1
+cp CDH-5.0.1-1.cdh5.0.1.p0.47-el6.parcel /var/www/html/cdh5.1
+chmod -R ugo+rX /var/www/html/cdh5.1
+cd ..
+
+==================================
+
+本地化tarball
+wget http://archive-primary.cloudera.com/cm5/repo-as-tarball/5.0.1/cm5.0.1-ubuntu12-04.tar.gz
+
+tar zxf cm5.0.1-ubuntu12-04.tar.gz
+mv cm /var/www/
+
+cd /etc/apt/sources.list.d/
+
+vim /etc/apt/sources.list.d/my-private-cloudera-repo.list
+deb [arch=amd64] http://10.111.188.12/cm precise-cm5 contrib
+
+apt-key adv --recv-key --keyserver keyserver.ubuntu.com 327574EE02A818DD
+apt-key export 327574EE02A818DD > 327574EE02A818DD.asc
+
+apt-key add 327574EE02A818DD.asc
+
+
+里面有：
+-rw-rw-r-- 1 1106 592 3859752 5月 13 08:51 cloudera-manager-agent-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592 330273388 5月 13 08:50 cloudera-manager-daemons-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592 8180 5月 13 08:51 cloudera-manager-server-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592 9884 5月 13 08:51 cloudera-manager-server-db-2-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592 684616 5月 13 08:51 enterprise-debuginfo-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592 71204325 5月 13 08:51 jdk-6u31-linux-amd64.rpm
+-rw-rw-r-- 1 1106 592 137780131 5月 13 08:51 oracle-j2sdk1.7-1.7.0+update45-1.x86_64.rpm
+
+==================================================
+
+保证服务器名一致性
+/usr/lib64/cmf/agent/build/env/bin/python /usr/lib64/cmf/agent/src/cmf/agent.py -h
+
+#这三个一定要保证一致
+python -c 'import socket; print socket.getfqdn(), socket.gethostbyname(socket.getfqdn())'
+hostname
+hostname -f
+
+===================================
+安装manger
+
+首先用之前配置好的本地化仓库
+
+vim /etc/yum.repos.d/myrepo.repo
+
+[myrepo]
+name=myrepo
+baseurl=http://192.168.9.3/cm/5.0.1/
+enabled=1
+gpgcheck=0
+
+yum update
+
+
+apt-get install jdk.x86_64 oracle-j2sdk1.7
+apt-get install install cloudera-manager-daemons cloudera-manager-server
+yum install oracle-j2sdk1.7 cloudera-manager-server cloudera-manager-server-db-2
+
+#启动db，并自动初始化
+service cloudera-scm-server-db start
+
+#启动服务器本身
+service cloudera-scm-server start
+
+chkconfig一下cloudera-scm-server
+
+http://192.168.9.6:7180/
+
+admin/admin
+
+===================================
+安装agent工作机
+
+记得一定要符合前置的要求的那五个前置条件。。。。
+
+配置好本地化仓库
+vim /etc/yum.repos.d/myrepo.repo
+
+[myrepo]
+name=myrepo
+baseurl=http://192.168.9.3/cm/5.0.1/
+enabled=1
+gpgcheck=0
+
+yum update
+
+apt-get install cloudera-manager-agent cloudera-manager-daemons jdk.x86_64 oracle-j2sdk1.7
+
+========================================
+
+OK，这一切都完成之后，进入manger，即可以开始安装主机的流程了，唯一麻烦的是会卡在yum makecache这一步上，当然还是看你的网络条件，这个稍后补充在集群内部做镜像的方法
+
+还有，初期的Host Monitor会取不到数据，需要重启一下整个集群即可，在安装主机过程中会又一个网络连接的报错。
+
+剩余的关于内存方便的报警，都可以直接在manger里看到。。。。按照警报调参即可。
+
+========================================
+
+rm /etc/apt/sources.list
+
+cat >> /etc/apt/sources.list << EOF
+# deb cdrom:[Ubuntu-Server 12.04.4 LTS _Precise Pangolin_ - Release amd64 (20140204)]/ dists/precise/main/binary-i386/
+# deb cdrom:[Ubuntu-Server 12.04.4 LTS _Precise Pangolin_ - Release amd64 (20140204)]/ dists/precise/restricted/binary-i386/
+# deb cdrom:[Ubuntu-Server 12.04.4 LTS _Precise Pangolin_ - Release amd64 (20140204)]/ precise main restricted
+
+#deb cdrom:[Ubuntu-Server 12.04.4 LTS _Precise Pangolin_ - Release amd64 (20140204)]/ dists/precise/main/binary-i386/
+#deb cdrom:[Ubuntu-Server 12.04.4 LTS _Precise Pangolin_ - Release amd64 (20140204)]/ dists/precise/restricted/binary-i386/
+#deb cdrom:[Ubuntu-Server 12.04.4 LTS _Precise Pangolin_ - Release amd64 (20140204)]/ precise main restricted
+
+# See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to
+# newer versions of the distribution.
+deb http://10.111.188.12/ubuntu/ precise main restricted
+deb-src http://10.111.188.12/ubuntu/ precise main restricted
+
+## Major bug fix updates produced after the final release of the
+## distribution.
+deb http://10.111.188.12/ubuntu/ precise-updates main restricted
+deb-src http://10.111.188.12/ubuntu/ precise-updates main restricted
+
+## N.B. software from this repository is ENTIRELY UNSUPPORTED by the Ubuntu
+## team. Also, please note that software in universe WILL NOT receive any
+## review or updates from the Ubuntu security team.
+deb http://10.111.188.12/ubuntu/ precise universe
+deb-src http://10.111.188.12/ubuntu/ precise universe
+deb http://10.111.188.12/ubuntu/ precise-updates universe
+deb-src http://10.111.188.12/ubuntu/ precise-updates universe
+EOF
+
+
+rm /etc/apt/sources.list.d/cloudera.list
+
+
+cat >> /etc/apt/sources.list.d/cloudera.list << EOF
+deb [arch=amd64] http://10.111.188.12/cm precise-cm5 contrib
+EOF
+
+rm 327574EE02A818DD.asc 
+
+cat >> 327574EE02A818DD.asc << EOF
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+mQGiBEnvgi0RBADLx1qQlXlrvHOo13dUvoWL97Ny/0s0S/GcMEgAqYvZzUPVcq8H
+GUsOb4PLTfcL1H7Ptq9fqr02uIb5Bc/ltdwE9GFaT2nvdfBx9T8jr8LrW9JE2xJq
+dCyFO5yP9YbZeFAxNO3yBxeP85lQ9CdWWLvyYdtQ+T84EYerqkcVbSvYRwCg6zyx
+EE3jWYvyVv/3HTrVTYpgHgMD/2kMR1Z2vEYOSM7h4cnRnxiadhefqJ2WCm4L30Rx
+/F9JBLAEuIuUndiOShoB043iDY+rrqCHqHQ/uI2D4piW9cDYMo7EJlsFtQ5g2SFg
+PcS4+DLhU464dTQsTGAhvcv+F0VQV4iu1HdD2/kKJkCS/MZL4rr4emqsh6VIBDdG
+ytPaA/9cyRJZe2BrBM2pECGncE5RUaM3g37Ka+VnmMVOXgZdzgCxwFZyVhyxzssD
+kB4jcm75UEZx8BiaoPQDQEsBongdx5M4Vwv5XnvUq7sK7eZLmUzW9hmkPjgLea0/
+znchvPsLeTNqSfIcH14TbFt6B2y1G3Vbi5/6UiAaIqLrqjZlCrQXQ2xvdWRlcmEg
+QXB0IFJlcG9zaXRvcnmIYAQTEQIAIAUCSe+CLQIbAwYLCQgHAwIEFQIIAwQWAgMB
+Ah4BAheAAAoJEDJ1dO4CqBjdGQUAnitydC/NGEh0aZXDN1v22pWFpRzTAJ46N4gT
+Zx25oWfyppX3R7fSH+7TPrkCDQRJ74ItEAgAq8s4iMsGhk9nnMF6wlarqHjws4Dw
+NFZBzA1Ah8KnMtrdr8t99OfzY1b7PNzHXujcaTTqL6L881ezdsls9aHp2kr24Btr
+8nqEZJHSjCnQscAGu+NrhoH2KvK+tMRCHGRcy5UNQbLTJi4Hf8Lo+zv0WUy9BCDu
+7HoDlwrrh1Rw5oOwLFc2UXSTEB6BwYna0mZcNjVpfKNHa//wJcKR0AtsCwRT9znP
+GS0Hpqi1l0/iU7sJhNWyyF427ANg+Jv2n4IP+dd734ZiFeJ9tWCtBjfc3MZJKETk
+tiCtX7FVIIqBAmYLwPqcvZMGJMrNzLBtRuuiBv5bFcPpMEhoD40oQEG8uwADBQf/
+f3NpQbuAcZLMzbrHYu3FB/+4ETvDJXJIEUiQUdobWancSBUhuNPOqIgLzIWM1jRu
+jWGIpkeP6iqNW9kDrq26CuMFP2CoVvnaMiLXUvyf62HWAiYXXlZle5O97bvhYMtM
+Y4o5sMo2ktI9IcgYIFicFwcmuGyGL7nJ3Bo9FAUV2LvMe++O/f13jsPpygoTZgGT
+6w0erglWgrgf5pXt8ajlI4TUrlMVg9Iy/tB9ZzVHnpk21o4vLHwZkgXe1WlK/Rze
+ZCruXyXHaFyEJN2zlP2xNj2F2WisL+/HEnl/qzU4IpNI2LQV2aiY9Nt8MBXgSHAh
+gWKWkjiB+tswgzuNsBOTM4hJBBgRAgAJBQJJ74ItAhsMAAoJEDJ1dO4CqBjd988A
+oJ1WlEx2BcFA7W1RMyErejcvB6thAKCf3t0thSQvkoGi3AOJ4Haj/C3yUQ==
+=H6IR
+-----END PGP PUBLIC KEY BLOCK-----
+EOF
+
+apt-key add 327574EE02A818DD.asc
+
+cat >> /etc/resolv.conf << EOF
+search sf-express.com db.sfdc.com.cn mq.sfdc.com.cn
+nameserver 10.111.113.6
+nameserver 10.111.113.7
+EOF
+
+apt-get update
+
+mkdir .ssh
+
+cat >> /root/.ssh/authorized_keys << EOF
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIww1w98SQHAmmvAX0lGt7YG1OMZnmMQjb89onQX9Q17fJhng/5Vjic1K5ogx3ApEguwU9WKuGaL9BkFS8brNTaTf95PA4BjeoXDcajcq/fmKXXCHZxM2Zrg16pkP4MOtGKdKeW0+k4Mr/+J7B+Z79DQoj06yqvN/O+vkNUig67u+TfVzsJCFk6rmagYXkxKpB/vQnPmj0DL8IgnTCsBOzIdxodsnNtLsszdCDN1UVNLSEm+C8XFODfObCl1d0fifWNlCdAjmKtCJibmLifKVqjwpK2UdEDf6VEUE4s8z8DvxFvsWWRfQ1vTyQ1UT0j6F+P5sdHTABKJviuMr2YdWf root@cdhManger
+EOF
+
+apt-get install cloudera-manager-agent cloudera-manager-daemons oracle-j2sdk1.7
+
+
+=========================================
+
+
+10.111.188.21 cdhManger
+10.111.188.22 master01
+10.111.188.23 slave01
+10.111.188.24 slave02
+10.111.188.25 dataNode01
+10.111.188.26 dataNode02
+10.111.188.27 dataNode03
+ 
+ 
+=====================================================
+ 
+余柠(Ning.Yu)-IT产品中心
+ 
+15289475287
