@@ -1,0 +1,122 @@
+拉取青云的慢日志
+
+1、安装lftp
+apt-get install lftp
+
+2、在青云后端数据库日志界面上点击同步
+
+3、lftp ftp://192.168.60.5/
+
+4、get mysql-slow
+
+5、exit
+
+6、vim mysql-slow
+
+=========================================
+
+# Time: 150126 15:17:17
+# User@Host: hksearch[hksearch] @  [192.168.60.3]
+# Query_time: 77.271400  Lock_time: 0.000185 Rows_sent: 2571  Rows_examined: 67705350
+SET timestamp=1422256637;
+SELECT a.PRODUCT_NAME,a.UNIT_PRICE,a.LIST_PRICE,a.APP_USERCOUNT,a.VISITCOUNT,a.PRODUCT_ID,a.CENTER_PICTURE,a.SMALL_PICTURE,a.PRODUCT_NO,a.product_type_flag,a.SEARCHKEY,a.CHECK_STATUS,a.store_check_status,a.uc_activation_status,a.uc_status,a.STATUS,a.promotion_Endtime,a.promotion_Type,a.promotion_Price,a.promotion_Createtime,a.TYPE,a.promotion_check_status,MIN(b.MODEL_PRICE) AS MODEL_PRICE,a.update_time,a.create_time, c.STATUS AS P_STATUS,c.CHECK_STATUS AS P_CHECK_STATUS,c.START_DATE AS P_START_DATE,c.END_DATE AS P_END_DATE,c.TYPE AS P_TYPE,c.ADDPRE,c.PREFIX,c.ADDPOST,c.POSTFIX,c.update_time as P_update_time  FROM product a LEFT JOIN product_model b ON a.product_id=b.product_id LEFT JOIN promotions_offers c ON a.product_id=c.product_id  where 1=1 AND a.CHECK_STATUS = 1 AND a.store_check_status =1 AND a.uc_activation_status =1 AND a.uc_status = 1 AND a.STATUS = 1 AND (a.UPDATE_TIME >= '2015-01-26 15:08:00' OR (a.promotion_Endtime!=null AND a.promotion_Endtime <= '2015-01-26 15:08:00') OR c.UPDATE_TIME >= '2015-01-26 15:08:00') GROUP BY a.PRODUCT_NAME,a.UNIT_PRICE,a.LIST_PRICE,a.APP_USERCOUNT,a.VISITCOUNT,a.PRODUCT_ID,a.CENTER_PICTURE,a.SMALL_PICTURE,a.PRODUCT_NO,a.product_type_flag,a.SEARCHKEY,a.CHECK_STATUS,a.store_check_status,a.uc_activation_status,a.uc_status,a.STATUS;
+
+=========================================
+
+促销SQL的排版版本：
+
+SELECT 
+	a.PRODUCT_NAME,
+	a.UNIT_PRICE,
+	a.LIST_PRICE,
+	a.APP_USERCOUNT,
+	a.VISITCOUNT,a.PRODUCT_ID,
+	a.CENTER_PICTURE,
+	a.SMALL_PICTURE,
+	a.PRODUCT_NO,
+	a.product_type_flag,
+	a.SEARCHKEY,
+	a.CHECK_STATUS,
+	a.store_check_status,
+	a.uc_activation_status,
+	a.uc_status,a.STATUS,
+	a.promotion_Endtime,
+	a.promotion_Type,
+	a.promotion_Price,
+	a.promotion_Createtime,
+	a.TYPE,
+	a.promotion_check_status,
+	MIN(b.MODEL_PRICE) AS MODEL_PRICE,
+	a.update_time,
+	a.create_time, 
+	c.STATUS AS P_STATUS,
+	c.CHECK_STATUS AS P_CHECK_STATUS,
+	c.START_DATE AS P_START_DATE,
+	c.END_DATE AS P_END_DATE,
+	c.TYPE AS P_TYPE,
+	c.ADDPRE,
+	c.PREFIX,
+	c.ADDPOST,
+	c.POSTFIX,
+	c.update_time AS P_update_time  
+	FROM product a LEFT JOIN product_model b
+	 ON a.product_id=b.product_id LEFT JOIN promotions_offers c 
+	 ON a.product_id=c.product_id 
+WHERE 1=1 AND 
+	a.CHECK_STATUS = 1 AND 
+	a.store_check_status =1 AND 
+	a.uc_activation_status =1 AND 
+	a.uc_status = 1 AND 
+	a.STATUS = 1 AND 
+	(a.UPDATE_TIME >= '2015-01-26 14:40:00' OR 
+	(a.promotion_Endtime!=NULL AND a.promotion_Endtime <= '2015-01-26 14:40:00') OR 
+	c.UPDATE_TIME >= '2015-01-26 14:40:00')
+GROUP BY 
+	a.PRODUCT_NAME,
+	a.UNIT_PRICE,
+	a.LIST_PRICE,
+	a.APP_USERCOUNT,
+	a.VISITCOUNT,
+	a.PRODUCT_ID,
+	a.CENTER_PICTURE,
+	a.SMALL_PICTURE,
+	a.PRODUCT_NO,
+	a.product_type_flag,
+	a.SEARCHKEY,
+	a.CHECK_STATUS,
+	a.store_check_status,
+	a.uc_activation_status,
+	a.uc_status,
+	a.STATUS 
+
+=========================================
+解释这个语句：
+【参考资料：http://orangeholic.iteye.com/blog/1700509】
+【Mysql 慢查询日志】
+
+
+desc SELECT a.PRODUCT_NAME,a.UNIT_PRICE,a.LIST_PRICE,a.APP_USERCOUNT,a.VISITCOUNT,a.PRODUCT_ID,a.CENTER_PICTURE,a.SMALL_PICTURE,a.PRODUCT_NO,a.product_type_flag,a.SEARCHKEY,a.CHECK_STATUS,a.store_check_status,a.uc_activation_status,a.uc_status,a.STATUS,a.promotion_Endtime,a.promotion_Type,a.promotion_Price,a.promotion_Createtime,a.TYPE,a.promotion_check_status,MIN(b.MODEL_PRICE) AS MODEL_PRICE,a.update_time,a.create_time, c.STATUS AS P_STATUS,c.CHECK_STATUS AS P_CHECK_STATUS,c.START_DATE AS P_START_DATE,c.END_DATE AS P_END_DATE,c.TYPE AS P_TYPE,c.ADDPRE,c.PREFIX,c.ADDPOST,c.POSTFIX,c.update_time as P_update_time  FROM product a LEFT JOIN product_model b ON a.product_id=b.product_id LEFT JOIN promotions_offers c ON a.product_id=c.product_id  where 1=1 AND a.CHECK_STATUS = 1 AND a.store_check_status =1 AND a.uc_activation_status =1 AND a.uc_status = 1 AND a.STATUS = 1 AND (a.UPDATE_TIME >= '2015-01-26 15:08:00' OR (a.promotion_Endtime!=null AND a.promotion_Endtime <= '2015-01-26 15:08:00') OR c.UPDATE_TIME >= '2015-01-26 15:08:00') GROUP BY a.PRODUCT_NAME,a.UNIT_PRICE,a.LIST_PRICE,a.APP_USERCOUNT,a.VISITCOUNT,a.PRODUCT_ID,a.CENTER_PICTURE,a.SMALL_PICTURE,a.PRODUCT_NO,a.product_type_flag,a.SEARCHKEY,a.CHECK_STATUS,a.store_check_status,a.uc_activation_status,a.uc_status,a.STATUS;
+
+
+
+|id|select_type| table | type |   possible_keys               | key 		     |key_len  |ref						    |rows   |Extra
+  1   SIMPLE     a     | ref  |   idx_p_up_time,				product_status    5        | const                      | 21864 | Using where; Using temporary; Using filesort |
+								  idx_p_checkstatus,
+								  product_check_Status,
+								  product_status,
+								  pro_uc_activation_status,
+								  pro_uc_status,
+								  pro_uc_store_check_status 
+  1 | SIMPLE    | b     | ref  |  p_m_pro_id                  | p_m_pro_id       | 67      | heike_product.a.PRODUCT_ID |     6 |                                              |
+  1 | SIMPLE    | c     | ALL  |  NULL                        | NULL             | NULL    | NULL                       |  1368 | Using where                                  |
++----+-------------+-------+------+-----------------------------------------------------------------------------------------------------------
+3 rows in set (0.00 sec)
+
+这里:a,b,c的定义为~~~
+			product a 
+			product_model b
+			promotions_offers c
+
+OK，那么就是a、c需要加索引
+
+=========================================

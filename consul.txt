@@ -1,0 +1,156 @@
+1、主页
+https://consul.io/
+
+
+===================================================================
+
+2、安装
+下载：
+wget https://dl.bintray.com/mitchellh/consul/0.4.1_linux_amd64.zip
+
+解压之后可以将bin文件放到：~/bin and /usr/local/bin文件夹当中去
+
+unzip 0.4.1_linux_amd64.zip
+mv consul /bin
+
+consul
+usage: consul [--version] [--help] <command> [<args>]
+
+Available commands are:
+    agent          Runs a Consul agent
+    event          Fire a new event
+    exec           Executes a command on Consul nodes
+    force-leave    Forces a member of the cluster to enter the "left" state
+    info           Provides debugging information for operators
+    join           Tell Consul agent to join cluster
+    keygen         Generates a new encryption key
+    leave          Gracefully leaves the Consul cluster and shuts down
+    members        Lists the members of a Consul cluster
+    monitor        Stream logs from a Consul agent
+    reload         Triggers the agent to reload configuration files
+    version        Prints the Consul version
+    watch          Watch for changes in Consul
+
+===================================================================
+
+3、部署
+部署原则：每一个数据中心有三个或者五个server端
+
+---------------------------------------------------------------------
+打开一个server
+#：consul agent -server -bootstrap-expect 1 -data-dir /tmp/consul
+
+
+==> WARNING: BootstrapExpect Mode is specified as 1; this is the same as Bootstrap mode.
+==> WARNING: Bootstrap mode enabled! Do not enable unless necessary
+==> WARNING: It is highly recommended to set GOMAXPROCS higher than 1
+==> Starting Consul agent...
+==> Starting Consul agent RPC...
+==> Consul agent running!
+         Node name: 'zk1'
+        Datacenter: 'dc1'
+            Server: true (bootstrap: true)
+       Client Addr: 127.0.0.1 (HTTP: 8500, DNS: 8600, RPC: 8400)
+      Cluster Addr: 192.168.60.10 (LAN: 8301, WAN: 8302)
+    Gossip encrypt: false, RPC-TLS: false, TLS-Incoming: false
+
+==> Log data will now stream in as it occurs:
+
+    2015/01/26 11:45:14 [INFO] serf: EventMemberJoin: zk1 192.168.60.10
+    2015/01/26 11:45:14 [INFO] serf: EventMemberJoin: zk1.dc1 192.168.60.10
+    2015/01/26 11:45:14 [INFO] raft: Node at 192.168.60.10:8300 [Follower] entering Follower state
+    2015/01/26 11:45:14 [INFO] consul: adding server zk1 (Addr: 192.168.60.10:8300) (DC: dc1)
+    2015/01/26 11:45:14 [INFO] consul: adding server zk1.dc1 (Addr: 192.168.60.10:8300) (DC: dc1)
+    2015/01/26 11:45:14 [ERR] agent: failed to sync remote state: No cluster leader
+    2015/01/26 11:45:15 [WARN] raft: Heartbeat timeout reached, starting election
+    2015/01/26 11:45:15 [INFO] raft: Node at 192.168.60.10:8300 [Candidate] entering Candidate state
+    2015/01/26 11:45:15 [INFO] raft: Election won. Tally: 1
+    2015/01/26 11:45:15 [INFO] raft: Node at 192.168.60.10:8300 [Leader] entering Leader state
+    2015/01/26 11:45:15 [INFO] consul: cluster leadership acquired
+    2015/01/26 11:45:15 [INFO] consul: New leader elected: zk1
+    2015/01/26 11:45:15 [INFO] raft: Disabling EnableSingleNode (bootstrap)
+    2015/01/26 11:45:15 [INFO] consul: member 'zk1' joined, marking health alive
+    2015/01/26 11:45:16 [INFO] agent: Synced service 'consul'
+
+---------------------------------------------------------------------
+验证：同一台机器打开
+root@zk1:~# consul members
+Node  Address             Status  Type    Build  Protocol
+zk1   192.168.60.10:8301  alive   server  0.4.1  2
+
+---------------------------------------------------------------------
+详细模式：
+
+consul members -detailed
+Node  Address             Status  Tags
+zk1   192.168.60.10:8301  alive   vsn_max=2,build=0.4.1:,port=8300,bootstrap=1,role=consul,dc=dc1,vsn=2,vsn_min=1
+
+---------------------------------------------------------------------
+
+绯闻协议只能保证最终一致性，所以可以这样：
+curl localhost:8500/v1/catalog/nodes
+
+---------------------------------------------------------------------
+
+你还可以使用DNS协议来query
+dig @127.0.0.1 -p 8600 Armons-MacBook-Air.node.consul
+
+---------------------------------------------------------------------
+
+https://consul.io/intro/getting-started/join.html
+
+加入集群：
+
+consul join 192.168.60.11
+Successfully joined cluster by contacting 1 nodes.
+
+root@zk1:~# consul members -detailed
+Node  Address             Status  Tags
+zk1   192.168.60.10:8301  alive   role=consul,dc=dc1,vsn=2,vsn_min=1,vsn_max=2,build=0.4.1:,port=8300,bootstrap=1
+zk2   192.168.60.11:8301  alive   vsn=2,vsn_min=1,vsn_max=2,build=0.4.1:,port=8300,bootstrap=1,role=consul,dc=dc1
+
+
+root@zk1:~# consul members
+Node  Address             Status  Type    Build  Protocol
+zk1   192.168.60.10:8301  alive   server  0.4.1  2
+zk2   192.168.60.11:8301  alive   server  0.4.1  2
+
+---------------------------------------------------------------------
+查询节点：
+
+dig @127.0.0.1 -p 8600 zk2.node.consul
+
+; <<>> DiG 9.9.5-3ubuntu0.1-Ubuntu <<>> @127.0.0.1 -p 8600 zk2.node.consul
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 30210
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+;; WARNING: recursion requested but not available
+
+;; QUESTION SECTION:
+;zk2.node.consul.		IN	A
+
+;; ANSWER SECTION:
+zk2.node.consul.	0	IN	A	192.168.60.11
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#8600(127.0.0.1)
+;; WHEN: Mon Jan 26 11:57:09 CST 2015
+;; MSG SIZE  rcvd: 64
+
+---------------------------------------------------------------------
+发布一个服务：
+
+https://consul.io/intro/getting-started/services.html
+
+sudo mkdir /etc/consul.d
+echo '{"service": {"name": "web", "tags": ["rails"], "port": 80}}' \
+    >/etc/consul.d/web.json
+
+consul agent -server -bootstrap-expect 1 -data-dir /tmp/consul -config-dir /etc/consul.d
+
+curl http://localhost:8500/v1/catalog/service/web
+No cluster leaderroot@zk1:~#
+
+OK，遇到了第一个坑

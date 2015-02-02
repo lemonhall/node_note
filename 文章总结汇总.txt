@@ -1,0 +1,411 @@
+2014年12月3日
+==========================================
+1、linux 3.0.2内核网络部分接收数据包较2.6.24内核的改进--RPS 
+http://bbs.chinaunix.net/thread-3595992-1-1.html
+
+2、关于Linux网卡调优之：RPS (Receive Packet Steering)
+http://www.lvtao.net/server/492.html
+
+3、意识到知乎上一篇关于 CAP 的答案写错了之后回家看了三四天资料 ಥ_ಥ
+http://www.douban.com/note/438220510/
+
+4、【转】Redis Cluster 简单配置与动态扩容
+http://www.douban.com/note/439228556/
+
+5、Readings in conflict-free replicated data types
+http://christophermeiklejohn.com/crdt/2014/07/22/readings-in-crdts.html
+
+6、Long stack traces for node.js inspired by https://github.com/tlrobinson/long-stack-traces
+https://github.com/mattinsler/longjohn
+
+7、【转】并行与分布式计算模型
+http://www.douban.com/note/444808034/
+
+8、Go语言是如何处理栈的
+http://tonybai.com/2014/11/05/how-stacks-are-handled-in-go/
+
+9、predictionio 实例
+http://www.douban.com/note/445708974/
+
+10、predictionIO 架构
+http://www.douban.com/note/445711914/
+
+11、predictionIO的依赖项目
+http://www.douban.com/note/445712935/
+
+12、On Hadoop CLI installation
+https://github.com/KylinOLAP/Kylin/wiki/On-Hadoop-CLI-installation
+
+13、不要小瞧了监控这件事
+http://www.v2ex.com/t/144542#reply40
+
+14、Node.JS's async I/O already benefits from multithreading. The problem is that the main thread (single thread) is limited to one operation at a time and all operations handled by multiple threads has to wait in the queue. Node's initial design assumes that the main thread will be fast enough to handle the queue. This assumption fails under load where the number of response/request is much bigger than a single thread can handle alone.
+http://jxcore.com/home/
+
+15、Titan
+http://s3.thinkaurelius.com/docs/titan/0.5.1/index.html
+
+16、sysdig
+http://www.douban.com/note/455136092/
+
+17、vfork 挂掉的一个问题
+http://coolshell.cn/articles/12103.html
+
+18、RabbitMQ简介
+http://shiningray.cn/rabbitmq%E7%AE%80%E4%BB%8B.html
+
+19、Redis Lock Pitfall
+http://www.douban.com/note/457390380/
+
+20、分布式机器学习的故事：Docker改变世界
+http://zhuanlan.zhihu.com/cxwangyi/19902938
+
+21、New Directions in Operating Systems
+https://operatingsystems.io/
+
+22、标准MySQL数据库外的5个开源兼容方案
+http://www.infoq.com/cn/news/2014/11/mysql-five-open-source-project
+
+23、bus protocol & distrubuted system
+http://www.douban.com/note/464224509/
+
+24、spinlock性能优化流水账
+http://www.douban.com/note/435445411/
+
+25、性能分析记录~补
+http://www.douban.com/note/344787213/
+
+26、PostgreSQL vs. MS SQL Server
+http://www.pg-versus-ms.com/
+
+27、The State of JavaScript in 2015
+http://www.breck-mckye.com/blog/2014/12/the-state-of-javascript-in-2015/
+
+======================================================
+2014年12月19日
+======================================================
+
+1、【转】机器学习的11个开源项目
+http://www.douban.com/note/472729978/
+
+2、在领域驱动设计中对聚合进行设计与存储
+http://www.infoq.com/cn/news/2014/12/aggregates-ddd
+
+3、【译】2015年JavaScript应用架构趋势
+http://melon.github.io/blog/2014/12/16/translation-javascript-application-architecture-on-the-road-to-2015/
+
+4、MongoDB分片部署实践
+http://segmentfault.com/blog/dmyang/1190000002426743
+
+5、提高NodeJS网站的安全性：Web服务器防黑客攻击技巧
+http://segmentfault.com/blog/news/1190000002425164
+
+6、pattern recognition and machine learning这本书怎么看？
+http://www.zhihu.com/question/20970802/answer/23105951
+
+7、Colossus：来自Tumblr的新服务框架
+http://www.infoq.com/cn/news/2014/12/colossus-tumbl-service-framework
+
+8、docker-gitlab部署
+http://segmentfault.com/blog/kid143/1190000002421271
+
+9、A new modular browser Entirely written in Javascript. Free. Hackable.
+http://breach.cc/
+
+======================================================
+2015年1月1日
+======================================================
+
+1、京东订单拆分漏洞导致子订单任意免减
+http://my.oschina.net/u/256407/blog/361914
+
+2、Proximal Algorithms
+http://www.nowpublishers.com/article/Details/OPT-003
+Proximal algorithm becomes a standard tool for nonsmooth, constrained, large-scale, or distributed optimization problems.
+
+3、SOA与相对论
+http://www.douban.com/photos/photo/2219941805/
+
+4、百度API搜索
+http://apistore.baidu.com/
+
+5、Linus：为何对象引用计数必须是原子的
+http://coolshell.cn/articles/16910.html
+
+6、JavaScript内部原理系列－闭包（Closures）
+http://segmentfault.com/blog/kidsama/1190000002452587
+
+7、mocha的时序问题
+http://segmentfault.com/blog/suemi/1190000002448251
+
+8、实现跨域通信（跨文档消息传输）的几种方法（crossMessageEvent.js）
+http://segmentfault.com/blog/kidsama/1190000002448922
+
+9、Simple DAG-based job scheduler in Python
+https://github.com/thieman/dagobah
+
+10、Lwan is a high-performance & scalable web server for glibc/Linux platforms.
+http://lwan.ws/
+
+11、A high level wrapper for Phantomjs. 
+http://nightmarejs.org
+https://github.com/segmentio/nightmare
+
+12、Mozilla Research Projects
+https://www.mozilla.org/en-US/research/projects/
+
+13、详解Node Stream
+http://segmentfault.com/blog/bornkiller/1190000002446928
+
+14、为什么不要把ZooKeeper用于服务发现
+http://www.infoq.com/cn/news/2014/12/zookeeper-service-finding
+
+15、Nashorn——在JDK 8中融合Java与JavaScript之力
+http://www.infoq.com/cn/articles/nashorn
+
+16、MuleSoft开源用于设计RESTful APIs的工具RAML Tools
+http://www.infoq.com/cn/news/2013/11/raml-rest-api-tools
+
+17、自动生成Android，iOS的REST API访问代码
+http://shenfeng.me/intro-api-kit.html
+
+18、Chrome 远程调试协议分析与实战
+http://segmentfault.com/blog/news/1190000002440587
+
+19、SequoiaDB 架构指南
+http://segmentfault.com/blog/sequoiadb/1190000002441514
+
+20、node测试基础
+http://segmentfault.com/blog/suemi/1190000002437819
+
+21、JavaScript中defer和async属性相关测试
+http://segmentfault.com/blog/liangyi/1190000002435922
+
+22、匿名函数自调用(IIFE)
+http://segmentfault.com/blog/liangyi/1190000002435410
+
+23、OpenBTS (Open Base Transceiver Station) is a software-based GSM access point
+http://en.wikipedia.org/wiki/OpenBTS
+
+24、使用 React 的一些经验
+http://segmentfault.com/blog/jiyinyiyong/1190000002432718
+
+25、使用 AngularJS & NodeJS 实现基于 token 的认证应用
+http://zhuanlan.zhihu.com/FrontendMagazine/19920223
+
+26、GS Collections实例教程（第一部分）
+http://www.infoq.com/cn/articles/gs-collections-examples-tutorial-part1
+
+27、Feign makes writing java http clients easier
+https://github.com/Netflix/feign
+
+28、从垃圾回收算法到Object Pool
+http://qingbob.com/from-GC-algorithm-to-ObjectPool/
+
+======================================================
+2015年1月21日
+======================================================
+
+1、EEG耳机的成本大约是150美元，它由3个组件构成。该耳机解放了人手，甚至机械手。用户通过该耳机只需脑电波就能够控制音乐播放器。EEG耳机的原理是利用Raspberry Pi和EEG传感器（读取人的脑电波）来控制音乐播放器。
+http://6xq.net/projects/pianobar/
+
+2、The problems Consul solves are varied, but each individual feature has been solved by many different systems. Although there is no single system that provides all the features of Consul, there are other options available to solve some of these problems.
+https://consul.io/intro/vs/
+
+3、基于线程与基于事件的并发编程之争
+http://www.jdon.com/46921
+
+4、Javascript可以高效地在安卓上运行了
+http://www.jdon.com/46880
+
+5、Netflix Hystrix - Latency and Fault Tolerance for Complex Distributed Systems
+http://www.infoq.com/news/2012/12/netflix-hystrix-fault-tolerance
+
+6、使用ReactJS + Node实现服务器端响应渲染
+http://www.jdon.com/46982
+
+7、INSIDE FASTBOOT: THE ROAD TO SERVER-SIDE RENDERING
+http://emberjs.com/blog/2014/12/22/inside-fastboot-the-road-to-server-side-rendering.html
+
+8、Facebook开源深度学习软件库，帮助开发者在短时间内建立大规模神经网络模型
+http://www.36kr.com/p/218818.html
+
+9、App Container Specification
+https://github.com/appc/spec/blob/master/SPEC.md
+
+10、京东商城交易系统双11总结
+http://www.infoq.com/cn/presentations/Jingdong-mall-trading-system-11-11-summary
+
+11、大数据分析引擎Apache Flink升级成为Apache顶级项目
+http://www.infoq.com/cn/news/2015/01/big-data-apache-flink-project
+
+12、 HP Helion实现OpenStack用户无缝升级
+http://www.infoq.com/cn/zones/hp-helion/
+
+13、bearcat-jstrace 让检测线上方法调用性能成为可能
+http://www.oschina.net/question/914236_156343
+
+14、淘宝内部分享：怎么跳出MySQL的10个大坑
+http://www.csdn.net/article/2015-01-16/2823591
+
+15、七款做好DevOps的强大工具
+http://www.csdn.net/article/2015-01-12/2823523
+
+16、MongoDB：逐渐变得无关紧要
+http://www.csdn.net/article/2015-01-14/2823551
+
+17、深度学习现在坑还多吗？
+http://www.zhihu.com/question/27608272/answer/37318565
+
+18、node.js 配置中心
+http://www.douban.com/note/479122791/
+
+19、a-gsm-base-station-with-software-defined-radio
+http://hackaday.com/2014/07/05/a-gsm-base-station-with-software-defined-radio/
+
+20、Add an AngularJS admin GUI to any RESTful API
+https://github.com/marmelab/ng-admin
+
+21、Monkey testing library for web apps and Node.js
+https://github.com/marmelab/gremlins.js
+
+22、Load data while still loading other scripts and display data faster in jQuery, Backbone, React, Angular, ... apps
+http://typicode.github.io/pegasus/
+
+23、A common solution for cross-document communication . 
+http://biqing.github.io/MessengerJS/
+https://github.com/biqing/MessengerJS
+https://github.com/typicode/pegasus
+
+24、松本行弘：我为什么要开发新语言Streem（上）
+http://www.ituring.com.cn/article/177079
+
+25、Chrome 39新增Beacon API和ES6 Generator支持
+http://www.infoq.com/cn/news/2014/12/chrome39
+
+26、介绍 JavaScript 国际化 API
+http://www.oschina.net/translate/introducing-the-javascript-internationalization-api
+
+27、SocketLog 2.0 发布，微信调试、API调试的工具
+http://www.oschina.net/news/58730/socketlog-2-0-released
+
+28、Embeds API for today’s web
+https://iframely.com/
+
+29、OpenSearch：轻松构建大数据搜索服务
+http://www.kuqin.com/shuoit/20141224/344067.html
+
+30、JsonDiffPatch 
+http://benjamine.github.io/jsondiffpatch/demo/index.html
+
+31、The gopkg.in service provides versioned URLs that offer the proper metadata for redirecting the go tool onto well defined GitHub repositories. Developers that choose to use this service are strongly encouraged to not make any backwards incompatible changes without also changing the version in the package URL. This convention improves the chances that dependent code will continue to work while depended upon packages evolve.
+http://labix.org/gopkg.in
+
+32、Squirrel State Machine
+http://squirrelframework.org/
+
+33、A finite state machine javascript micro framework
+https://github.com/jakesgordon/javascript-state-machine
+
+======================================================
+2015年1月26日
+======================================================
+
+1、Kafka深度解析
+http://www.jasongj.com/2015/01/02/Kafka%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/
+
+2、Distributed Switch
+http://www.vmware.com/in/products/vsphere/features/distributed-switch
+
+3、Flockport labs - Using LXC containers as routers
+http://www.flockport.com/flockport-labs-use-lxc-containers-as-routers/
+
+4、Flockport labs - Extending layer 2 across container hosts
+http://www.flockport.com/flockport-labs-extending-layer-2-across-container-hosts/
+
+5、Improving Linux networking performance
+https://lwn.net/Articles/629155/
+
+6、Get up and running w/ machine learning using Docker 
+http://startup.ml
+https://github.com/StartupML/jetpack
+
+7、PERCONA MYSQL PERFORMANCE BLOG
+http://www.percona.com/blog/2011/06/09/aligning-io-on-a-hard-disk-raid-the-theory/
+
+======================================================
+2015年2月2日
+======================================================
+
+1、用面向对象的思维方式来设计数据库
+http://segmentfault.com/blog/aidenzou/1190000002524530
+
+2、Some notes on Rust, the language.
+http://lambda-the-ultimate.org/node/5113
+
+3、BitTorrent DHT 协议中文翻译
+http://segmentfault.com/blog/justjavac/1190000002528378
+
+4、为什么说 Scala 是 JVM 上的 C++？
+http://www.zhihu.com/question/27332932
+
+5、谷歌关于容器的观点分享
+http://www.infoq.com/cn/news/2015/02/google-series-containers
+
+6、Oracle发布Oracle数据库的官方Node.js驱动node-oracledb
+http://www.infoq.com/cn/news/2015/02/oracle-node-js-node-oracledb
+
+7、Docket - Custom docker registry that allows for lightning fast deploys through bittorrent
+https://github.com/netvarun/docket
+
+8、HTML5的TCP和UDP Web Socket API草案定稿
+http://code.csdn.net/news/2822983
+
+9、使用HTML5在浏览器中开发虚拟现实业务
+http://www.infoq.com/cn/news/2015/01/vr-html5
+
+10、React.js Conf 2015 Keynote - Introducing React Native
+http://www.tudou.com/programs/view/A-1wE18UWeA/
+
+11、移动Web技术的春天来了？Facebook发布React Native，用JavaScript开发移动原生应用
+http://www.csdn.net/article/2015-01-29/2823762-facebook-announces-react-native
+
+12、Node.js library for streamlining application deployment or systems administration tasks.
+https://github.com/pstadler/flightplan
+
+13、什么是好的推荐系统
+http://segmentfault.com/blog/2shou/1190000002522928
+
+14、提前关于 React Native 的一些介绍
+http://segmentfault.com/blog/jiyinyiyong/1190000002523389
+
+15、What every programmer should know about memory, Part 1
+http://lwn.net/Articles/250967/
+
+16、社区之力：40余人协作完成4万字Spark论文翻译
+http://code.csdn.net/news/2823703
+
+17、世界各地程序员共同总结的前端面试题
+http://segmentfault.com/blog/news/1190000002513251
+
+18、移动H5前端性能优化指南
+http://segmentfault.com/blog/kidsamong/1190000002511921
+
+19、Introducing streaming k-means in Spark 1.2
+http://databricks.com/blog/2015/01/28/introducing-streaming-k-means-in-spark-1-2.html
+
+20、Parallel.js is a tiny library for multi-core processing in Javascript. 
+http://adambom.github.com/parallel.js
+https://github.com/adambom/parallel.js
+
+21、一步步搭建物联网系统——RESTful的CoAP协议
+http://segmentfault.com/blog/phodal/1190000002511350
+
+22、JavaScript ES(6|2015) generators workshopper. Learn in practice.
+https://github.com/isRuslan/learn-generators
+
+23、Kue is a feature rich priority job queue for node.js backed by redis. A key feature of Kue is its clean user-interface for viewing and managing queued, active, failed, and completed jobs.
+http://learnboost.github.io/kue/
+
+24、Functional reactive programming
+https://en.wikipedia.org/wiki/Functional_reactive_programming
