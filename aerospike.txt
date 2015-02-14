@@ -1,0 +1,243 @@
+lemonhall 于 2015年2月7日第一版本
+lemonhall 于 2015年2月9日加入查询、建库、基本概念和aql部分
+
+TODOS：
+* 看架构图部分、补充架构图部分
+* ACID部分
+* node.js的例子
+* 实验几种失败情况
+* 补充monitor和运维文档
+
+===================================================
+1、官网
+http://www.aerospike.com/
+
+===================================================
+
+2、基准测试
+http://www.infoq.com/cn/news/2015/02/aerospikedb-redis-aws-nosql
+http://www.csdn.net/article/2013-04-15/2814886-nosql-benchmark
+
+===================================================
+
+3、文档
+http://www.aerospike.com/docs/
+
+===================================================
+
+4、下载
+http://www.aerospike.com/download/server/3.4.1/
+
+===================================================
+
+5、企业版？
+http://www.aerospike.com/products-services
+
+跨机房复制
+热补丁
+
+===================================================
+
+6、比较有趣的特性
+按照基准测试文章当中的描述，它主要的吸引人的特性有：
+
+	6.1、Redis需要开发人员自己管理分片并提供分片算法用于在各分片之间平衡数据；而AerospikeDB可以自动处理相当于分片的工作；
+
+	6.2、在Redis中，为了增加吞吐量，需要增加Redis分片的数量，并重构分片算法及重新平衡数据，这通常需要停机；而在AerospikeDB中，可以动态增加数据卷和吞吐量，无需停机，并且AerospikeDB可以自动平衡数据和流量；
+
+	6.3、在Redis中，如果需要复制及故障转移功能，则需要开发人员自己在应用程序层同步数据；而在AerospikeDB中，只需设置复制因子，然后由AerospikeDB完成同步复制操作，保持即时一致性；而且AerospikeDB可以透明地完成故障转移；
+
+	6.4、此外，AerospikeDB既可以完全在内存中运行，也可以利用Flash/SSD存储的优点。
+
+===================================================
+
+7、安装Server
+【参考链接：http://www.aerospike.com/download/server/3.4.1/】
+
+wget http://www.aerospike.com/artifacts/aerospike-server-community/3.4.1/aerospike-server-community-3.4.1.tar.gz
+
+tar zxvf aerospike-server-community-3.4.1.tar.gz
+
+ 22   The following is a quick walk-through to help you get started:
+ 23
+ 24     1. Initialize a directory for hosting your aerospike instance.
+ 25
+ 26         ./bin/aerospike init
+ 27
+ 28     2. Start the aerospike server
+ 29
+ 30         sudo ./bin/aerospike start
+ 31
+ 32       Superuser priveledges are required because it attempts to set upper
+ 33       limits on system resources.
+ 34
+ 35     3. Check the status of the aerospike server
+ 36
+ 37         ./bin/aerospike status
+ 38
+ 39     4. Stop the aerospike server
+ 40
+ 41         sudo ./bin/aerospike stop
+
+ 四步即可启动一个aerospike服务器
+
+ bin/aerospike init
+error: install -m 755 -o root -g root -C /root/aerospike-server/share/bin/aerospike /root/aerospike-server/share/bin/aerospike
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/lib/*  /root/aerospike-server/share/lib/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/libexec/*  /root/aerospike-server/share/libexec/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/man/aerospike-init.man  /root/aerospike-server/share/man/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/man/aerospike-destroy.man  /root/aerospike-server/share/man/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/man/aerospike-restart.man  /root/aerospike-server/share/man/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/man/aerospike-start.man    /root/aerospike-server/share/man/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/man/aerospike-status.man   /root/aerospike-server/share/man/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/man/aerospike-stop.man     /root/aerospike-server/share/man/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/etc/aerospike.conf /root/aerospike-server/share/etc/aerospike.conf
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/udf/lua/*.lua /root/aerospike-server/share/udf/lua/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/udf/lua/external/*.lua /root/aerospike-server/share/udf/lua/external/.
+error: install -m 644 -o root -g root -C /root/aerospike-server/share/udf/lua/ldt/*.lua /root/aerospike-server/share/udf/lua/ldt/.
+error: install -m 755 -o root -g root -C /root/aerospike-server/bin/asd /root/aerospike-server/bin/asd
+root@i-5ygfjuik:~/aerospike-server# bin/aerospike start
+info: kernel.shmall too low, setting to 4G pages
+kernel.shmall = 4294967296
+info: kernel.shmmax too low, setting to 1GB
+kernel.shmmax = 1073741824
+info: started
+
+--------------------------------------------------
+
+bin/aerospike status
+
+===================================================
+
+8、安装Client
+【参考链接：http://www.aerospike.com/download/client/】
+
+这个页面只是针对各个语言的客户端而已
+
+
+===================================================
+
+9、管理WEB工具集
+【参考链接：http://www.aerospike.com/download/amc/3.5.4/】
+
+下载的是mac版本的，在ubuntu 14.04 LTS下
+
+wget http://www.aerospike.com/artifacts/aerospike-amc-community/3.5.4/aerospike-amc-community-3.5.4.tar.gz
+
+tar xvf aerospike-amc-community-3.5.4.tar.gz
+
+安装依赖：
+apt-get install gcc python-dev
+
+安装成功：
+./install
+You have chosen to install AMC
+Please press y to continue installation or any other key to exit: y
+building greenlet...
+You may check greenlet compilation output in /tmp/greenlet.log and delete it if all is OK
+building setproctitle...
+You may check setproctitle compilation output in /tmp/setproctitle.log and delete it if all is OK
+Successfully installed AMC.
+
+反安装：
+sudo /opt/amc/bin/uninstall
+
+
+===================================================
+
+10、基础概念
+
+		namespaces ------> databases;
+		sets ------------> tables;
+		records ---------> rows;
+		bins ------------> columns;
+
+* aerospike是无范式的
+
+* bin当中的值是有类型的，但bin本身无类型约束，不同的record当
+  中的bin的值的类型可以是不同的。
+
+* key仍旧是建立index的基础
+
+* 每个record有一个计数器，用来记录上次修改的版本号，类似于
+  memcahce的“Check and Set”范式
+
+===================================================
+
+11、查询
+
+可以仅仅基于简单的key-value来查询，同时提供基于值的次级索引机制。
+返回时，可以根据UDF来过滤，意味着aerospike同时具有存储过程的能力。
+
+其中次级索引可以建立在两种bin类型之上：
+	* INT类型
+	* STRING类型
+
+当前独立索引构建在
+	* Namespace
+	* Set name
+	* Bin name
+
+的排列组合之上
+
+STRING是支持UTF-8的，更多的可索引类型正在加入中。
+
+次级索引也有一些限制：
+
+	* 每个namespace上只能建立256个次级索引
+	* 当前并不支持快速重启
+	* 优化不足
+	* 预测器类型不足，优化不足
+
+用例：
+
+	* 显示分支看板，最高绩效等
+	* 显示最近搜索/查询/下单/活动 信息页面
+	* 提取数据列，同一雇主活着同一俱乐部
+
+----------------------------------------------
+
+建立索引：
+aql> CREATE INDEX ix1 ON user_profile.west (last_activity) NUMERIC
+OK, 1 index added.
+
+----------------------------------------------
+
+查看索引：
+aql > show indexes
+
+----------------------------------------------
+
+插入数据：
+aql> INSERT INTO user_profile.west (PK,location,last_activity) VALUES ('cookie_100','MA',342)
+OK, 1 record affected.
+aql> INSERT INTO user_profile.west (PK,location,last_activity) VALUES ('cookie_101','AZ',345)
+OK, 1 record affected.
+aql> INSERT INTO user_profile.west (PK,location,last_activity) VALUES ('cookie_102','CA',345)
+OK, 1 record affected.
+aql> INSERT INTO user_profile.west (PK,location,last_activity) VALUES ('cookie_103','AL',340)
+OK, 1 record affected.
+aql> INSERT INTO user_profile.west (PK,location,last_activity) VALUES ('cookie_104','TX',347)
+OK, 1 record affected.
+aql> INSERT INTO user_profile.west (PK,location,last_activity) VALUES ('cookie_105','MA',323)
+OK, 1 record affected.
+
+----------------------------------------------
+
+简单的范围查找：
+SELECT * FROM user_profile.west WHERE last_activity BETWEEN 340 AND 345
+
+----------------------------------------------
+AQL的操作手册：
+http://www.aerospike.com/docs/tools/aql/index.html
+
+===================================================
+
+12、聚合操作
+http://www.aerospike.com/docs/guide/aggregation.html
+
+就是MapReduce
+
+是一个需要写lua的mapreduce脚本，然后在aql里执行的机制
+
+===================================================

@@ -1,0 +1,109 @@
+【原文链接：https://cwiki.apache.org/confluence/display/KAFKA/Idempotent+Producer】
+【作者：lemonhall 2015年2月5日】
+
+原文版本为：Added by Jay Kreps, last edited by Jay Kreps on Jan 31, 2014  (view change)
+
+===============================
+Idempotent Producer
+幂等生产者
+
+-------------------------------------------
+【简介】
+
+Kafka provides "at least once" delivery semantics. This means that a message that is sent may delivered one or more times. What people really want is "exactly once" semantics whereby duplicate messages are not delivered.
+
+Kafka提供了“至少一次”的语义。这意味着消息有可能被一次或多次递送。而实际上，使用者多半希望的是“仅此一次”的语义，使得消息系统绝不递送重复的消息。
+
+There are two common reasons duplicate messages may occur:
+
+有两种常见的原因使得重复消息发生：
+
+1、If a client attempts to send a message to the cluster and gets a network error then retrying will potentially lead to duplicates. If network error occurred before the message was delivered, no duplication will occur. However if the network error occurs after the message is appended to the log but before the response can be delivered to the sender the sender is left not knowing what has happened. The only choices are to retry and risk duplication or to give up and declare the message lost.
+
+1、如果客户端发送消息给集群，并发生了底层网络的错误，并重试，那么将会导致一个潜在的重复消息。网络错误发生在消息递送之前，那么不会发生重复。但如果是发生在递送之后，而客户端因网络原因没有获得正确响应导致的重发。那么唯一的选择就是冒着潜在的重复消息的风险而不至于最终致使消息丢失。
+
+2、If a consumer reads a message from a topic and then crashes then when the consumer restarts or another instances takes over consumption the new consumer will start from the last known position of the original consumer.
+
+2、如果消费者从topic当中读取消息，中途crashes并重启，新的实例接管了消费工作，那么将会从最后的读取消息的位置读取。
+
+The second case can be handled by consumers by making use of the offset Kafka provides. They can store the offset with their output and then ensure that the new consumer always picks up from the last stored offset. Or, they can use the offset as a kind of key and use it to deduplicate their output in whatever final destination system they populate.
+
+第二种情况Kafka的消费者机制本身会将offset记录到高可靠的zookeeper或者kafka本身。它们可是将offset存储在它们的输出当中，即可保证新的消费者总是从它们上次的断点开始工作。或者，它们可以用offset来作为某种key，并使用key来去重（存疑）
+
+The first case currently has no good solution, however. The client doesn't know the offset of the message so it has no unique way to identify the message and check if the send succeeded.
+
+第一种情况当下并没有好的解决方案，客户端在无法知道消息的offset的情况下（因为网络隔离），生产者自然就无法知晓消息是否成功送达。
+
+For consumers that correctly handle duplicates, this proposal would strengthen the guarantees provided by Kafka to what is often called "atomic broadcast".
+
+对于当下可以重复处理重复消息的消费方，提案当中多被称之为"atomic broadcast"【有链接引用】（其实质其实就是消费方去重）
+
+This proposal will introduce an optional set of ids that will provide a unique identifier for messages to avoid duplicates.
+
+这个草案将会介绍一个可选的id生成方案来避免消息的重复。
+
+-------------------------------------------
+Some Nuances
+一些细节
+
+Opt-in
+选择性加入
+
+Producer implementations that don't care about idempotency should not need to do anything special.
+生产者的实现放不应当关心幂等性，并不应该做任何特别的实现。
+
+Transitivity: Consumers that also produce
+传递性：消费者同时也生产消息
+
+Consider a more elaborate use case which involves copying data from a source to a Kafka topic. This would be the case with Mirror Maker, for example, or any "stream processing" use case. We want it to be the case that the process doing the population can periodically save its position in the upstream topic/database and always resume from this saved position. In the event of a crash we want the copy process to be able to resume from the last known position without producing duplicates in the destination topic. 
+
+To accomplish this the copy process can save BOTH its input offset/position AND the ids we will introduce associated with its downstream topic. When it restarts after a crash it will initialize with the saved ids. This will effectively make the duplicate produce requests the same as the network error retry case described above.
+
+考虑到一个更为复杂的使用场景，即拷贝数据从一个数据源到一个Kafka的topic。这常常是镜像的场景，又或者是在"stream processing"（流式处理）的场景。我们希望在上游数据源保存消费的断点记录，以便crash发生时，可以继续从正确的位置继续消费。
+
+为了实现这个特性，这个镜像进程可以同时保存其输入流的offset位置以及其ids号并将其与下游系统做关联。当进程crash后重启时，它便可以从上次的ids开始工作。这样的实现即可防止重复消息的发生。
+
+（注：其实这非常像MYSQL的主从实现机制）
+
+Fencing
+栅栏
+
+Another twist to this is that it in the mirror maker or other cases where consumer failure is automatically detected it is possible to have false positives leading to a situation where at least transiently we have two consumers reading the same input and producing the same output. It is important that we handle this "split brain" problem correctly and gracefully.
+
+另一种扭曲的情况是，重启了多个消费者，产生了多个输出，“脑裂发生”。
+
+Pipelining
+管道
+
+A related need is the ability to pipeline produce requests safely in the presence of retries. When combined with retries this can lead to messages being stored out of order. If the sender sends messages M1, M2, M3 asynchronously without waiting for responses it may then receive a success for M1 and M3 but an error for M2. If it retries M2 successfully this will lead to the topic containing the messages in the order M1, M3, M2.
+
+一个相关的需求是，可以将生产者的重试请求安全的传送。当结合了多次重试，消息的序自然不再有保障。
+比如，消息的发送方异步得发送消息：M1，M2，M3，那么就有可能M1，M3消息成功而M2失败。如果它重试M2，并成功，那么消息的序将变成M1，M3，M2。
+
+
+Fault tolerance
+容灾
+
+A common cause of errors is actual broker failure. If a broker fails with a request outstanding and unacknowledged you don't know if the newly elected master contains the message or not and will want to retry your request. Thus the idempotency mechanism needs to work even in the presence of broker failures.
+
+最常见的致命错误当然是集群当中的broker失效。当一个broker失效，同时你上一次发送的消息又没有得到确认，你无法知晓新选举的主broker是否有上一条你发送的消息，故你自然会选择重试。所以幂等机制需要在broker失效时同时起作用。
+
+-------------------------------------------
+
+Proposed Implementation
+提议的实现
+
+A simple, impractical implementation for deduplication would be to have the client create a unique id for each message it sends (a UUID, say) and have the server save all such ids for all messages it retains. New messages would be checked against this database and messages that existed already would be rejected. This would satisfy at least the basic requirements, but would be hopelessly inefficient as the database would contain O(num_messages) entries. A practical implementation will have to provide a similar way of detecting duplicates but with lower space requirements and negligible lookup performance impact.
+
+最简单的实现当然是让客户端为每一条信息生成一个唯一的UUID，然后使用数据库的去重机制就OK了。但是这种实现的问题主要在于效率问题，过低的效率。
+
+A similar but more efficient implementation would be to assign each producer a unique id (PID) and keep a sequence number that increments with each message sent. This pair effectively acts as a unique id, but the broker no longer needs to store all the ids to reason about what it has received from a given producer. This leverages the in-order property of Kafka (and TCP) to ensure that the broker need only keep a single "highwater mark" sequence number for each producer and reject any message with a lower sequence number. Specifically if H(P)  is the highwatermark and if the broker receives a message with PID P and sequence number S then it will accept the message iff H(P) < S.
+
+对最简版本的改进是，对每个生产者赋予一个唯一的PID，并为每条消息加上一个序列号。与UUID类似，但是broker无需存储全部的ids，而只需关心它所对接的生产者即可。其余的事情都交给了TCP底层，broker是需要维持一个“highwater mark”序列号并拒绝低于水位线的消息即可。
+
+
+The next question is whether the producer will maintain a global sequence number across all messages it sends or whether it will be per topic-partition. A global number would be simpler for the client to implement. However if the sequence number was per-partition then the broker could enforce a tighter constraint, namely that H(P) + 1 = S. This would allow us to handle the pipelined request case as if any request fails we will automatically fail all other in-flight requests which will allow us to thus retain retry the full set in order.
+
+下一个问题是，生产者是维持所有消息的全局序列号，还是为每一个topic-partition组合维护一个序列号。全局序列号对于实现而言更为简便。但后者的实现更利于broker做强约束。H(P)+1=S【？】
+
+这允许我们处理

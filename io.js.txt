@@ -1,6 +1,61 @@
-1、新的文档地址
-https://iojs.org/api/index.html
+1、安装nvm
+https://github.com/creationix/nvm/
 
+【操作系统版本】
+ubuntu 14.04 LTS
 
-2、新增的模块
-io.js 第一个版本今天发布了...看了看 doc 多了几个 module (smalloc, v8 ) ,也增加了一些 api ( util 里有很多新的 )...这个 v8 module 好像可以在内部控制 v8 引擎的 options ...
+【前置依赖】
+apt-get install build-essential libssl-dev 
+
+【下载安装】
+curl https://raw.githubusercontent.com/creationix/nvm/v0.23.3/install.sh | bash
+
+root@i-5ygfjuik:~/iojs-v1.1.0-linux-x64# curl https://raw.githubusercontent.com/creationix/nvm/v0.23.3/install.sh | bash
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  5226  100  5226    0     0   4019      0  0:00:01  0:00:01 --:--:--  4016
+=> Downloading nvm from git to '/root/.nvm'
+=> Cloning into '/root/.nvm'...
+remote: Counting objects: 3328, done.
+remote: Total 3328 (delta 0), reused 0 (delta 0)
+Receiving objects: 100% (3328/3328), 635.28 KiB | 303.00 KiB/s, done.
+Resolving deltas: 100% (1894/1894), done.
+Checking connectivity... done.
+
+=> Appending source string to /root/.bashrc
+=> Close and reopen your terminal to start using nvm
+
+【注意：重新登录系统后才可以使用nvm
+
+=================================================================
+
+2、使用nvm来安装iojs
+nvm install iojs
+
+root@i-5ygfjuik:~# nvm install iojs
+######################################################################## 100.0%
+WARNING: checksums are currently disabled for io.js
+Now using io.js v1.1.0
+
+nvm ls 列出所有的版本
+
+然后就用iojs就可以运行了
+
+nvm use system
+root@i-5ygfjuik:~# nvm use system
+Now using system version of node: v0.11.14.
+root@i-5ygfjuik:~#
+
+这回切会11.14
+
+root@i-5ygfjuik:~# nvm ls
+    iojs-v1.1.0
+->       system
+
+root@i-5ygfjuik:~# nvm use iojs
+Now using io.js v1.1.0
+root@i-5ygfjuik:~#
+
+然后再切一下就回去咯~~~~爽歪歪
+
+=================================================================

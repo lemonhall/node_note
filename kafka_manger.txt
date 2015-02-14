@@ -1,0 +1,29 @@
+lemonhall 2015年2月10日
+
+TODOS:
+* 编写使用说明
+* 实际部署的坑的说明
+* 最佳实践
+* 试着玩一下rpm和deb包的通用包机制，或者干脆就做一个docker镜像算了
+
+====================================================
+0、编译过程
+git clone https://github.com/yahoo/kafka-manager
+然后到目录下去
+./sbt clean dist
+
+1、下载安装包
+http://pan.baidu.com/s/1o6Hpplo
+
+2、解压
+
+3、到conf目录修改
+kafka-manager.zkhosts="my.zookeeper.host.com:2181"
+具体到你的zk环境的ip地址即可
+
+4、启动
+kafka-manager-1.0-SNAPSHOT/bin
+./kafka-manager
+
+5、ok
+9000端口即可
