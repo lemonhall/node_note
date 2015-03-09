@@ -1,0 +1,93 @@
+1、项目主页
+http://kylin.incubator.apache.org/
+
+要注意，因为kylin被转移到了apche，所以这个地址才是正式的项目地址
+
+======================================================
+
+2、二进制安装
+
+【参考新闻：http://www.oschina.net/news/60248/apache-kylin-binary-download】
+
+下载页面：http://kylin.incubator.apache.org/download/
+
+wget http://kylin.incubator.apache.org/download/kylin-0.7.1-SNAPSHOT.tgz
+
+2.1 从Kylin.io下载页面http://kylin.io/download/ 获取最新的安装包(v0.7.x)
+
+----------------------------------------------------------------------------------------------
+2.2 将安装包解压到相应目录，并设置$KYLIN_HOME指向该目录
+
+----------------------------------------------------------------------------------------------
+2.3 运行$KYLIN_HOME/bin目录下的相关启动脚本即可
+
+----------------------------------------------------------------------------------------------
+2.4 如果需要定制化，请修改$KYLIN_HOME/conf/kylin.properties中的相应配置项
+
+----------------------------------------------------------------------------------------------
+2.5 访问http://hostname:7070/kylin 以访问Kylin Web App
+
+----------------------------------------------------------------------------------------------
+
+【参考官方链接地址：https://github.com/KylinOLAP/Kylin/blob/master/docs/Installation/install_and_run.md】
+
+Install and Run
+
+How to run
+
+Download the release version(according to the hadoop distribution)
+Setup a KYLIN_HOME pointing to the corresponding directory where you extract the release tar
+Make sure the user has the privilege to run hadoop, hive and hbase cmd in shell. If you are not so sure, you can just run bin/check-env.sh, it will print out the detail information if you have some environment issues.
+To start Kylin, simply run bin/kylin.sh start
+To stop Kylin, simply run bin/kylin.sh stop
+If you are running Kylin in a cluster or you have multiple Kylin instances, please make sure you have the following property correctly configured.
+
+kylin.rest.servers
+
+List of web servers in use, this enables one web server instance to sync up with other servers.
+
+kylin.server.mode
+
+Make sure there is only one instance whose "kylin.server.mode" is set to "all" if there are multiple instances.
+
+The directory structure of the installation
+
+├── bin
+│   ├── check-env.sh
+│   ├── find-hive-dependency.sh
+│   ├── health-check.sh
+│   └── kylin.sh
+│
+├── conf
+│   ├── kylin_job_conf.xml
+│   └── kylin.properties
+│
+├── tomcat
+│   ├── webapps
+│   │    └── kylin.war
+│    …….
+│ 
+└── lib
+    ├── kylin-coprocessor-${version}.jar
+    └── kylin-job-${version}.jar 
+Build from source
+
+git clone https://github.com/KylinOLAP/Kylin.git   
+cd KylinOLAP/Kylin   
+sh script/package.sh
+======================================================
+1、解压文件：
+tar zxvf kylin-0.7.1-SNAPSHOT.tgz
+
+2、修改/etc/bashrc：
+vim /etc/bashrc
+export KYLIN_HOME=/root/kylin-0.7.1-SNAPSHOT
+
+3、更新文件：
+source /etc/bashrc
+
+4、检查配置是否成功
+echo $KYLIN_HOME
+
+5、
+举报

@@ -1,0 +1,1156 @@
+再加一个两周文章总结，回去再合并到这里面来，半年的链接汇总就完成了
+http://www.douban.com/note/323527949/
+
+http://www.douban.com/note/320978820/
+
+http://www.douban.com/note/316316190/
+
+http://www.douban.com/note/313898304/
+
+http://www.douban.com/note/312527483/
+
+http://www.douban.com/note/311560291/
+
+
+========================================================
+【内核篇】
+1、SYNPROXY：廉价的抗DoS攻击方案
+http://www.solidot.org/story?sid=38791
+3.13新特性
+
+2、两个新的动态内核补丁项目: kGraft 和 kpatch
+https://linuxtoy.org/archives/kgraft-and-kpatch.html
+
+3、伙伴分配器的一个极简实现
+http://coolshell.cn/articles/10427.html
+
+4、Deadline调度器合并进3.14 kernel
+http://www.solidot.org/story?sid=38141
+
+5、CPU合并写缓冲区简介
+http://segmentfault.com/a/1190000000382798
+
+6、tpps: 一个可做cgroup资源隔离的高效IO调度器
+http://blog.donghao.org/2014/01/06/tpps/
+
+======================================================================
+【HTML5技术篇】
+
+1、使用WebRTC搭建前端视频聊天室——信令篇
+http://blog.segmentfault.com/skyinlayer/1190000000439103
+
+
+================================================================
+【大数据与流式处理】
+1、Spark集锦
+http://www.douban.com/note/337119271/
+
+2、rabbitmq
+http://www.douban.com/note/336709356/
+
+3、pinterest-對-zookeeper-的用法
+http://blog.gslin.org/archives/2014/03/16/4376/pinterest-%E5%B0%8D-zookeeper-%E7%9A%84%E7%94%A8%E6%B3%95/
+简单的说就是应用从本地文件系统读取配置，每个节点加上一个deamon然后去和zookeeper打交道
+
+4、读书笔记 Big Data Analytics with R and Hadoop
+http://blog.fens.me/r-hadoop-book-big-data/
+
+5、Storm Real-Time Processing Cookbook
+http://book.douban.com/subject/25725353/
+
+6、分布式机器学习的故事
+http://cxwangyi.github.io/2014/01/20/distributed-machine-learning/
+
+7、DryadLINQ is a simple, powerful, and elegant programming environment for writing large-scale data parallel applications running on large PC clusters.
+http://research.microsoft.com/en-us/projects/DryadLINQ/
+
+这个是微软早年已经失败了的一个项目
+
+8、Apache Hama 
+is an Apache Top-Level open source project, allowing you to do advanced analytics beyond MapReduce. 
+
+Many data analysis techniques such as machine learning and graph algorithms require iterative computations, this is where Bulk Synchronous Parallel model can be more effective than "plain" MapReduce. Therefore To run such iterative data analysis applications more efficiently, Hama offers pure Bulk Synchronous Parallel computing engine. 
+
+Hama can make jobs that take hours in Hadoop run in minutes. For details, see the Performance Benchmarks.
+
+http://hama.apache.org/
+
+9、Bulk synchronous parallel
+https://en.wikipedia.org/wiki/Bulk_synchronous_parallel
+
+================================================================
+【密码安全】
+1、如何正确使用加盐密码哈希
+http://www.solidot.org/story?sid=38777
+
+2、4 个常用的 HTTP 安全头部
+http://segmentfault.com/a/1190000000419263
+
+3、Linux 首次引入 nftables，你可能会喜欢 nftables 的理由
+http://segmentfault.com/a/1190000000410970
+
+Linux 3.13 带来了很多特性。nftables也是第一次正式发布。nftables是一个致力于替换现有的{ip,ip6,arp,eb}tables框架（也就是大家熟知的iptables）的项目。然而，Linux3.13中的nftables版本还是不完整的，还缺少一些重要的特性。这些特性会在后续的Linux版本中发布。大多数场景下nftables已经可以使用，但是完整的支持（即，nftables优先级高于iptables）应该在Linux 3.15。
+
+4、SSL/TLS协议运行机制的概述
+http://www.ruanyifeng.com/blog/2014/02/ssl_tls.html
+
+5、在-html-內嵌-json-object-時要注意的事情
+http://blog.gslin.org/archives/2014/01/06/4071/%E5%9C%A8-html-%E5%85%A7%E5%B5%8C-json-object-%E6%99%82%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E4%BA%8B%E6%83%85/
+
+=================================================================
+【运维与集群】
+1、用Puppet进行系统管理
+http://blog.fens.me/linux-manage-puppet/
+
+2、Utility for zero downtime restarts of unmodified programs.
+https://github.com/amscanne/huptime
+
+=================================================================
+【JAVA】
+1、gradle
+http://www.douban.com/note/336715661/
+
+2、Java中的CopyOnWrite容器
+http://coolshell.cn/articles/11175.html
+
+3、编译Lambda表达式: Scala和Java 8
+http://ifeve.com/compiling-lambda-expressions-scala-vs-java-8/
+
+4、Azul Systems: Java for the Real Time Business
+http://www.azulsystems.com/
+
+5、Linux内核的内存屏障设计（上）
+http://segmentfault.com/a/1190000000381287
+
+6、JAVA线程间通信简介
+http://segmentfault.com/a/1190000000398256
+
+7、java的4种reference: strong, soft, weak, phantom
+http://www.douban.com/note/155272515/
+
+8、AOP 的利器：ASM 3.0 介绍
+http://www.ibm.com/developerworks/cn/java/j-lo-asm30/index.html
+
+9、详细分析Java中断机制
+http://segmentfault.com/a/1190000000389847
+
+10、JAVA多线程和并发基础面试问答
+http://ifeve.com/java-multi-threading-concurrency-interview-questions-with-answers/
+
+11、多线程的优点
+http://segmentfault.com/a/1190000000383098
+
+12、双重检查锁定失效分析
+http://segmentfault.com/a/1190000000382965
+
+13、Getting Started with the G1 Garbage Collector
+http://www.oracle.com/webfolder/technetwork/tutorials/obe/java/G1GettingStarted/index.html
+
+14、三种避免死锁的思路
+http://segmentfault.com/a/1190000000378725
+
+15、HashMap 的工作原理
+http://segmentfault.com/a/1190000000372862
+
+==================================================================
+【PYTHON】
+1、2013年度Python数据模块
+http://segmentfault.com/a/1190000000424711
+
+2、Python 程序员必知必会的开发者工具
+http://www.oschina.net/news/48645/python-developer-tools?from=20140210
+
+3、提高你的Python能力：理解单元测试
+http://segmentfault.com/a/1190000000400091
+
+===================================================================
+【数据库】
+1、谈谈陌陌争霸在数据库方面踩过的坑( Redis 篇)
+http://blog.codingnow.com/2014/03/mmzb_redis.html
+
+2、谈谈陌陌争霸在数据库方面踩过的坑(芒果篇)
+http://blog.codingnow.com/2014/03/mmzb_mongodb.html
+
+3、谈谈陌陌争霸在数据库方面踩过的坑(排行榜篇)
+http://blog.codingnow.com/2014/03/mmzb_db_2.html
+
+4、Vedis is an embeddable datastore C library built with over 70 commands similar in concept to Redis but without the networking layer since Vedis run in the same process of the host application.
+http://vedis.symisc.net/
+
+5、Simbase is a redis-like vector similarity database. You can add, get, delete vectors to/from it, and then retrieve the most similar vectors within one vector set or between two vector sets.
+
+https://github.com/guokr/simbase
+
+6、MySQL与PostgreSQL：该选择哪个开源数据库？
+http://www.oschina.net/news/47440/mysql-vs-postgresql?from=20140105
+
+===================================================================
+【日志处理】
+
+1、logstash is a tool for managing events and logs
+http://www.logstash.net/
+
+2、Suro —— Netflix开源的分布式数据管道系统
+http://segmentfault.com/a/1190000000371039
+
+
+==================================================================
+【管理】
+1、Amazon前技术副总裁解剖完美技术面试
+http://www.douban.com/note/333719092/
+
+2、当自己是正确的那样争取，当自己是错误的那样聆听——管理学二三事
+http://www.36kr.com/p/210013.html
+
+====================================================================
+【PHP】
+1、排名前 8 的 PHP 调试工具，你认可吗？
+http://segmentfault.com/a/1190000000419556
+
+2、用 nginx + FastCGI 接 HHVM…
+http://blog.gslin.org/archives/2014/01/13/4133/%E7%94%A8-nginx-fastcgi-%E6%8E%A5-hhvm/
+
+3、《深入理解PHP内核》
+http://www.php-internals.com/
+
+====================================================================
+【docker与虚拟化】
+
+1、USING NGINX, CONFD, AND DOCKER FOR ZERO-DOWNTIME WEB UPDATES
+http://brianketelsen.com/2014/02/25/using-nginx-confd-and-docker-for-zero-downtime-web-updates/
+零下线时间
+
+2、
+
+=================================================================
+【游戏】
+1、AlloyStick 是一款专为HTML5开发的2D骨骼动画引擎
+http://www.alloyteam.com/2014/02/html5-skeletal-animation/
+
+=================================================================
+【Android】
+1、Android 开源的真相: 无法fork
+http://jandan.net/2014/02/11/android-cant-fork.html
+
+=================================================================
+【go】
+1、Cheat sheet for some of the common concurrent flows in Go
+https://github.com/rakyll/coop
+
+Coop--Cheat sheet for some of the common concurrent flows in Go //所以说，一旦知道go的这个东西是协程之后，再看看这些包装好的框架，有了co之后其实和js写起来也没神马两样嘛。
+
+
+2、goroutine背后的系统知识
+http://www.sizeofvoid.net/goroutine-under-the-hood/
+
+
+3、Go Go Gadget
+
+bitly’s stack isn’t fancy. We use a combination of languages and tools that interact well with each other and promote philosophies such as explicitness, simplicity, and robustness. Most of our services are Python with many core components in C (of which some are open sourced under simplehttp). We believe whole-heartedly in a services oriented approach where components do one thing and do it well.
+
+http://word.bitly.com/post/29550171827/go-go-gadget
+
+
+4、golang在github上的前30
+http://www.douban.com/note/327704328/
+
+
+5、Go by Example
+https://gobyexample.com/
+
+===============================================================
+【分布式】
+1、分布式系统的事务处理
+http://coolshell.cn/articles/10910.html
+
+2、Kafka的一些特点
+http://blog.segmentfault.com/mongo/1190000000385620
+
+
+=============================================================
+【Javascript】
+1、Pure JavaScript Port of WebKit
+https://github.com/trevorlinton/webkit.js
+
+2、2013 年 AngularJS 学习资源精选
+http://segmentfault.com/a/1190000000379581
+
+3、18个基于 HTML5 Canvas 开发的图表库
+http://segmentfault.com/a/1190000000378708
+
+4、JS计算字符串所占字节数 In JavaScript,Web开发
+http://www.alloyteam.com/2013/12/js-calculate-the-number-of-bytes-occupied-by-a-string/
+
+
+===================================================================
+【C++】
+1、C++的另一种错误处理策略
+http://segmentfault.com/a/1190000000385650
+
+2、esr-解釋-c-的-compiler-對-structure-packing-的處理
+http://blog.gslin.org/archives/2014/01/03/4055/esr-%E8%A7%A3%E9%87%8B-c-%E7%9A%84-compiler-%E5%B0%8D-structure-packing-%E7%9A%84%E8%99%95%E7%90%86/
+
+====================================================================
+
+1、高并发长连接
+土豪的64G
+http://www.douban.com/note/349004890/
+
+2、js的OCR库，前端用
+https://github.com/antimatter15/ocrad.js
+
+3、golang的mocha类测试框架
+https://github.com/franela/goblin
+
+4、docker类
+部署自己的私有docker仓库
+http://www.douban.com/note/348717315/
+
+docker/shipyard Ubuntu 14.04 LTS
+http://www.douban.com/note/348696287/
+
+5、node.js
+node-java/mac
+http://www.douban.com/note/349074866/
+
+socket.io/golang
+http://www.douban.com/note/348444248/
+
+
+6、InfluxDB/运维类数据库
+InfluxDB/Ubuntu 14.04
+http://www.douban.com/note/348982521/
+
+
+7、rabbitmq/ubuntu 14.04
+http://www.douban.com/note/348936489/
+
+
+8、elasticsearch
+http://www.douban.com/note/343506276/
+
+9、golang:一个高性能低精度timer实现
+http://blog.csdn.net/siddontang/article/details/23826507
+
+10、 golang:使用timingwheel进行大量ticker的优化
+http://blog.csdn.net/siddontang/article/details/18370541
+
+11、《More Effective C++》条款27：如何让类对象只在栈（堆）上分配空间？
+http://blog.csdn.net/hxz_qlh/article/details/13135433
+
+12、Escape the 1.4GB V8 heap limit in Node.js!
+http://blog.caustik.com/2012/04/11/escape-the-1-4gb-v8-heap-limit-in-node-js/
+
+13、Websocket transport reliability (Socket.io data loss during reconnection)
+http://stackoverflow.com/questions/20685208/websocket-transport-reliability-socket-io-data-loss-during-reconnection
+
+14、minicron: a system to manage and monitor cron jobs
+http://thechangelog.com/minicron/
+
+15、优化Linux下的内核TCP参数来提高服务器负载能力
+http://blog.renhao.org/2010/07/setup-linux-kernel-tcp-settings/
+
+16、针对TCP/IP的调优 
+http://blog.chinaunix.net/uid-7177878-id-196678.html
+
+17、http keep_alive 和 tcp keep_alive
+http://blog.csdn.net/lys86_1205/article/details/21234867
+
+18、Multi-master replication
+http://en.wikipedia.org/wiki/Multi-master_replication
+
+19、Peer-to-Peer Transactional Replication
+http://technet.microsoft.com/en-us/library/ms151196.aspx
+
+20、NetHogs 实时检测网络流量
+http://segmentfault.com/a/1190000000470060
+
+21、提供了elasticsearch as service的服务，亮点在于：1、有不少有价值的文章。2、提供了一个交互式的实验环境来实验elasticsearch。3、14天的免费服务；
+https://www.found.no/foundation/
+
+22、分布式搜索elasticsearch java API 之（八）------使用More like this实现基于内容的推荐
+http://blog.csdn.net/laigood/article/details/7831713
+
+23、快速搭建 Node.js 开发环境以及加速 npm
+http://blog.segmentfault.com/fengmk2/1190000000454456
+
+24、Synergy – 教你在局域网中用一套键盘/鼠标控制多台电脑
+http://www.appinn.com/synergy/
+
+25、使用Nightwatch进行端到端测试
+http://www.infoq.com/cn/news/2014/02/nightwatch
+
+26、LocalForage：引领离线时代
+http://www.infoq.com/cn/news/2014/03/localforage-offline-data-web
+
+27、基于LLVM的高性能Erlang(Hipe)尝鲜
+http://blog.yufeng.info/archives/3104
+
+28、goroutine
+https://www.evernote.com/shard/s4/sh/a40e8897-3949-4eb8-b4d6-9d57829ba9e8/5cefba19eeffb562fd808e5888ee9ef3
+
+29、Zookeeper在引擎离线数据处理系统的运用以及遇到过的问题
+http://www.searchtb.com/2014/03/zookeeper-in-offline-computing.html
+
+========================================================
+
+1、Golang 大半年使用感受
+http://www.douban.com/note/353996627/
+
+2、青云的混合云（Hybrid Cloud）架构及其对企业的帮助
+http://www.infoq.com/cn/presentations/qingyun-hybrid-cloud-architecture-and-its-helpful-for-enterprise
+
+3、server1
+a c++ network server/client framework.
+https://code.google.com/p/server1/
+
+4、华为Hbase二级索引（Secondary Index）细节分析
+http://www.dengchuanhua.com/167.html
+
+5、zookeeper笔记
+http://www.douban.com/note/353706563/
+
+6、fast-failover-using-mysql-and-zookeeper
+http://www.percona.com/live/mysql-conference-2014/sessions/fast-failover-using-mysql-and-zookeeper
+
+7、Hbase sort on column qualifiers
+http://stackoverflow.com/questions/20975405/hbase-sort-on-column-qualifiers
+
+8、建立自己的私有仓库/CentOS
+http://www.douban.com/note/353565371/
+
+9、nodejs中流(stream)的理解
+http://blog.segmentfault.com/chshouyu/1190000000519006
+
+10、基于Zookeeper的分步式队列系统集成案例
+http://blog.fens.me/hadoop-zookeeper-case/
+
+11、Spark Summit Hands-on Exercises
+http://spark-summit.org/2013/exercises/index.html
+
+12、Zookeeper在引擎离线数据处理系统的运用以及遇到过的问题
+http://www.searchtb.com/2014/03/zookeeper-in-offline-computing.html
+
+13、ZooKeeper Recipes and Solutions
+http://zookeeper.apache.org/doc/trunk/recipes.html#sc_recipes_Locks
+
+14、Distributed locks with Redis
+http://redis.io/topics/distlock
+
+15、CDH套件半手动安装流程
+http://www.douban.com/note/352772895/
+
+16、Generator与异步编程
+http://www.infoq.com/cn/articles/generator-and-asynchronous-programming
+
+17、函数式编程与Continuation/CPSContinuation是什么？
+http://www.nowamagic.net/academy/detail/1220553
+
+18、当前 WEB APP 开发的最佳实践
+http://lyric.im/best-practice-for-web-app-development/
+
+19、如何使用 ab 產生數據壓力
+http://xiongjia.github.io/dev/2014/05/18/ab/
+
+20、Spark SQL和Shark在架构上有哪些区别？将来会合并吗？
+http://www.zhihu.com/question/23182567
+
+21、Long Life Web Apps
+http://matthew-andrews.github.io/talk-long-life-web-apps/#/1
+
+22、Hive RCFile的高效存储结构
+http://www.linuxidc.com/Linux/2013-10/91574.htm
+
+23、Brief History of Machine Learning
+http://www.erogol.com/brief-history-machine-learning/
+
+24、Presto is a distributed system that runs on a cluster of machines
+http://prestodb.io/overview.html
+
+25、ORCFile压缩的非常狠
+http://www.douban.com/people/lemonhall2012/status/1398373782/
+
+26、青云的私有网络以及负载均衡器
+http://www.douban.com/note/350883523/
+
+27、Go 程序的性能调试问题 - CPU 篇
+http://blog.segmentfault.com/yexiaobai/1190000000501635
+
+28、2013流行Python项目汇总
+http://www.iteye.com/news/28717-2013-top-python-projects
+
+29、面向GC的Java编程
+http://coolshell.cn/articles/11541.html
+
+30、PyPy.js: Now faster than CPython
+http://www.tuicool.com/articles/u2Efm2
+
+31、分布式基础
+http://study.163.com/plan/planIntroduction/272067.htm#/planDetail
+
+=================================================================
+
+1、geohash的二叉树理解和附近搜索
+http://www.douban.com/note/364414588/
+
+2、《Hadoop/Spark企业应用实战》第二期，7月21日开课
+http://www.chinahadoop.cn/course/45
+
+3、深喉：再谈美女直播平台
+http://www.douban.com/note/364417178/
+
+4、并发编程框架之FlumeJava
+http://www.cnblogs.com/raymondshiquan/archive/2013/01/08/2851818.html
+
+5、用Redis bitmap统计活跃用户、留存
+http://blog.csdn.net/hguisu/article/details/9191389
+
+6、Redis 代理服务Twemproxy
+http://blog.csdn.net/hguisu/article/details/9174459
+
+7、Redis应用场景
+http://blog.csdn.net/hguisu/article/details/8836819
+
+8、大数据计算：如何仅用1.5KB内存为十亿对象计数
+http://blog.csdn.net/hguisu/article/details/8433731
+
+9、TCP 的那些事儿（上）
+http://coolshell.cn/articles/11564.html
+
+10、TCP 的那些事儿（下）
+http://coolshell.cn/articles/11609.html
+
+11、分布式系统的事务处理
+http://coolshell.cn/articles/10910.html
+
+12、Spark1.0.0 学习路线
+http://blog.csdn.net/book_mmicky/article/details/25714567
+
+13、SequenceFile文件
+http://blog.csdn.net/xhh198781/article/details/7693358
+
+14、 Hive数据压缩笔记
+http://blog.csdn.net/cnbird2008/article/details/9182869
+
+15、国家安全很重要，但现在银行离开了IBM就死翘翘
+http://mp.weixin.qq.com/s?__biz=MjM5MDUwNDU2NA==&mid=200381967&idx=5&sn=b80b6b92410360b1cfc25308e957202a&scene=2&from=timeline&isappinstalled=0#rd
+
+16、Scala 课堂
+http://twitter.github.io/scala_school/zh_cn/
+
+17、Twitter开源Parquet 将支持Impala加速实时查询
+http://www.csdn.net/article/2013-03-13/2814484-Twitter_open_source_Parquet
+
+18、DataTorrent 1.0每秒处理超过10亿个实时事件
+http://www.infoq.com/cn/news/2014/06/datatorrent
+
+19、Facebook公布Apollo，一种新的用于在线低延迟存储的NoSQL数据库
+http://www.infoq.com/cn/news/2014/06/facebook-apollo
+
+20、Apache Kafka：下一代分布式消息系统
+http://www.infoq.com/cn/articles/apache-kafka
+
+21、Linkin开放的于类似于ooize的东西。。
+http://azkaban.github.io/
+
+22、Apache Tajo™: A big data warehouse system on Hadoop--韩国人主导的一个项目，类似于Hive、Spark SQL、Shark这类的
+https://tajo.apache.org/
+
+23、Spark：大数据的“电光石火”
+http://www.csdn.net/article/2013-07-08/2816149-Spark
+
+24、教授给我推荐的那篇raft的论文，看来是另外一个实践版的。再算上Resilient Distributed Datasets: AFault-Tolerant Abstraction for In-Memory Cluster，我这边就欠了3篇论文了，_(:зゝ∠)_
+
+25、YARN应用开发流程
+http://my.oschina.net/u/1434348/blog/193374
+
+26、专访许鹏：谈C程序员修养及大型项目源码阅读与学习
+http://www.csdn.net/article/2014-06-05/2820092-interview-with-pengxu
+
+27、周末巨献：100+诡异的数据集，20万Eclipse Bug、死囚遗言等
+http://www.csdn.net/article/2014-06-06/2820111-100-Interesting-Data-Sets-for-Statistics
+
+28、raft
+https://ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf
+
+29、Testin
+http://www.testin.cn/portal.action;jsessionid=CD32443BC1A1D3568CDF10F15C395775?op=Portal.index
+
+30、Delivering iOS Push Notifications with Node.js
+https://blog.engineyard.com/2013/developing-ios-push-notifications-nodejs
+
+31、Roshi implements a time-series event storage via a LWW-element-set CRDT with inline garbage collection. 
+https://github.com/soundcloud/roshi
+
+32、知乎关于Swift的评论
+http://swift.sh/topic/8/swift/
+
+33、zookeeper学习记录
+http://agapple.iteye.com/blog/1111377
+
+34、Apache Curator
+http://curator.apache.org/
+
+35、分布式服务框架 Zookeeper -- 管理分布式环境中的数据
+http://www.ibm.com/developerworks/cn/opensource/os-cn-zookeeper/
+
+36、Distributed Algorithms in NoSQL Databases
+http://blog.csdn.net/macyang/article/details/8051957
+
+37、关于图计算和graphx的一些思考
+http://rdc.taobao.org/?p=1927
+
+==============================================================
+
+1、SLIK：高扩展、低延时的键值存储索引实现（RAMCloud）
+http://www.infoq.com/cn/articles/slik-key-value-store-index-ramcloud
+
+2、虚拟座谈会：大数据一栈式方案Spark
+http://www.infoq.com/cn/articles/virtual-panel-spark
+
+3、读书笔记 Big Data Analytics with R and Hadoop
+http://blog.fens.me/r-hadoop-book-big-data/
+
+4、Coursera公开课笔记: 斯坦福大学机器学习第六课“逻辑回归(Logistic Regression)”
+http://52opencourse.com/125/coursera%E5%85%AC%E5%BC%80%E8%AF%BE%E7%AC%94%E8%AE%B0-%E6%96%AF%E5%9D%A6%E7%A6%8F%E5%A4%A7%E5%AD%A6%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%AC%AC%E5%85%AD%E8%AF%BE-%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92-logistic-regression
+
+5、怎样用5张幻灯片，在1年内，为2个创业公司，融资3轮，筹得1000万美元？
+http://www.douban.com/note/98699945/
+
+6、HBase优化案例分析：Facebook Messages系统问题与解决方案
+http://www.infoq.com/cn/articles/hbase-casestudy-facebook-messages
+
+7、Matt Turck：大数据行业信息图以及一些思考
+http://www.36kr.com/p/213424.html
+
+8、数据库的最简单实现
+http://www.ruanyifeng.com/blog/2014/07/database_implementation.html
+
+9、Hadoop --Aggregate 包使用 Streaming 及 Combiner
+http://blog.sina.com.cn/s/blog_5f54f0be0101fif9.html
+
+10、华为的index
+https://github.com/Huawei-Hadoop/hindex
+
+11、用stanford TMT进行LDA建模
+http://computational-communication.com/wen-ben-wa-jue/2014-06-30-tmt-lda
+
+12、基于Stateless Future的Scala异步编程（二）欠条  
+http://www.ac.net.blog.163.com/blog/static/1364905620146210261060
+
+13、MySQL推出Applier，可实时复制数据到Hadoop
+http://blog.csdn.net/cnbird2008/article/details/18987577
+
+14、 Hadoop中Combiner的使用
+http://blog.csdn.net/ipolaris/article/details/8723782
+
+15、汇总运行在Hadoop YARN上的开源系统
+http://dongxicheng.org/mapreduce-nextgen/run-systems-on-hadoop-yarn/
+
+16、Apache Phoenix
+Apache Phoenix is a SQL skin over HBase delivered as a client-embedded JDBC driver targeting low latency queries over HBase data. Apache Phoenix takes your SQL query, compiles it into a series of HBase scans, and orchestrates the running of those scans to produce regular JDBC result sets. The table metadata is stored in an HBase table and versioned, such that snapshot queries over prior versions will automatically use the correct schema. Direct use of the HBase API, along with coprocessors and custom filters, results in performance on the order of milliseconds for small queries, or seconds for tens of millions of rows.
+
+
+http://phoenix.apache.org/
+
+17、8 SQL-on-Hadoop frameworks worth checking out
+http://blog.matthewrathbone.com/2014/06/08/sql-engines-for-hadoop.html
+
+18、【翻译】Writing an Hadoop MapReduce Program in Python
+http://www.tianjun.ml/essays/19
+
+19、node.js写Hadoop上的MR---CDH 5.0.2
+http://www.douban.com/note/365493413/
+
+20、再叙TIME_WAIT
+http://huoding.com/2013/12/31/316
+
+21、MapReduce：一个重大的倒退
+http://foreversunyao.iteye.com/blog/971141
+
+22、GraphLab CreateTM Build scalable data products, fast
+http://graphlab.com/index.html
+
+23、Hive & Performance 学习笔记
+http://blog.csdn.net/macyang/article/details/23179601
+
+===========================================================
+
+1、GraphLab:新的面向机器学习的并行框架
+http://androidfuture.com/blog/?p=215
+
+2、【翻译】构建高效内存利用率的JAVA程序教程
+http://www.douban.com/note/350288130/
+
+3、Spark Streaming Programming Guide
+https://spark.apache.org/docs/latest/streaming-programming-guide.html
+
+4、GraphX Programming Guide
+https://spark.apache.org/docs/latest/graphx-programming-guide.html
+
+5、kafka
+http://www.douban.com/note/383894128/
+
+6、基于Stateless Future的Scala异步编程（四）await、for和yield
+http://9.douban.com/site/entry/699090760/
+
+7、HFT：野蛮生长的低科技
+http://book.douban.com/review/6727588/
+
+8、How-to: Build Advanced Time-Series Pipelines in Apache Crunch
+http://blog.cloudera.com/blog/2014/07/how-to-build-advanced-time-series-pipelines-in-apache-crunch/
+
+9、The New Hadoop Application Architectures Book is Here!
+http://blog.cloudera.com/blog/2014/07/the-new-hadoop-application-architectures-book-is-here/
+
+10、Estimating Financial Risk with Apache Spark
+http://blog.cloudera.com/blog/2014/07/estimating-financial-risk-with-apache-spark/
+
+11、Phoenix in 15 minutes or less
+http://phoenix.apache.org/Phoenix-in-15-minutes-or-less.html
+
+12、无意间发现一个很diao的scala数值库（似乎完爆各种主流ML平台）号称fastest Big Data tools。。。还好我之前把数值部分单独提出来加了一层interface，有时间把breeze换成BIDData试试
+https://github.com/BIDData/BIDMach/wiki/Benchmarks
+
+13、阿里云ODPS的愿景、技术实现与难点
+http://www.infoq.com/cn/news/2014/04/odps-implementation
+
+14、DDAL技术议案选型
+http://blog.csdn.net/ajian005/article/details/17677045
+
+15、JAVA Threads Dumps
+http://blog.segmentfault.com/yexiaobai/1190000000615690
+
+16、HBase高性能复杂条件查询引擎
+http://www.infoq.com/cn/articles/hbase-second-index-engine
+
+17、Tiptop
+
+Motivation
+
+
+Hardware performance monitoring counters have recently received a lot of attention.
+http://tiptop.gforge.inria.fr/
+
+18、概率编程语言与贝叶斯方法实践
+http://www.infoq.com/cn/news/2014/07/programming-language-bayes
+
+19、百度员工离职总结：如何做个好员工？(都是大实话)
+http://blog.jobbole.com/73785/
+
+20、【存储入门必读】存储基础知识（2014年7月23日更新）
+https://community.emc.com/thread/176852
+
+21、JavaScript: Read 8 bytes to 64 bit integer
+http://stackoverflow.com/questions/14200071/javascript-read-8-bytes-to-64-bit-integer
+
+22、Zookeeper的一致性协议：Zab
+http://blog.csdn.net/chen77716/article/details/7309915
+
+23、FLP Impossibility
+http://blog.csdn.net/chen77716/article/details/27963079
+
+24、CDH5/UBUNTU 12.04/Hbase 0.98/node.js/Thrift方式链接
+http://www.douban.com/note/372671186/
+
+25、Metamorphosis是淘宝开源的一个Java消息中间件，他类似apache-kafka，但不是一个简单的山寨拷贝，而是做了很多改进和优化，项目的主页在淘蝌蚪上。
+
+这是MetaQ的一个github分支，我做了部分优化和改进，并将meta发布到maven central repository，还做了一些wiki文档，我能承诺的是我个人会持续维护本项目。
+
+MetaQ的淘宝版本已经发展到2.0乃至3.0版本，设计原则发生了变更，有兴趣的可以上它的官方网站看。
+
+本分支应用在京东，delicious.com，支付宝，腾讯等公司的产品上。
+https://github.com/killme2008/Metamorphosis
+
+26、Dubbo
+http://alibaba.github.io/dubbo-doc-static/User+Guide-zh.htm#UserGuide-zh-%E5%85%A5%E9%97%A8
+
+27、Hbase资料
+http://www.douban.com/note/369135681/
+
+===========================================================
+
+1、CSE512 Data Visualization (Winter 2014)
+http://courses.cs.washington.edu/courses/cse512/14wi/
+Jeff Heer 是 D3.js 创始人的博士导师，可视化领域大牛。他最新版的 Data Visualization 课程，内容都挂在了这个课程网站，gallery 页还能看到学生的课程作品。这门课涵盖了几十年来可视化领域各种新奇的研究和应用，非常值得一看。
+
+2、spring事务管理器设计思想（一）
+http://www.cnblogs.com/aigongsi/p/3152419.html
+
+3、小白学数据分析----->关联分析学习算法篇Apriori
+http://zhan.renren.com/dmeryuyang?gid=3602888498023976650&checked=true
+
+4、ID3算法在电信客户流失中的应用
+http://zhan.renren.com/dmeryuyang?gid=3602888498024045446&checked=true
+
+5、关于分布式系统的数据一致性问题(一)
+http://www.cnblogs.com/aigongsi/p/3439766.html
+
+6、跨行清算系统的实现原理
+http://www.cnblogs.com/aigongsi/p/3439766.html
+
+7、HBase如何合理设置客户端Write Buffer
+http://www.chawenti.com/articles/7998.html
+
+8、基于HBase的消息队列：HQueue
+http://www.tuicool.com/articles/YryuQ3
+
+9、HBase多线程建立HTable问题
+http://www.tuicool.com/articles/iaqyu2R
+
+10、 Hbase ＋ Spring Aop 配置Hbase链接的开启和关闭
+http://blog.csdn.net/whos2002110/article/details/36874389
+
+11、HBase 性能优化笔记
+http://www.cnblogs.com/shitouer/archive/2012/08/07/2626377.html
+
+12、MapReduce生成HFile入库到HBase
+http://www.cnblogs.com/shitouer/archive/2013/02/20/hbase-hfile-bulk-load.html
+
+13、深入理解HBase Memstore
+http://www.cnblogs.com/shitouer/archive/2013/02/05/configuring-hbase-memstore-what-you-should-know.html
+
+14、Storm可靠性及事务性相关设计: Acker及Trident State
+http://blog.csdn.net/pelick/article/details/17688185
+
+15、5分钟了解Mockito
+http://liuzhijun.iteye.com/blog/1512780
+
+16、Storm通过消费kafka写入Hbase的例子
+https://github.com/lemonhall/storm-hbase-examples
+
+17、<context:component-scan>使用说明---Spring的自动装配机制
+http://blog.csdn.net/chunqiuwei/article/details/16115135
+
+18、《统计学习方法》勘误表 
+http://blog.sina.com.cn/s/blog_7ad48fee01017dpi.html
+
+19、ZooKeeper: Wait-free coordination for Internet-scale systems
+https://www.usenix.org/legacy/event/usenix10/tech/full_papers/Hunt.pdf
+雅虎的论文吧。。其实就是灌水贴，又介绍了一下ZK的使用场景
+
+20、The Easy Way Of Building A Growing Startup Architecture Using HAProxy, PHP, Redis And MySQL To Handle 1 Billion Requests A Week
+http://highscalability.com/blog/2014/8/11/the-easy-way-of-building-a-growing-startup-architecture-usin.html
+
+主要需要赞的是那个图片
+
+21、Kafka data structures in Zookeeper
+http://blog.csdn.net/xeseo/article/details/23921743
+
+22、HBase在单Column和多Column情况下批量Put的性能对比分析
+http://blog.linezing.com/?p=2106
+
+23、Distributed transactions in Spring, with...
+http://www.javaworld.com/article/2077963/open-source-tools/distributed-transactions-in-spring--with-and-without-xa.html
+
+24、XA transactions using Spring
+http://www.javaworld.com/article/2077714/java-web-development/xa-transactions-using-spring.html
+
+25、Maven实战（七）——常用Maven插件介绍（上）
+http://www.infoq.com/cn/news/2011/04/xxb-maven-7-plugin
+
+26、java多线程中的异常处理
+http://blog.csdn.net/bluishglc/article/details/8216824
+呵呵，底层是跨了栈了，当然try/cactch不到了，不过这个uncaughtException还颇有node.js那边的感觉
+
+27、Distributed systems theory for the distributed systems engineer
+http://the-paper-trail.org/blog/distributed-systems-theory-for-the-distributed-systems-engineer/
+英语原版论文集结？
+
+看一下
+
+28、一步一步教你怎样给Apache Spark贡献代码
+http://www.parallellabs.com/2014/08/05/how-to-contribute-to-spark-step-by-step/
+
+29、大众点评的大数据实践
+http://www.csdn.net/article/2013-12-18/2817838-big-data-practice-in-dianping
+
+30、An Overview of the Ice Platform
+http://www.zeroc.com/overview.html
+
+31、如何准备机器学习工程师的面试 ？
+http://www.zhihu.com/question/23259302
+
+32、从Storm和Spark 学习流式实时分布式计算的设计
+http://www.csdn.net/article/2014-08-04/2821018
+
+33、Spark Streaming/Kafka
+http://www.douban.com/note/386463856/
+
+34、MapReduce: 提高MapReduce性能的七点建议[译]
+http://blog.csdn.net/aaa1117a8w5s6d/article/details/37774463
+
+================================================================
+
+1、apache oozie安装试用
+http://www.douban.com/note/405523655/
+
+2、Spark-streaming的DEMO
+https://github.com/lemonhall/spark-streamin-demon
+
+3、CALL ME MAYBE系列，狂操分布式系统的系列。。。对架构师来说非常有用
+http://aphyr.com/posts/283-call-me-maybe-redis
+
+4、Jepsen：测试PostgreSQL、Redis、MongoDB以及Riak的分区容忍性
+http://www.infoq.com/cn/articles/jepsen
+
+5、Flickr选择使用Sentinel来保证Redis的高可用性
+http://www.infoq.com/cn/news/2014/08/flickr-sentinel-redis
+
+6、Tokutek宣布了用于MongoDB的新一致性算法
+http://www.infoq.com/cn/news/2014/08/ark-mongodb
+
+7、BDD框架之Cucumber研究  
+http://kongqingyun123.blog.163.com/blog/static/6377283520134158437813/
+
+8、Ability to control the data rate in Spark Streaming
+https://issues.apache.org/jira/browse/SPARK-1341
+
+9、大众点评零压力中间件独立部署
+http://www.infoq.com/cn/presentations/dianping-zero-pressure-to-deploy-middleware-independent
+
+10、Notes talking about the design and implementation of Apache Spark
+https://github.com/JerryLead/SparkInternals
+
+11、Netty - Best Practices a.k.a Faster == Better
+http://normanmaurer.me/presentations/2014-twitter-meetup-netty/slides.html#1.0
+
+12、10个有关String的面试问题
+http://www.importnew.com/9622.html
+
+13、Java线程面试题 Top 50
+http://www.importnew.com/12773.html
+
+14、Maven最佳实践：划分模块
+http://juvenshun.iteye.com/blog/305865
+
+15、理解零拷贝
+http://my.oschina.net/plucury/blog/192577#OSC_h2_1
+
+16、JAVA Metrics 度量工具使用介绍1
+http://blog.csdn.net/scutshuxue/article/details/8350135
+
+17、使用常用工具测试HBase应用
+http://blog.csdn.net/moxiaomomo/article/details/16817497
+
+18、去哪儿网的JAVA开发生态环境
+http://www.infoq.com/cn/presentations/qunar-java-development-environment
+
+19、为什么ZeroMQ不应该成为你的第一选择
+http://www.infoq.com/cn/news/2014/08/zeromq-not-first-choice
+
+20、关于Hadoop IPC
+http://www.cnblogs.com/shileiw/archive/2012/12/19/2825264.html
+
+21、Distributed systems for fun and profit
+http://book.mixu.net/distsys/ebook.html
+
+22、快刀初试：Spark GraphX在淘宝的实践
+http://www.csdn.net/article/2014-08-07/2821097
+
+23、MapReduce over snapshot files
+https://issues.apache.org/jira/browse/HBASE-8369
+
+24、Comparing BlockCache Deploys
+https://blogs.apache.org/hbase/entry/comparing_blockcache_deploys
+
+25、回顾2013：HBase的提升与挑战
+http://www.csdn.net/article/2014-01-15/2818147-hbase-in-2013
+
+26、HBase业务实践
+http://rdc.taobao.org/?p=457
+
+27、HBase 事务性 (Transaction)
+http://www.linuxidc.com/Linux/2013-03/81363p2.htm
+
+===========================================================
+
+1、RANCID 入门
+http://blog.segmentfault.com/yexiaobai/1190000000658460
+
+2、Visualizing Garbage Collection Algorithms
+http://spin.atomicobject.com/2014/09/03/visualizing-garbage-collection-algorithms/
+
+3、 B-树和B+树的应用：数据搜索和数据库索引
+http://blog.csdn.net/hguisu/article/details/7786014
+
+4、淘宝下单高并发解决方案 
+http://blog.chinaunix.net/uid-7374279-id-4082920.html
+
+5、关于分库分表(Mysql篇) 
+http://blog.chinaunix.net/uid-7374279-id-3874363.html
+
+6、MySQL在大型网站的应用架构演变
+http://www.csdn.net/article/2014-06-10/2820160
+
+7、What's New in MySQL 5.6
+http://dev.mysql.com/tech-resources/articles/whats-new-in-mysql-5.6.html
+
+8、从机器学习的角度看拒绝推断（1）
+http://www.douban.com/note/410573602/
+
+9、Foundationdb VS jepsen
+https://foundationdb.com/news/foundationdb-vs-jepsen
+
+10、分布式系统常用思想和技术总结
+http://www.360doc.com/content/14/0821/09/1073512_403507606.shtml
+
+11、Readings in Databases
+https://github.com/rxin/db-readings
+
+12、etcd：Kubernetes和Cloud Foundry之间的那些事
+http://www.csdn.net/article/2014-07-17/2820700
+
+13、Bitly：构建月处理60亿点击的分布式系统
+http://www.csdn.net/article/2014-07-16/2820670-bitly-lessons-learned-building-a-distributed-system
+
+14、Oracle weaves Fabric for MySQL clustering
+http://www.computerworld.com/article/2489881/database-administration/oracle-weaves-fabric-for-mysql-clustering.html
+
+15、MySQL原生Sharding方案–Fabric体验之旅
+http://www.csdn.net/article/2014-08-26/2821386
+
+16、MySQL原生HA方案 – Fabric体验之旅
+http://www.csdn.net/article/2014-08-20/2821300
+
+17、从Java到Clojure，大量使用NoSQL和云，MixRadio只为高效
+http://www.csdn.net/article/2014-08-28/2821436
+
+18、MySQL数据库运维的五大指标 - 数据安全
+http://www.educity.cn/shujuku/1594109.html
+
+19、Redis错误配置详解
+http://www.csdn.net/article/2014-07-31/2820964
+
+20、lua + libuv 的坑与爽
+http://blog.segmentfault.com/sugr_dev/1190000000652257
+
+21、[征集] 我们读过的Erlang论文
+http://site.douban.com/204209/widget/notes/17144051/note/409113054/
+
+22、[转载]什么是CLOS
+http://blog.sina.com.cn/s/blog_70f2b3a60100z0w5.html
+
+23、架构分析—LinkedIn出品的databus 
+http://blog.sina.com.cn/s/blog_6c9b83990101bbzq.html
+
+24、Roshi: a CRDT system for timestamped events
+http://www.douban.com/note/406133766/
+
+=========================================================
+
+1、Discover Feature Engineering, How to Engineer Features and How to Get Good at It
+http://machinelearningmastery.com/discover-feature-engineering-how-to-engineer-features-and-how-to-get-good-at-it/
+
+2、中介经济学分析 Brokonomics Analysis——107间的经济学合理性基础
+http://www.douban.com/note/313846164/
+
+3、React
+A JAVASCRIPT LIBRARY FOR BUILDING USER INTERFACES
+http://facebook.github.io/react/index.html
+
+4、mdrill
+for千亿数据即席分析 
+https://github.com/alibaba/mdrill
+
+5、Six Ways to Crash Elasticsearch
+https://www.found.no/foundation/crash-elasticsearch/
+
+6、Nobody Needs Reliable Messaging
+http://www.infoq.com/articles/no-reliable-messaging
+
+7、怎样设计一个合理的积分体系
+http://segmentfault.com/q/1010000000152780
+
+8、CausalImpact，谷歌开源的R时域因果关系分析工具
+http://www.csdn.net/article/2014-09-15/2821684-google-has-open-sourced-a-tool-for-inferring-cause-from-correlations
+
+9、eventsourced
+https://github.com/eligosource/eventsourced/blob/master/README.md
+
+10、SSL延迟有多大？
+http://www.ruanyifeng.com/blog/2014/09/ssl-latency.html
+
+11、Event Sourcing in practice
+http://ookami86.github.io/event-sourcing-in-practice/index.html
+
+12、
+http://krasserm.blogspot.jp/2013/03/eventsourced-for-akka-high-level.html
+
+13、Javascript实现图片的预加载功能
+http://segmentfault.com/blog/joe_ray/1190000000684923
+
+14、npm addon utility for creating and installing from an archive file of an npm install, including dependencies.
+https://github.com/arei/npmbox
+
+=======================================
+
+
+1、Mcrouter 介绍 —— 来自 Facebook 的 memcached 协议路由器
+http://www.oschina.net/translate/introducing-mcrouter-a-memcached-protocol-router-for-scaling-memcached-deployments
+
+2、当大数据遇到安全分析：思科OpenSOC即将开源
+http://www.oschina.net/news/55323/opensoc-opensource
+
+3、Infinispan 7.0.0.Beta2 发布，数据网格平台
+http://www.oschina.net/news/55310/infinispan-7-0-beta2
+
+4、如何解决热点数据更新问题
+http://www.douban.com/note/421501251/
+
+5、CAP理论十二年回顾："规则"变了
+http://www.oschina.net/news/29927/cap-twelve-years-later-how-the-rules-have-changed
+
+6、写程序很难之logstash之file input插件实现分析
+http://blog.csdn.net/hengyunabc/article/details/25665877
+
+7、利用redis + lua解决抢红包高并发的问题
+http://blog.csdn.net/hengyunabc/article/details/19433779
+
+======================================================
+
+1、Discover Feature Engineering, How to Engineer Features and How to Get Good at It
+http://machinelearningmastery.com/discover-feature-engineering-how-to-engineer-features-and-how-to-get-good-at-it/
+
+2、中介经济学分析 Brokonomics Analysis——107间的经济学合理性基础
+http://www.douban.com/note/313846164/
+
+3、React
+A JAVASCRIPT LIBRARY FOR BUILDING USER INTERFACES
+http://facebook.github.io/react/index.html
+
+4、mdrill
+for千亿数据即席分析 
+https://github.com/alibaba/mdrill
+
+5、Six Ways to Crash Elasticsearch
+https://www.found.no/foundation/crash-elasticsearch/
+
+6、Nobody Needs Reliable Messaging
+http://www.infoq.com/articles/no-reliable-messaging
+
+7、怎样设计一个合理的积分体系
+http://segmentfault.com/q/1010000000152780
+
+8、CausalImpact，谷歌开源的R时域因果关系分析工具
+http://www.csdn.net/article/2014-09-15/2821684-google-has-open-sourced-a-tool-for-inferring-cause-from-correlations
+
+9、eventsourced
+https://github.com/eligosource/eventsourced/blob/master/README.md
+
+10、SSL延迟有多大？
+http://www.ruanyifeng.com/blog/2014/09/ssl-latency.html
+
+11、Event Sourcing in practice
+http://ookami86.github.io/event-sourcing-in-practice/index.html
+
+12、
+http://krasserm.blogspot.jp/2013/03/eventsourced-for-akka-high-level.html
+
+13、Javascript实现图片的预加载功能
+http://segmentfault.com/blog/joe_ray/1190000000684923
+
+14、npm addon utility for creating and installing from an archive file of an npm install, including dependencies.
+https://github.com/arei/npmbox
+
+=======================================

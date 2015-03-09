@@ -1,0 +1,559 @@
+1、docker类
+http://mesosphere.io/2013/09/26/docker-on-mesos/
+http://devashish.co.in/2013/09/28/docker-containers-memory-troubleshooting/
+
+Production Quality MongoDB Setup with Docker
+https://medium.com/on-coding/65136a4a9d8
+
+在 Ubuntu 12.04 LTS 上跑 Docker…
+http://blog.gslin.org/archives/2013/09/23/3615/在-ubuntu-12-04-lts-上跑-docker/
+
+2、Interview Experience
+http://zonyitoo.me/blog/article/5245a8fb1d41c811f8978537
+
+3、淺談coroutine與gevent
+http://blog.ez2learn.com/2010/07/17/talk-about-coroutine-and-gevent/
+
+4、以色列黑客发布开源虚拟化操作系统OSv
+http://www.solidot.org/story?sid=36649
+
+5、非常經典的 UTF-8…
+http://blog.gslin.org/archives/2013/10/01/3670/非常經典的-utf-8/
+
+6、解读Nodejs多核处理模块cluster
+http://blog.fens.me/nodejs-core-cluster/
+
+7、常用mq系统总结
+http://blog.eood.cn/mq
+
+8、关于Git的主要维护者滨野纯的访谈
+http://blog.jobbole.com/48849/#jtss-douban
+
+9、编程语言Ceylon发布1.0 beta
+http://www.solidot.org/story?sid=36601
+
+10、Dpark Note 1: Mesos  
+http://fleurer-lee.com/2013/09/25/dpark-note1-mesos.html
+
+11、Tracking Down Memory Leaks in Node.js – A Node.JS Holiday Season
+https://hacks.mozilla.org/2012/11/tracking-down-memory-leaks-in-node-js-a-node-js-holiday-season/
+
+12、Long connections with Node.js, how to reduce memory usage and prevent memory leak? Also related with V8 and webkit-devtools
+http://stackoverflow.com/questions/14049109/long-connections-with-node-js-how-to-reduce-memory-usage-and-prevent-memory-lea
+
+13、[其他] 腾讯电商面试回来，发现我太菜了，缺乏技术深度。 [复制链接]
+http://bbs.chinaunix.net/forum.php?mod=viewthread&tid=4098714&page=1
+
+14、A Portable Foreign Function Interface Library
+http://sourceware.org/libffi/
+
+15、揭开 iOS 7 之 Multipath TCP 的面纱
+http://imtx.me/archives/1852.html
+
+16、c++继承中的内存布局
+http://blog.csdn.net/jiangyi711/article/details/4890889
+
+17、Node FFI Tutorial
+https://github.com/rbranson/node-ffi/wiki/Node-FFI-Tutorial
+
+18、为开发者和企业提供通讯和实时数据传递模块API，PubNub融资1100万美元
+http://www.36kr.com/p/206321.html
+
+19、cstring
+https://github.com/cloudwu/cstring
+http://blog.codingnow.com/2013/09/cstring.html
+
+20、OSv is designed from the ground up to execute a single application on top of a hypervisor, resulting in superior performance and effortless management
+http://www.osv.io
+
+21、Concurrency primitives, safe memory reclamation mechanisms and non-blocking data structures designed to aid in the research, design and implementation of high performance concurrent systems.
+http://concurrencykit.org
+
+22、libPhenom is an eventing framework for building high performance and high scalability systems in C
+http://facebook.github.io/libphenom/
+
+23、中国SaltStack用户组(China SaltStack User Group, aka 'CSSUG')为经SaltStack官方认可、在广大中国SaltStack爱好者推动下为宣传和发展SaltStack而成立的用户组。 当前CSSUG建立有Wiki用于知识分享、QQ群、Google Groups及邮件列表用于线上交流，同时也组织线下交流活动。有兴趣可以加入我们。我们接受各种支持和赞助，同时也愿意与您合作，一同致力于SaltStack的发展。
+http://saltstack.cn
+
+24、C++ 并发编程指南
+https://github.com/forhappy/A-Detailed-Cplusplus-Concurrency-Tutorial
+
+25、动态库的麻烦之处 - lzprgmr
+http://9.douban.com/site/entry/690886466/
+
+26、The fastest Android emulator for app testing and presentation
+http://www.genymotion.com
+
+27、Android 及其设备还有哪些不好的做法至今 (2013 年) 没有改善？
+http://www.zhihu.com/question/21609131
+
+28、CoreOS笔记
+http://www.douban.com/note/307670186/
+
+29、Docker笔记-mac向
+http://www.douban.com/note/307549008/
+
+1、Haskell与范畴论
+http://yi-programmer.com/2010-04-06_haskell_and_category_translate.html
+
+2、《数据库引擎开发》课程
+http://www.dataguru.cn/article-3165-1.html
+
+3、标签自动生成的一些论文
+http://www.douban.com/note/299909184/
+
+4、Low-latency Ethernet device polling
+http://lwn.net/Articles/551284/
+
+5、紐約公共圖書館提供的 Library：將地圖 OCR 成向量資料…
+http://blog.gslin.org/archives/2013/09/01/3508/紐約公共圖書館提供的-library：將地圖-ocr-成向量資料/
+
+6、用salt管理成千上万的服务器
+http://thinkinside.tk/2013/06/24/salt_intro.html
+
+7、Mono：SGen GC和其他方面的提升，PlayScript和CppSharp 正在开发中
+http://www.infoq.com/cn/news/2013/08/mono-3-2
+
+8、服务器时间校正思考
+http://blog.yufeng.info/archives/2861
+
+9、虚拟机随谈（一）：解释器，树遍历解释器，基于栈与基于寄存器，大杂烩
+http://rednaxelafx.iteye.com/blog/492667
+
+10、Linux的控制台（TTY/PTY）与多任务（MULTI-TASKING）
+http://blog.kghost.info/2012/08/20/tty-multi-tasking/
+
+11、各種密碼破解速度…
+http://blog.gslin.org/archives/2013/08/28/3484/各種密碼破解速度/
+
+12、让企业有能力分析自己的用户数据，XiaoClick以分析即服务(AaaS)模式，为顾客提供用户价值分析和识别欺诈
+http://www.36kr.com/p/205780.html
+
+13、网络虚拟化技术（二）: TUN/TAP MACVLAN MACVTAP
+http://blog.kghost.info/2013/03/27/linux-network-tun/
+
+14、网络虚拟化技术（一）: Linux网络虚拟化
+http://blog.kghost.info/2013/03/01/linux-network-emulator/
+
+15、The fastest Android emulator for app testing and presentation
+http://www.genymotion.com
+
+16、UDP Lite is  a new standardized IP transport protocol (RFC 3828) for error-prone network environments. It offers to applications such as streaming media to use the `good parts' of a partially corrupted packet. 
+http://www.erg.abdn.ac.uk/~gerrit/udp-lite/
+
+17、bash 网络接口
+http://wangcong.org/blog/archives/2099
+
+18、两个精彩的比喻
+http://wangcong.org/blog/archives/2176
+
+19、tcp拥塞算法vegas分析
+http://www.pagefault.info/?p=444
+
+20、Linux内核 RPS/RFS功能详细测试分析
+http://www.igigo.net/archives/204
+
+21、C,C++开源项目中的100个Bugs
+http://tonybai.com/2013/04/10/100-bugs-in-c-cpp-opensource-projects/?utm_source=rss&utm_medium=rss&utm_campaign=100-bugs-in-c-cpp-opensource-projects
+
+22、Linux 3.9 introduced new way of writing socket servers
+http://freeprogrammersblog.vhex.net/post/linux-39-introduced-new-way-of-writing-socket-servers/2
+
+23、【消息队列MQ】各类MQ比较
+http://blog.csdn.net/sunxinhere/article/details/7968886
+
+24、Impala：新一代开源大数据分析引擎
+http://9.douban.com/site/entry/690033954/
+
+25、《Understanding and Using C Pointers》要点先睹为快
+http://tonybai.com/2013/05/28/understanding-and-using-c-pointers-keypoint-preview/
+
+26、利用ZooKeeper服务实现分布式系统的Leader选举
+http://9.douban.com/site/entry/689969054/
+
+27、关于几个数据挖掘问题的回答
+http://www.datakong.cn/archives/3984
+
+28、阿里巴巴分布式数据库同步系统(解决中美异地机房)
+https://github.com/alibaba/otter
+
+29、C99中的restrict和volatile关键字
+http://chienlung.github.io/blog/2013/08/21/c99zhong-de-restricthe-volatileguan-jian-zi/
+
+30、The Datacenter As A Computer: An Introduction To The Design Of Warehouse-Scale Machines, Second Edition
+
+http://highscalability.com/blog/2013/8/22/the-datacenter-as-a-computer-an-introduction-to-the-design-o.html
+
+31、Rock with Android
+http://beartung.github.io/rockwithandroid/
+
+32、An implementation of the PGM reliable multicast protocol.
+http://code.google.com/p/openpgm/
+
+33、nanomsg is a socket library that provides several common communication patterns.
+http://nanomsg.org
+
+1、C++中三种正则表达式比较（C regex，C ++regex，boost regex）
+http://www.cnblogs.com/pmars/archive/2012/10/24/2736831.html
+
+2、HyperScan: A high-performance regular expression matching engine
+http://sensorynetworks.com/hyperscan/
+
+3、用 Go 發展的 groupcache…
+http://blog.gslin.org/archives/2013/08/18/3453/用-go-發展的-groupcache/
+
+4、手機網路的不安全性…
+http://blog.gslin.org/archives/2013/08/18/3455/手機網路的不安全性/
+
+5、让R在windows下开足马力进行计算
+http://www.douban.com/note/296114898/
+
+6、Quick Blind TCP Connection Spoofing with SYN Cookies
+http://www.douban.com/note/295782360/
+
+7、为何 Mac / OS X 的内存占用那么大？
+http://www.zhihu.com/question/21481625
+
+8、为什么移动Web应用程序很慢
+http://blog.jobbole.com/45670/
+
+9、Packet Processing on Intel® Architecture
+http://www.intel.com/content/www/us/en/intelligent-systems/intel-technology/packet-processing-is-enhanced-with-software-from-intel-dpdk.html
+
+10、The Secret To 10 Million Concurrent Connections -The Kernel Is The Problem, Not The Solution
+http://highscalability.com/blog/2013/5/13/the-secret-to-10-million-concurrent-connections-the-kernel-i.html
+
+11、用AOP改善javascript代码
+http://www.alloyteam.com/2013/08/yong-aop-gai-shan-javascript-dai-ma/
+
+12、Javascript中有趣的反柯里化技术
+http://www.alloyteam.com/2013/08/javascript-zhong-you-qu-di-fan-ke-li-hua-ji-shu/
+
+13、[小Tip]用好浏览器的控制台
+http://www.imququ.com/post/about-browser-devtools-console.html
+
+14、Linux 为什么还要坚持使用宏内核？
+http://www.zhihu.com/question/20314255
+
+15、Ultrasonic Networking with the Web Audio API  http://smus.com/ultrasonic-networking
+https://github.com/borismus/sonicnet.js
+
+16、如何估算电影特效的成本
+http://www.douban.com/note/176997733/
+
+17、How To Build a User-Level CPU Profiler
+http://research.swtch.com/pprof
+
+18、MySQL中无GROUP BY直接HAVING的问题
+http://www.penglixun.com/tech/database/having_without_groupby_in_mysql.html
+
+19、新语言Quipper帮助量子程序员编写杀手级应用
+http://www.diglog.com/story/technology_developers_762042.html
+
+1、O'Reilly 免费书籍添新品
+http://linuxtoy.org/archives/oreilly-10-books.html
+
+2、浅析 Linux 中的时间编程和实现原理，第 1 部分: Linux 应用层的时间编程
+http://www.ibm.com/developerworks/cn/linux/1307_liuming_linuxtime1/index.html
+
+3、Threads Cannot be Implemented as a Library
+http://www.hpl.hp.com/techreports/2004/HPL-2004-209.html
+
+4、《C++0x漫谈》系列之：多线程内存模型
+http://www.douban.com/note/213465204/
+
+5、Linux Kernel 2.6 Syscall Hooking via the Interrupt Descriptor Table
+https://github.com/ebradbury/linux-syscall-hooker
+http://www.elliotbradbury.com/linux-syscall-hooking-interrupt-descriptor-table/
+
+6、7个示例科普CPU Cache
+http://coolshell.cn/articles/10249.html
+
+7、gcc当中的volatile
+http://www.douban.com/note/291707384/
+
+8、Why the "volatile" type class should not be used
+https://www.kernel.org/doc/Documentation/volatile-considered-harmful.txt
+
+9、ThreadSanitizer, a data race detector for C/C++ and Go
+http://code.google.com/p/thread-sanitizer/wiki/CppManual
+
+10、[整理] gcov lcov 覆盖c/c++项目入门
+http://www.cnblogs.com/turtle-fly/archive/2013/01/09/2851474.html
+
+11、谈Objective-C Block的实现
+http://blog.devtang.com/blog/2013/07/28/a-look-inside-blocks/
+
+12、各种 Spinlock 实现的性能测试
+http://chenyufei.info/blog/2012-01-28/spinlock-implementation-comparision/
+
+13、Linux内存点滴 用户进程内存空间
+http://www.perfgeeks.com/?p=770
+
+14、Linux 可加载内核模块剖析
+http://www.ibm.com/developerworks/cn/linux/l-lkm/
+
+15、谈正确理解 CAP 理论
+http://www.douban.com/group/topic/11765014/
+
+16、类型的本质和函数式实现
+http://9.douban.com/site/entry/686262255/
+
+17、Memory Allocators 101
+http://jamesgolick.com/2013/5/15/memory-allocators-101.html
+
+18、机器学习算法让TCP传输速度提升一倍
+http://www.solidot.org/story?sid=35675
+
+19、C语言全局变量那些事儿
+http://coolshell.cn/articles/10115.html
+
+【Javescript】
+===========================================
+1、Strongloop Node：第一个企业级的Node.js发布版本
+http://www.infoq.com/cn/news/2013/05/strongloop-node
+
+2、JavaScript同样的意思，更巧的写法
+http://www.candoudou.com/archives/631
+
+3、Microsoft提供新模块，支持实时Node.js应用的水平伸缩
+http://www.infoq.com/cn/news/2013/06/node-socketio-servicebus
+
+4、Mozilla Sweet.js: Extending JavaScript with Macros
+http://www.infoq.com/news/2012/10/Mozilla-Sweetjs
+
+5、Felix's Node.js Style Guide
+http://nodeguide.com/style.html
+
+6、Node.js EventEmitter Tutorial
+http://www.hacksparrow.com/node-js-eventemitter-tutorial.html
+
+7、Implementing Monads in JavaScript
+http://functionaljavascript.blogspot.com/2013/03/implementing-monads-in-javascript.html
+
+8、如何设计一门语言（六）——exception和error code
+http://www.cnblogs.com/geniusvczh/archive/2013/06/10/3130745.html
+
+9、使用TraceGL可视化跟踪JavaScript代码流
+http://www.infoq.com/cn/news/2013/06/tracegl
+
+10、How to replace failure by a list of successes a method for exception handling, backtracking, and pattern matching in lazy functional languages - Springer
+http://www.douban.com/people/hunoz/status/1188644610/
+
+11、Scala.js: write in Scala for the browser
+http://www.parleys.com/play/51c380bfe4b0ed8770356866/chapter0/about
+
+12、分析System.Windows.Forms.Timer和另两个Timer的重入行为
+http://msdn.microsoft.com/zh-cn/ff700303.aspx
+
+13、回调函数（Callback）
+http://www.zhihu.com/topic/19571221
+
+14、回调还是消息队列 来自云风的 BLOG 
+http://9.douban.com/site/entry/682990581/
+
+15、Federation is a federated message network for distributed environments
+http://underflow.ca/federation/
+
+
+【大数据】
+===========================================
+1、大数据存取的选择：行存储还是列存储？
+http://www.infoq.com/cn/articles/bigdata-store-choose
+
+2、Cascading is an application framework for Java developers to simply develop robust Data Analytics and Data Management applications on Apache Hadoop. Learn.more.→
+http://www.cascading.org
+
+【数据库】
+===========================================
+1、在 InnoDB 下的 COUNT(*)… | Gea-Suan Lin's BLOG
+http://blog.gslin.org/archives/2013/06/10/3346/在-innodb-下的-count/
+
+【云端】
+===========================================
+1、演讲回顾：阿里云存储技术的演进，以及云服务用例最佳实践
+http://www.infoq.com/cn/news/2013/06/aliyun-nihao-storage
+
+【数学】
+===========================================
+1、Making things with Maths
+http://acko.net/files/fullfrontal/fullfrontal/wdcode/online.html
+
+2、康托尔、哥德尔、图灵——永恒的金色对角线(rev#2)
+http://blog.csdn.net/pongba/article/details/1336028
+
+3、对角线方法之后的故事
+http://www.kuqin.com/math/20111207/315802.html
+
+【分布式、并行计算】
+===========================================
+1、Google利器之Chubby
+http://blog.csdn.net/historyasamirror/article/details/3870168
+
+2、 Transactional Synchronization Extensions 
+http://en.wikipedia.org/wiki/Transactional_Synchronization_Extensions
+
+3、深入理解Java内存模型
+http://www.infoq.com/cn/minibooks/java_memory_model
+
+4、REST的缺点是什么？
+http://www.infoq.com/cn/news/2013/06/rest-drawbacks
+
+5、Eric Lippert关于Monad的13篇文章合集
+http://ericlippert.com/category/monads/
+
+6、Tasks, Monads, and LINQ
+http://blogs.msdn.com/b/pfxteam/archive/2013/04/03/tasks-monads-and-linq.aspx
+
+7、Implementing Monads in JavaScript
+http://functionaljavascript.blogspot.com/2013/03/implementing-monads-in-javascript.html
+
+8、大战Maximum call stack size exceeded
+http://www.douban.com/note/240952363/
+
+9、遇见C++ AMP：在GPU上做并行计算
+http://www.cnblogs.com/allenlooplee/archive/2012/08/15/2640644.html
+
+10、遇见PPL：C++ 的并行和异步
+http://www.infoq.com/cn/articles/meet-ppl-cpp-parallel-asynchronous
+
+11、理解HTTP幂等性
+http://www.cnblogs.com/weidagang2046/archive/2011/06/04/2063696.html
+
+【软件工程、方法学】
+===========================================
+1、聚划算安卓客户端1期教训总结
+http://www.vmatianyu.cn/poly-effective-client-1-issues-lessons.html
+
+
+【架构与工具】
+===========================================
+1、Backend Architectures
+https://gist.github.com/ragingwind/5840075
+
+2、IoC/DIP其实是一种管理思想
+http://coolshell.cn/articles/9949.html
+
+【虚拟化】
+===========================================
+1、系统虚拟化已过时，Containers将主导未来的云架构？
+http://www.infoq.com/cn/news/2013/07/containers-are-the-future-cloud?utm_source=infoq&utm_medium=popular_links_homepage
+
+2、The Linux container engine
+Docker is an open-source engine which automates the deployment of applications as highly portable, self-sufficient containers which are independent of hardware, language, framework, packaging system and hosting provider.
+http://www.docker.io
+
+【MAC】
+===========================================
+1、Top 10 Most Useful iOS Libraries to Know and Love
+http://www.raywenderlich.com/21987/top-10-most-useful-ios-libraries-to-know-and-love
+
+2、How to Use Cocoa Bindings and Core Data in a Mac App
+http://www.raywenderlich.com/21752/how-to-use-cocoa-bindings-and-core-data-in-a-mac-app
+
+
+【前端设计】
+===========================================
+1、Polymer is a new type of library for the web, built on top of Web Components, and designed to leverage the evolving web platform on modern browsers.
+http://www.polymer-project.org
+
+
+1、Typescript指南
+http://www.douban.com/note/272776449/
+
+2、Travis CI指南
+http://www.douban.com/note/272454198/
+
+3、使用Weinre调试webview类应用
+http://www.douban.com/note/272019480/
+
+4、使用node.js/vines/gossip协议构造自动故障转移集群
+http://www.douban.com/note/269669446/
+
+5、个人学LISP的路径
+http://www.douban.com/note/268940065/
+
+6、大数据：“人工特征工程+线性模型”的尽头
+http://www.douban.com/note/268235421/
+
+7、系统架构领域的一些学习材料
+http://www.douban.com/note/268233244/
+
+8、node.js部署最佳实践
+http://www.douban.com/note/265207425/
+
+9、NGINX安装
+http://www.douban.com/note/263099603/
+
+1、NoSQL数据库的分布式算法
+http://blog.nosqlfan.com/html/4139.html
+
+2、P2P的原理和常见的实现方式(为libjingle开路)
+http://www.cppblog.com/peakflys/archive/2013/01/25/197562.html
+
+3、An idea that changed the world
+Wintersession panel explains the pivotal breakthrough from a lecture 100 years ago
+http://news.ycombinator.com/item?id=5111178
+
+4、2012年夏用Processing做的公益项目
+http://www.douban.com/review/5749044/
+
+5、Paxos 算法
+http://baike.baidu.com/view/8438269.htm
+
+6、Paxos小议  
+http://stblog.baidu-tech.com/?p=1196
+
+7、Overlay Images and Overlay Views with MapKit Tutorial
+http://www.raywenderlich.com/30001/overlay-images-and-overlay-views-with-mapkit-tutorial
+
+8、可视化函数调用
+http://www.dullgull.com/2012/04/可视化函数调用-2/
+
+9、RCU
+http://www.ibm.com/developerworks/cn/linux/l-rcu/
+
+10、如何测试内存带宽
+http://software.intel.com/zh-cn/articles/detecting-memory-bandwidth-saturation-in-threaded-applications
+
+11、PhoneGap 实践
+http://www.douban.com/note/263531769/
+
+1、javascript新手向：JSON、HASHTABLE、Array、Object、序列化、反序列化、Redis、Nosql、缓存、索引
+http://www.douban.com/note/222781342/
+
+2、javascript图像处理资料留存
+http://www.douban.com/note/222130508/
+
+3、Chrome扩展开发指南(第一版)
+http://www.douban.com/note/220787751/
+
+4、游览器插件架构总结
+http://www.douban.com/note/220782135/
+
+5、KadOH
+http://www.douban.com/note/220408728/
+
+6、怎样自己用Deferred来封装一遍XMLHttpRequest Level 2
+http://www.douban.com/note/223420663/
+
+7、跟我一起读WebRTC 1.0
+http://www.douban.com/note/223049644/
+
+8、为了解决操蛋的兼容性
+http://www.douban.com/note/228753531/
+
+9、移植C库到Javascript指南 HOW-TO（UBUNTU 12.04）
+http://www.douban.com/note/226657603/
+
+10、chrome插件开发日记（二）
+http://www.douban.com/note/226246765/
+
+11、JS与二进制相关的一切
+http://www.douban.com/note/225494734/
+
+12、有关javascript的encoding问题【Draft】
+http://www.douban.com/note/229925588/
+
+13、HTML5的音频
+http://www.douban.com/note/233817456/

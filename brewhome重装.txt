@@ -1,0 +1,10 @@
+$ cd `brew --prefix`
+$ rm -rf Cellar
+$ brew prune
+$ rm -rf Library .git .gitignore bin/brew README.md share/man/man1/brew
+$ rm -rf ~/Library/Caches/Homebrew
+
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+然后再到官网上去重装就可以了
+
+长期运行homebrew，其实垃圾也很多。不重装都不舒服了

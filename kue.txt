@@ -1,0 +1,145 @@
+1、项目地址
+https://github.com/learnboost/kue
+
+=======================================================
+
+2、安装
+npm install kue
+
+另外需要启动redis
+brew install redis
+
+=======================================================
+3、使用
+启动依赖的redis-server
+redis-server
+
+建立目录mkdir kue-example
+
+cd kue-example
+npm install kue
+
+------------------------------------------------------------
+
+创建新文件：server.js
+
+var kue = require('kue')
+  , jobs = kue.createQueue();
+
+var job = jobs.create('email', {
+    title: 'welcome email for tj'
+  , to: 'tj@learnboost.com'
+  , template: 'welcome-email'
+}).save( function(err){
+   if( !err ) console.log( job.id );
+});
+
+// start the UI
+kue.app.listen(3000);
+console.log('UI started on port 3000');
+
+------------------------------------------------------------
+执行之，即可打开监控页面
+node server.js
+
+http://localhost:3000/
+
+
+
+
+=======================================================
+4、失败重试
+
+jobs.create('email', {
+     title: 'welcome email for tj'
+   , to: 'tj@learnboost.com'
+   , template: 'welcome-email'
+ }).priority('high').attempts(5).save();
+
+重试5次
+
+失败重试的策略默认来说是尽快重试，当然，也可以定义其它策略
+
+    // Honor job's original delay (if set) at each attempt, defaults to fixed backoff
+    job.attempts(3).backoff( true )
+
+    // Override delay value, fixed backoff
+    job.attempts(3).backoff( {delay: 60*1000, type:'fixed'} )
+
+    // Enable exponential backoff using original delay (if set)
+    job.attempts(3).backoff( {type:'exponential'} )
+
+    // Use a function to get a customized next attempt delay value
+    job.attempts(3).backoff( function( attempts, delay ){
+      return my_customized_calculated_delay;
+    })
+=======================================================
+5、实例一：
+
+var kue = require('kue')
+  , jobs = kue.createQueue();
+
+var job = jobs.create('email', {
+    title: 'welcome email for tj'
+  , to: 'tj@learnboost.com'
+  , template: 'welcome-email'
+}).save( function(err){
+   if( !err ) console.log( job.id );
+});
+
+//监听三个任务的事件
+job.on('complete', function(result){
+  console.log("Job completed with data ", result);
+}).on('failed', function(){
+  console.log("Job failed");
+}).on('progress', function(progress){
+  process.stdout.write('\r  job #' + job.id + ' ' + progress + '% complete');
+});
+
+//任务入队
+jobs.on('job enqueue', function(id,type){
+  console.log( 'job %s got queued', id );
+});
+
+//任务完成
+jobs.on('job complete', function(id,result){
+  kue.Job.get(id, function(err, job){
+    if (err) return;
+    job.remove(function(err){
+      if (err) throw err;
+      console.log('removed completed job #%d', job.id);
+    });
+  });
+});
+
+//使用贪婪关闭特性
+//https://github.com/learnboost/kue#graceful-shutdown
+process.once( 'SIGTERM', function ( sig ) {
+  queue.shutdown(function(err) {
+    console.log( 'Kue is shut down.', err||'' );
+    process.exit( 0 );
+  }, 5000 );
+});
+
+//使用并发处理特性来处理具体的任务，具体来说就是去抓取特定影院特定场次的座位信息，然后入库
+//https://github.com/learnboost/kue#processing-concurrency
+jobs.process('email', function(job, done){
+  email(job.data.to, done);
+});
+
+function email(address, done) {
+  //if(!isValidEmail(address)) {
+    //done('invalid to address') is possible but discouraged
+    //return done(new Error('invalid to address'));
+  //}
+  // email send stuff...
+  console.log(address);
+  done("I have send email to "+address);
+}
+
+
+// start the UI
+kue.app.listen(3000);
+console.log('UI started on port 3000');
+
+=======================================================

@@ -1,0 +1,251 @@
+1、硬件配置
+a.启动一台2核心、4G内存左右的机器，作为manger机器，安装最终7180端口暴露的manger
+这个上面还需要一个postgrel数据库，我是选用了它自带的，没去折腾自己的数据库
+
+b.zookeeper最少要三个实例，而HDFS也最少要三个DataNode，其实说白了就是，要有三个NameNode、三个Zookeeper、如果是Hbase的话，最好也是有三个ResourceManger，如果要跑spark的话，其实Master机器也都是这种配置级别
+
+集群里有三台机器，都属于管理机，其实manger也应该做高可用的。所以光所谓的管理机器就是，3+2=5台左右，加上内网所需要的DNS、yum的内部仓库、数据库的主从等等高可用问题，其实最好的配置是6台机器来做。
+
+c.接下来是各种工作机器，DataNode、Worker等等干活儿的机器，10台左右，跑impala和spark都是16G内存起为好
+
+==================================================
+
+2、前置准备
+
+有几点一定需要注意
+a.FQDN
+b.ipv6
+c.ntp
+d.selinux
+e.本地仓库化
+
+基本上把以上五点搞定，安装应该会相当顺利。
+
+分点描述：
+==================================================
+a.FQDN
+这个东西之前在独立安装HADOOP，也遇到了这个问题，具体来说就是需要一个DNS。如果不用DNS的情况下就只能：
+
+vim /etc/hosts
+
+192.168.9.3     manger
+192.168.9.2     master
+
+vim /etc/sysconfig/network
+HOSTNAME=hadoop.master1‘
+
+就是FQDN这个东西，这个坑十分巨大，一定要在安装任何CDH的组件，甚至是JAVA的组件之前就搞定。
+==================================================
+b.ipv6确定关掉
+关闭IPV6
+
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+
+vim /etc/sysctl.conf
+
+==================================================
+c.selinux确定关闭
+
+关闭selinux
+vim /etc/sysconfig/selinux
+
+setenforce 0
+
+==================================================
+d.ntp
+
+yum install ntp
+
+chkconfig --list ntpd
+chkconfig ntpd on
+
+cat >> /etc/ntp.conf <<EOF
+server 0.north-america.pool.ntp.org
+server 1.north-america.pool.ntp.org
+server 2.north-america.pool.ntp.org
+server 3.north-america.pool.ntp.org
+EOF
+
+cat >> /etc/ntp/step-tickers <<EOF
+0.north-america.pool.ntp.org
+1.north-america.pool.ntp.org
+2.north-america.pool.ntp.org
+3.north-america.pool.ntp.org
+EOF
+
+ntpdate -db 0.north-america.pool.ntp.org
+
+==================================================
+
+e.本地仓库化
+
+yum install httpd
+service httpd start 
+chkconfig httpd on
+
+
+本地化parcels
+
+1、CDH
+mkdir cdh5
+cd cdh5
+wget http://archive.cloudera.com/cdh5/parcels/latest/CDH-5.0.1-1.cdh5.0.1.p0.47-el6.parcel
+wget http://archive.cloudera.com/cdh5/parcels/latest/manifest.json
+mkdir /var/www/html/cdh5.1
+cp manifest.json /var/www/html/cdh5.1
+cp CDH-5.0.1-1.cdh5.0.1.p0.47-el6.parcel /var/www/html/cdh5.1
+chmod -R ugo+rX /var/www/html/cdh5.1
+cd ..
+
+2、impala
+mkdir impala
+cd impala
+wget http://archive.cloudera.com/impala/parcels/latest/IMPALA-1.3.1-1.impala1.3.1.p0.1172-el6.parcel
+wget http://archive.cloudera.com/impala/parcels/latest/manifest.json
+mkdir /var/www/html/impala1.3.1
+cp manifest.json /var/www/html/impala1.3.1
+cp IMPALA-1.3.1-1.impala1.3.1.p0.1172-el6.parcel /var/www/html/impala1.3.1
+chmod -R ugo+rX /var/www/html/impala1.3.1
+cd ..
+
+3、sqoop
+mkdir sqoop
+cd sqoop
+wget http://archive.cloudera.com/sqoop-connectors/parcels/latest/SQOOP_NETEZZA_CONNECTOR-1.2c5-el6.parcel
+wget http://archive.cloudera.com/sqoop-connectors/parcels/latest/manifest.json
+mkdir /var/www/html/sqoop
+cp manifest.json /var/www/html/sqoop
+cp SQOOP_NETEZZA_CONNECTOR-1.2c5-el6.parcel /var/www/html/sqoop
+chmod -R ugo+rX /var/www/html/sqoop
+cd ..
+
+4、spark
+mkdir spark
+cd spark
+wget http://archive.cloudera.com/spark/parcels/latest/SPARK-0.9.0-1.cdh4.6.0.p0.98-el6.parcel
+wget http://archive.cloudera.com/spark/parcels/latest/manifest.json
+mkdir /var/www/html/spark
+cp manifest.json /var/www/html/spark
+cp SPARK-0.9.0-1.cdh4.6.0.p0.98-el6.parcel /var/www/html/spark
+chmod -R ugo+rX /var/www/html/spark
+cd ..
+
+5、solr
+mkdir solr
+cd solr
+wget http://archive.cloudera.com/search/parcels/latest/SOLR-1.2.0-1.cdh4.5.0.p0.4-el6.parcel
+wget http://archive.cloudera.com/search/parcels/latest/manifest.json
+mkdir /var/www/html/solr
+cp manifest.json /var/www/html/solr
+cp SOLR-1.2.0-1.cdh4.5.0.p0.4-el6.parcel /var/www/html/solr
+chmod -R ugo+rX /var/www/html/solr
+cd ..
+
+6、accumulo
+mkdir accumulo
+cd accumulo
+wget http://archive.cloudera.com/accumulo/parcels/latest/ACCUMULO-1.4.4-1.cdh4.5.0.p0.65-el6.parcel
+wget http://archive.cloudera.com/accumulo/parcels/latest/manifest.json
+mkdir /var/www/html/accumulo
+cp manifest.json /var/www/html/accumulo
+cp ACCUMULO-1.4.4-1.cdh4.5.0.p0.65-el6.parcel /var/www/html/accumulo
+chmod -R ugo+rX /var/www/html/accumulo
+cd ..
+
+
+
+==================================
+
+本地化tarball
+wget http://archive-primary.cloudera.com/cm5/repo-as-tarball/5.0.1/cm5.0.1-centos6.tar.gz
+
+tar zxf cm5.0.1-centos6.tar.gz
+mv cm /var/www/html
+
+vim /etc/yum.repos.d/myrepo.repo
+
+[myrepo]
+name=myrepo
+baseurl=http://192.168.9.3/cm/5.0.1/
+enabled=1
+gpgcheck=0
+
+yum update
+
+里面有：
+-rw-rw-r-- 1 1106 592   3859752 5月  13 08:51 cloudera-manager-agent-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592 330273388 5月  13 08:50 cloudera-manager-daemons-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592      8180 5月  13 08:51 cloudera-manager-server-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592      9884 5月  13 08:51 cloudera-manager-server-db-2-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592    684616 5月  13 08:51 enterprise-debuginfo-5.0.1-1.cm501.p0.257.el6.x86_64.rpm
+-rw-rw-r-- 1 1106 592  71204325 5月  13 08:51 jdk-6u31-linux-amd64.rpm
+-rw-rw-r-- 1 1106 592 137780131 5月  13 08:51 oracle-j2sdk1.7-1.7.0+update45-1.x86_64.rpm
+
+==================================================
+
+保证服务器名一致性
+/usr/lib64/cmf/agent/build/env/bin/python /usr/lib64/cmf/agent/src/cmf/agent.py -h
+
+#这三个一定要保证一致
+python -c 'import socket; print socket.getfqdn(), socket.gethostbyname(socket.getfqdn())'
+hostname
+hostname -f
+
+===================================
+安装manger
+
+首先用之前配置好的本地化仓库
+
+vim /etc/yum.repos.d/myrepo.repo
+
+[myrepo]
+name=myrepo
+baseurl=http://192.168.9.3/cm/5.0.1/
+enabled=1
+gpgcheck=0
+
+yum update
+
+
+yum install jdk.x86_64 oracle-j2sdk1.7
+yum install cloudera-manager-daemons cloudera-manager-server
+yum install oracle-j2sdk1.7 cloudera-manager-server cloudera-manager-server-db-2
+
+#启动db，并自动初始化
+service cloudera-scm-server-db start
+
+#启动服务器本身
+service cloudera-scm-server start
+
+chkconfig一下cloudera-scm-server
+
+http://192.168.9.6:7180/
+
+admin/admin
+
+===================================
+安装agent工作机
+
+记得一定要符合前置的要求的那五个前置条件。。。。
+
+配置好本地化仓库
+vim /etc/yum.repos.d/myrepo.repo
+
+[myrepo]
+name=myrepo
+baseurl=http://192.168.9.3/cm/5.0.1/
+enabled=1
+gpgcheck=0
+
+yum update
+
+yum install cloudera-manager-agent cloudera-manager-daemons jdk.x86_64 oracle-j2sdk1.7
+
+========================================
+
+OK，这一切都完成之后，进入manger，即可以开始安装主机的流程了，唯一麻烦的是会卡在yum makecache这一步上，当然还是看你的网络条件，这个稍后补充在集群内部做镜像的方法
+
+还有，初期的Host Monitor会取不到数据，需要重启一下整个集群即可，在安装主机过程中会又一个网络连接的报错。
+
+剩余的关于内存方便的报警，都可以直接在manger里看到。。。。按照警报调参即可。
