@@ -1,7 +1,13 @@
 1、项目主页
 http://kylin.incubator.apache.org/
 
+https://github.com/apache/incubator-kylin
+
 要注意，因为kylin被转移到了apche，所以这个地址才是正式的项目地址
+
+Kylin depends on HDFS, MapReduce, Hive and HBase. Hive and MapReduce is used for cube building. Hive is used for pre-join and MapReduce is used for pre-aggregation. HDFS is used to store intermediated files during cube building. HBase is used to store data cube and answer the query. HBase coprocessor is also used for query processing.
+
+简要的介绍就是，Kylin使用Hive和MR来构建立方体，Hive用作预链接，MR用作预聚合，HDFS用来储存构建立方体时的中间文件，HBase用来存储立方体，HBase的coprocessor（协处理器）用来响应查询。
 
 ======================================================
 
@@ -36,10 +42,14 @@ Install and Run
 How to run
 
 Download the release version(according to the hadoop distribution)
+
 Setup a KYLIN_HOME pointing to the corresponding directory where you extract the release tar
 Make sure the user has the privilege to run hadoop, hive and hbase cmd in shell. If you are not so sure, you can just run bin/check-env.sh, it will print out the detail information if you have some environment issues.
+
 To start Kylin, simply run bin/kylin.sh start
+
 To stop Kylin, simply run bin/kylin.sh stop
+
 If you are running Kylin in a cluster or you have multiple Kylin instances, please make sure you have the following property correctly configured.
 
 kylin.rest.servers
@@ -89,5 +99,408 @@ source /etc/bashrc
 4、检查配置是否成功
 echo $KYLIN_HOME
 
-5、
-举报
+----------------------------------------------------------------
+5、前置依赖
+OK
+
+安装JDK，去ORACLE下载一套JDK，不说什么了。
+
+这次的实验环境是：CENTOS 7，要记住CENTOS 7有自己的防火墙，使用SYSTEMD启动管理系统
+启停服务比较特殊，另外lsb_release需要自己看装，要启动扩展的epel的话，可以先搜索
+yum search epel然后yum安装之，最后再update包管理器即可
+
+----------------------------------------------------------------
+5.1.1 安装JAVA----CENTOS 7，64位系统，JDK 8
+
+包是使用scp上传到目标机器的
+
+tar zxvf jdk-8u31-linux-x64.gz
+mv jdk1.8.0_31/ /opt/
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk1.8.0_31/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_31/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_31/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk1.8.0_31
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+验证
+java -version
+
+java version "1.8.0_31"
+Java(TM) SE Runtime Environment (build 1.8.0_31-b13)
+Java HotSpot(TM) 64-Bit Server VM (build 25.31-b07, mixed mode)
+
+----------------------------------------------------------------
+5.1.2、安装JAVA----这是UBUNTU下的安装方式
+wget http://119.254.108.84:8080/jdk.tar.gz
+tar zxvf jdk.tar.gz
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+source /etc/profile
+
+验证
+java -version
+----------------------------------------------------------------
+5.2 安装Hbase
+
+5.2.1 Hbase下载页面
+http://www.apache.org/dyn/closer.cgi/hbase/
+
+5.2.2 下载二进制包并安装过程
+wget http://mirrors.hust.edu.cn/apache/hbase/hbase-1.0.0/hbase-1.0.0-bin.tar.gz
+
+实际上Hbase因为是依赖于zookeeper的，当然单机版本它自带一个zk，所以从玩玩的角度来说，这样的安装过程是OK的
+
+解压：
+tar zxvf hbase-1.0.0-bin.tar.gz
+cd hbase-1.0.0-bin/bin
+./start-hbase
+./hbase shell
+
+设置PATH：
+vim /etc/profile
+/root/hbase-1.0.0/bin
+
+文档地址：
+http://hbase.apache.org/book.html#quickstart
+
+文档中有说明，JDK8支持得并不太好
+
+----------------------------------------------------------------
+5.3 安装Hive
+
+5.3.1 项目主页
+http://hive.apache.org/
+
+5.3.2 下载地址
+http://hive.apache.org/downloads.html
+
+我们来下载 1.1.0版本的，具体兼容性未知：
+wget http://mirrors.hust.edu.cn/apache/hive/hive-1.1.0/apache-hive-1.1.0-bin.tar.gz
+
+解压：
+tar zxvf apache-hive-1.1.0-bin.tar.gz
+cd /root/apache-hive-1.1.0-bin/bin
+
+运行hive时，你会发现报错
+Cannot find hadoop installation: $HADOOP_HOME or $HADOOP_PREFIX must be set or hadoop must be in the path
+
+OK，Hive的独立安装是依赖Hadoop的
+
+下载页里已经说了：
+8 March 2015: release 1.1.0 available
+This release works with Hadoop 1.x.y, 2.x.y
+
+ok，兼容性不错
+
+到5.4步安装一下hadoop，反正就是单机版，让Kylin先跑起来再说
+
+可惜貌似是因为JDK的问题，Hive社区发展速度过慢，导致的问题，Hive和JDK8貌似不太兼容
+
+----->误，sl4j的错误已经解决掉了，看来不是那个logger的问题导致的
+
+主文档索引页面：
+https://cwiki.apache.org/confluence/display/Hive/Home
+
+安装文档索引页面：
+https://cwiki.apache.org/confluence/display/Hive/AdminManual+Installation
+
+--------------------------
+再换：
+换成0.13.1把嫩的
+wget http://mirror.bit.edu.cn/apache/hive/hive-0.13.1/apache-hive-0.13.1-bin.tar.gz
+tar zxvf apache-hive-0.13.1-bin.tar.gz
+export HIVE_HOME=/root/apache-hive-0.13.1-bin
+
+然后hive就可以启动了，ok，走/etc/profile
+
+export HIVE_HOME=/root/apache-hive-0.13.1-bin
+export PATH=$PATH:$HIVE_HOME/bin
+
+
+----------------------------------------------------------------
+5.4 安装Hadoop？
+
+5.4.1 下载地址
+http://www.apache.org/dyn/closer.cgi/hadoop/common/
+
+下载：
+wget http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-2.6.0/hadoop-2.6.0.tar.gz
+略微有点大，186M
+
+解压：
+tar zxvf hadoop-2.6.0.tar.gz
+cd hadoop-2.6.0
+
+看之前Hive的提示，我主要需要设置两个环境变量
+Cannot find hadoop installation: $HADOOP_HOME or $HADOOP_PREFIX must be set or hadoop must be in the 
+path
+
+【参考文档：http://www.micmiu.com/bigdata/hadoop/hadoop2x-cluster-setup/】
+
+# Michael@micmiu.com
+# Hadoop
+export HADOOP_HOME=/root/hadoop-2.6.0
+export HADOOP_PREFIX="/root/hadoop-2.6.0"
+export PATH=$PATH:$HADOOP_PREFIX/bin:$HADOOP_PREFIX/sbin
+export HADOOP_COMMON_HOME=${HADOOP_PREFIX}
+export HADOOP_HDFS_HOME=${HADOOP_PREFIX}
+export HADOOP_MAPRED_HOME=${HADOOP_PREFIX}
+export HADOOP_YARN_HOME=${HADOOP_PREFIX}
+
+更新文件：
+source /etc/profile
+----------------------------------------------------------------
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 400
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 400
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 400
+sudo update-alternatives --config  java
+
+
+----------------------------------------------------------------
+5.5 检查依赖的脚本
+
+#!/bin/sh
+#by source
+
+if [ -z "$KYLIN_HOME" ]
+then
+        bin=$(dirname ${0})
+        export KYLIN_HOME=$(dirname $bin)
+fi
+echo "KYLIN_HOME is set to ${KYLIN_HOME}"
+
+if [ -z "$(command -v hbase version)" ]
+then
+    echo "Please make sure the user has the privilege to run hbase shell"
+    exit 1
+fi
+
+if [ -z "$(command -v hive --version)" ]
+then
+    echo "Please make sure the user has the privilege to run hive shell"
+    exit 1
+fi
+
+if [ -z "$(command -v hadoop version)" ]
+then
+    echo "Please make sure the user has the privilege to run hadoop shell"
+    exit 1
+fi
+
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+
+
+======================================================
+
+6.启动 Kylin
+
+./kylin.sh start
+
+报错了，hcatalog的东西没装好
+KYLIN_HOME is set to /root/kylin-0.7.1-SNAPSHOT
+
+Logging initialized using configuration in jar:file:/root/apache-hive-0.13.1-bin/lib/hive-common-0.13.1.jar!/hive-log4j.properties
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+hcatalog lib not found
+
+
+-------------------------------------------------------------------
+修改了Kylin/bin目录下的
+find-hive-dependency.sh
+脚本的第25行之后，搞定问题
+
+ 25 hcatalog=`find /root/apache-hive-0.13.1-bin/hcatalog/share/hcatalog -name "hive-hcatalog-core[0-9\.-]*jar" 2>&1 | grep -m 1 -v 'Permission denied'`
+
+-------------------------------------------------------------------
+
+./kylin.sh start
+KYLIN_HOME is set to /root/kylin-0.7.1-SNAPSHOT
+
+Logging initialized using configuration in jar:file:/root/apache-hive-0.13.1-bin/lib/hive-common-0.13.1.jar!/hive-log4j.properties
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+I find hdp_home
+/root/apache-hive-0.13.1-bin/lib/hive-exec-0.13.1.jar
+hive dependency: :/root/apache-hive-0.13.1-bin/lib/hive-exec-0.13.1.jar/hive/lib/*:/root/apache-hive-0.13.1-bin/hcatalog/share/hcatalog/hive-hcatalog-core-0.13.1.jar
+A new Kylin instance is started by root, stop it using "stop-kylin.sh"
+Please visit http://<your_sandbox_ip>:7070/kylin to play with the cubes! (Useranme: ADMIN, Password: KYLIN)
+You can check the log at ./../tomcat/logs/kylin.log
+-------------------------------------------------------------------
+
+netstat -nlp | grep 7070
+
+发现7070端口开着呢
+
+You can check the log at ./../tomcat/logs/kylin.log
+
+然后去看了看日志，发现hadoop的版本绝对是太新了，继续折腾
+
+-------------------------------------------------------------------
+
+
+解决第一个报错：
+
+警告: Failed to scan [file:/root/hadoop-2.6.0/contrib/capacity-scheduler/*.jar] from classloader hierarchy
+java.io.FileNotFoundException: /root/hadoop-2.6.0/contrib/capacity-scheduler/*.jar (没有那个文件或目录)
+
+
+yum install mlocate
+updatedb
+
+locate capacity-scheduler
+
+看一下2.5.2的版本
+wget http://mirrors.cnnic.cn/apache/hadoop/common/hadoop-2.5.2/hadoop-2.5.2.tar.gz
+
+-------------------------------------------------------------------
+
+
+结果不OK，所以？所以他妈的Kylin是基于1.x版本的Hadoop，你特么的早说啊
+
+最后的配置文件的样子是：
+
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin:/root/hbase-1.0.0/bin
+
+# Michael@micmiu.com
+# Hadoop
+export HADOOP_HOME=/root/hadoop-1.2.1
+export HADOOP_PREFIX="/root/hadoop-1.2.1"
+export PATH=$PATH:$HADOOP_PREFIX/bin:$HADOOP_PREFIX/sbin
+export HADOOP_COMMON_HOME=${HADOOP_PREFIX}
+export HADOOP_HDFS_HOME=${HADOOP_PREFIX}
+export HADOOP_MAPRED_HOME=${HADOOP_PREFIX}
+export HADOOP_YARN_HOME=${HADOOP_PREFIX}
+
+export HIVE_HOME=/root/apache-hive-0.13.1-bin
+export PATH=$HIVE_HOME/bin:$PATH
+
+-------------------------------------------------------------------
+
+再启动，又报错，说是找不到Hbase的链接
+
+ok，看来它并不会自动启动Hbase，等会看一下它的启动脚本
+
+./start-hbase.sh
+starting master, logging to /root/hbase-1.0.0/bin/../logs/hbase-root-master-i-a790q8jm.out
+[root@i-a790q8jm bin]# hbase shell
+NativeException: java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+  initialize at /root/hbase-1.0.0/bin/../lib/ruby/hbase/hbase.rb:41
+      (root) at /root/hbase-1.0.0/bin/../bin/hirb.rb:118
+
+
+于是Hadoop换装成1.2.1之后，该死的Hbase出错了
+
+
+最终证实，Hbase真心是挑Hadoop版本的
+
+于是，重启机器
+wget http://mirror.bit.edu.cn/apache/hbase/hbase-0.94.26/hbase-0.94.26.tar.gz
+下载0.94版本的Hbase
+
+
+export PATH=$PATH:$JAVA_HOME/bin:/root/hbase-0.94.26/bin
+
+
+-------------------------------------------------------------------
+
+还是会报错，看来主要问题在于Kylin的依赖，首先通过折腾，知道了它只支持Hadoop 1.x版本的东西
+
+另外Hive和Hbase容易互相写错对方的东西，似乎和zookeeper有关?
+
+
+排除变量：sudo update-alternatives --config  java
+
+换成 JDK 7
+hive 0.13/jdk7
+报错
+将hadoop1.2.1/lib下的slf4J改回来，就不报错了
+
+ok，在查看了日志之后发现了问题
+
+删除/tmp/hbase-root之后，问题解决，看来还是和一些版本之间的元数据兼容性之间有关系
+
+启动成功
+
+hbase shell
+HBase Shell; enter 'help<RETURN>' for list of supported commands.
+Type "exit<RETURN>" to leave the HBase Shell
+Version 0.94.26, ra9114543cd48c7e230dabd31f45a086f7b7a5d6a, Wed Dec 17 20:37:01 UTC 2014
+
+hbase(main):001:0> list
+TABLE
+0 row(s) in 0.5880 seconds
+
+hbase(main):002:0>
+
+
+-------------------------------------------------------------------
+
+Hbase成功之后，再来看Hive
+
+继续报错，必须是0.96以上的，所以必须使用0.98
+
+wget http://mirrors.hust.edu.cn/apache/hbase/hbase-0.98.10.1/hbase-0.98.10.1-hadoop1-bin.tar.gz
+
+
+Getting Started
+
+Prerequisites
+
+Hadoop
+
+Hadoop: 2.2.0.2.0.6.0-61 or above
+Hive: 0.12.0.2.0.6.0-61 or above
+HBase: 0.96.0.2.0.6.0-61-hadoop2
+Tested with Hortonworks HDP 2.1.3 and Cloudera Quickstart VM 5.1.
+
+Misc
+
+Command hadoop, hive, hbase is workable on your hadoop cluster
+JDK Runtime: JDK7 (OpenJDK or Oracle JDK)
+Maven
+Git
+Tomcat (CATALINA_HOME being set)
+Npm
+
+【按照文档所述，其实就是文档：https://github.com/apache/incubator-kylin】
+
+-------------------------------------------------------------------
+于是一切转换会源头，看来主要问题在于，Kylin依赖的是2.2.0.2.0.6.0-61 的Hadoop
+以及0.13版本以上的Hive
+Hbase是0.96版本以上的，1.0.0总是报错，于是实验了一下0.98版本的
+
+
+wget http://mirror.bit.edu.cn/apache/hive/hive-0.13.1/apache-hive-0.13.1-bin.tar.gz
+wget http://mirrors.hust.edu.cn/apache/hbase/hbase-0.98.10.1/hbase-0.98.10.1-hadoop1-bin.tar.gz
+wget http://mirrors.hust.edu.cn/apache/hadoop/common/hadoop-1.2.1/hadoop-1.2.1-bin.tar.gz
+
+但是事实上证明，官方上却只有1.2.1
+
+tar zxvf hbase-0.98.10.1-hadoop1-bin.tar.gz
+修改/etc/profile
+source /etc/profile
+
+-------------------------------------------------------------------
+
+http://119.254.101.58:7070/kylin/login
