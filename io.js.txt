@@ -27,6 +27,24 @@ Checking connectivity... done.
 
 【注意：重新登录系统后才可以使用nvm
 
+----------------------------------------------------------------
+
+1.2 CentOS 6.6 64位系统安装 nvm与 io.js
+
+yum install gcc gcc-c++ make openssl-devel
+
+curl https://raw.githubusercontent.com/creationix/nvm/v0.24.0/install.sh | bash
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  6841  100  6841    0     0   6618      0  0:00:01  0:00:01 --:--:-- 12483
+=> Downloading nvm as script to '/root/.nvm'
+
+=> Appending source string to /root/.bashrc
+=> Close and reopen your terminal to start using nvm
+
+OK，0.24.0版本的nvm安装成功
+
+
 =================================================================
 
 2、使用nvm来安装iojs

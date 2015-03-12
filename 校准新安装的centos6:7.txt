@@ -1,0 +1,122 @@
+校准新安装的centos6/7
+
+【目录】
+1、更新软件包
+2、安装常用工具
+3、安装扩展epel包
+4、安装lsb检测工具
+5、检查防火墙安装
+6、检查hosts文件指向
+7、检查DNS文件指向
+8、安装JDK
+9、安装node.js
+10、确认配置
+
+=============================================
+1、更新软件包
+yum update
+yum install epel-release
+yum update
+
+=============================================
+2、安装常用工具
+yum install vim wget
+
+=============================================
+3、4 安装检测工具
+yum install redhat-lsb
+
+确定操作系统版本：
+
+lsb_release -a
+LSB Version:	:base-4.0-amd64:base-4.0-noarch:core-4.0-amd64:core-4.0-noarch:graphics-4.0-amd64:graphics-4.0-noarch:printing-4.0-amd64:printing-4.0-noarch
+Distributor ID:	CentOS
+Description:	CentOS release 6.6 (Final)
+Release:	6.6
+Codename:	Final
+
+=============================================
+3.1.1 安装JAVA----CENTOS 6.6，64位系统，JDK 7
+
+包是使用scp上传到目标机器的
+
+tar zxvf jdk.tar.gz
+mv jdk/ /opt/
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+验证
+java -version
+
+java version "1.7.0_60"
+Java(TM) SE Runtime Environment (build 1.7.0_60-b19)
+Java HotSpot(TM) 64-Bit Server VM (build 24.60-b09, mixed mode)
+
+=============================================
+
+1.2 CentOS 6.6 64位系统安装 nvm与 io.js
+
+yum install gcc gcc-c++ make openssl-devel
+
+curl https://raw.githubusercontent.com/creationix/nvm/v0.24.0/install.sh | bash
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  6841  100  6841    0     0   6618      0  0:00:01  0:00:01 --:--:-- 12483
+=> Downloading nvm as script to '/root/.nvm'
+
+=> Appending source string to /root/.bashrc
+=> Close and reopen your terminal to start using nvm
+
+OK，0.24.0版本的nvm安装成功
+
+
+=================================================================
+
+2、使用nvm来安装iojs
+nvm install iojs
+
+root@i-5ygfjuik:~# nvm install iojs
+######################################################################## 100.0%
+WARNING: checksums are currently disabled for io.js
+Now using io.js v1.1.0
+
+nvm ls 列出所有的版本
+
+然后就用iojs就可以运行了
+
+nvm use system
+root@i-5ygfjuik:~# nvm use system
+Now using system version of node: v0.11.14.
+root@i-5ygfjuik:~#
+
+这回切会11.14
+
+root@i-5ygfjuik:~# nvm ls
+    iojs-v1.1.0
+->       system
+
+root@i-5ygfjuik:~# nvm use iojs
+Now using io.js v1.1.0
+root@i-5ygfjuik:~#
+
+然后再切一下就回去咯~~~~爽歪歪
+
+===============================================
+2、安装maven
+wget http://mirror.bit.edu.cn/apache/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+
+tar zxvf apache-maven-3.2.5-bin.tar.gz
+mv apache-maven-3.2.5 /opt/maven
+
+vim /etc/profile
+export M2_HOME=/opt/maven
+export M2=$M2_HOME/bin
+export PATH=$M2:$PATH
