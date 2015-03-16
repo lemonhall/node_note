@@ -1,0 +1,66 @@
+1、项目地址
+https://github.com/zxh0/jvm.go
+
+====================================================================
+
+2、过程
+mkdir jvm.go
+cd jvm.go
+go get github.com/zxh0/jvm.go/jvmgo
+
+建立目录树：
+cd $GOPATH
+cd bin
+mkdir jre
+cd jre
+mkdir lib
+cd lib
+cp /Library/Java/JavaVirtualMachines/jdk1.8.0_31.jdk/Contents/Home/jre/lib/rt.jar .
+
+
+$GOPATH/bin
+├── jvmgo
+└── jre/
+    └── lib/
+        ├── rt.jar
+        ├── currency.data
+        └── net.properties
+jvmgo -cp path/to/jars:path/to/classes HelloWorld
+
+运行例子？？
+
+
+====================================================================
+3、前置依赖
+
+brew install go
+==> Downloading https://homebrew.bintray.com/bottles/go-1.4.2.yosemite.bottle.1.tar.gz
+######################################################################## 100.0%
+==> Pouring go-1.4.2.yosemite.bottle.1.tar.gz
+==> Caveats
+As of go 1.2, a valid GOPATH is required to use the `go get` command:
+  https://golang.org/doc/code.html#GOPATH
+
+You may wish to add the GOROOT-based install location to your PATH:
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+------------------------------------
+mac下先要参考这篇文章：http://www.douban.com/note/487885540/
+
+编辑一下.bash_profile:
+
+if [ -f ~/.bashrc ]; then
+   source ~/.bashrc
+fi
+
+-------
+
+mkdir goworkbase
+
+vim ~/.bashrc
+
+  export GOPATH=~/goworkbase
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+
+source ~/.bashrc
+
+====================================================================

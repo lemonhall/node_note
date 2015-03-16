@@ -1,0 +1,626 @@
+1、安装
+brew install go
+==> Downloading https://homebrew.bintray.com/bottles/go-1.4.2.yosemite.bottle.1.tar.gz
+######################################################################## 100.0%
+==> Pouring go-1.4.2.yosemite.bottle.1.tar.gz
+==> Caveats
+As of go 1.2, a valid GOPATH is required to use the `go get` command:
+  https://golang.org/doc/code.html#GOPATH
+
+You may wish to add the GOROOT-based install location to your PATH:
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+------------------------------------
+mac下先要参考这篇文章：http://www.douban.com/note/487885540/
+
+编辑一下.bash_profile:
+
+if [ -f ~/.bashrc ]; then
+   source ~/.bashrc
+fi
+
+-------
+
+mkdir goworkbase
+
+vim ~/.bashrc
+
+  export GOPATH=~/goworkbase
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+
+source ~/.bashrc
+
+==================================================================================
+2、rest
+https://github.com/ant0ine/go-json-rest
+
+
+==================================================================================
+3、交叉编译问题：
+https://github.com/laher/goxc
+
+
+==================================================================================
+
+4、目录树结构
+
+在GOPATH下运行tree命令，你可以看到这样的目录结构
+
+
+.
+├── bin
+│   ├── goxc
+│   └── jvmgo
+├── pkg
+│   └── darwin_amd64
+│       └── github.com
+│           ├── debber
+│           │   └── debber-v0.3
+│           │       ├── deb.a
+│           │       ├── debgen.a
+│           │       └── targz.a
+│           ├── laher
+│           │   ├── argo
+│           │   │   └── ar.a
+│           │   └── goxc
+│           │       ├── archive.a
+│           │       ├── config.a
+│           │       ├── core.a
+│           │       ├── executils.a
+│           │       ├── exefileparse.a
+│           │       ├── platforms.a
+│           │       ├── source.a
+│           │       ├── tasks.a
+│           │       └── typeutils.a
+│           └── zxh0
+│               └── jvm.go
+│                   └── jvmgo
+│                       ├── any.a
+│                       ├── classfile.a
+│                       ├── classpath.a
+│                       ├── cmdline.a
+│                       ├── jvm
+│                       │   ├── instructions.a
+│                       │   ├── interpreter.a
+│                       │   ├── jerrors.a
+│                       │   ├── keepalive.a
+│                       │   ├── options.a
+│                       │   ├── rtda
+│                       │   │   └── class.a
+│                       │   └── rtda.a
+│                       ├── jvm.a
+│                       ├── native
+│                       │   ├── java
+│                       │   │   ├── io.a
+│                       │   │   ├── lang
+│                       │   │   │   └── reflect.a
+│                       │   │   ├── lang.a
+│                       │   │   ├── security.a
+│                       │   │   ├── util
+│                       │   │   │   ├── concurrent
+│                       │   │   │   │   └── atomic.a
+│                       │   │   │   ├── jar.a
+│                       │   │   │   └── zip.a
+│                       │   │   └── util.a
+│                       │   └── sun
+│                       │       ├── management.a
+│                       │       ├── misc.a
+│                       │       └── reflect.a
+│                       ├── native.a
+│                       ├── util
+│                       │   └── bigendian.a
+│                       └── util.a
+└── src
+    └── github.com
+        ├── debber
+        │   └── debber-v0.3
+        │       ├── LICENSE
+        │       ├── README.md
+        │       ├── TODO
+        │       ├── cmd
+        │       │   └── debber
+        │       │       ├── changelog-add.go
+        │       │       ├── cmdutils.go
+        │       │       ├── deb-gen.go
+        │       │       ├── deb.go
+        │       │       ├── init.go
+        │       │       ├── main.go
+        │       │       └── source-gen.go
+        │       ├── deb
+        │       │   ├── architectures.go
+        │       │   ├── checksums.go
+        │       │   ├── checksums_test.go
+        │       │   ├── constants.go
+        │       │   ├── control.go
+        │       │   ├── control_test.go
+        │       │   ├── controlfile_reader.go
+        │       │   ├── controlfile_reader_test.go
+        │       │   ├── deb_reader.go
+        │       │   ├── deb_reader_test.go
+        │       │   ├── deb_writer.go
+        │       │   ├── deb_writer_test.go
+        │       │   ├── dev_package.go
+        │       │   ├── dev_test.go
+        │       │   ├── doc.go
+        │       │   ├── package.go
+        │       │   ├── package_test.go
+        │       │   ├── source_package.go
+        │       │   ├── source_test.go
+        │       │   ├── testdata
+        │       │   │   ├── 1.txt
+        │       │   │   ├── adduser_3.112ubuntu1.dsc
+        │       │   │   ├── butaca.control
+        │       │   │   ├── gitso.control
+        │       │   │   ├── kompas-plugins.control
+        │       │   │   ├── test_0.3.0_amd64.deb
+        │       │   │   ├── webpy-example.changelog
+        │       │   │   └── xkcdMeegoReader.control
+        │       │   ├── validation.go
+        │       │   └── validation_test.go
+        │       ├── debgen
+        │       │   ├── binary_test.go
+        │       │   ├── build_params.go
+        │       │   ├── common.go
+        │       │   ├── constants.go
+        │       │   ├── deb_gen.go
+        │       │   ├── defaults.go
+        │       │   ├── dev_build.go
+        │       │   ├── dev_test.go
+        │       │   ├── doc.go
+        │       │   ├── integration-test.sh
+        │       │   ├── source_gen.go
+        │       │   ├── source_test.go
+        │       │   ├── tar.go
+        │       │   └── template.go
+        │       ├── debian
+        │       │   ├── changelog
+        │       │   ├── control
+        │       │   ├── copyright
+        │       │   ├── postinst
+        │       │   └── rules
+        │       └── targz
+        │           ├── example_test.go
+        │           ├── reader.go
+        │           ├── targz_test.go
+        │           ├── testdata
+        │           │   └── tmp.tar.gz
+        │           └── writer.go
+        ├── laher
+        │   ├── argo
+        │   │   ├── LICENSE
+        │   │   ├── README.md
+        │   │   ├── ar
+        │   │   │   ├── ar_test.go
+        │   │   │   ├── common.go
+        │   │   │   ├── example_test.go
+        │   │   │   ├── reader.go
+        │   │   │   ├── reader_test.go
+        │   │   │   ├── testdata
+        │   │   │   │   ├── common.ar
+        │   │   │   │   ├── nofooter.ar
+        │   │   │   │   ├── simple.ar
+        │   │   │   │   ├── small.txt
+        │   │   │   │   ├── small2.txt
+        │   │   │   │   └── writer.ar
+        │   │   │   ├── writer.go
+        │   │   │   └── writer_test.go
+        │   │   └── debian
+        │   │       ├── changelog
+        │   │       ├── control
+        │   │       └── rules
+        │   └── goxc
+        │       ├── README.md
+        │       ├── archive
+        │       │   ├── archive.go
+        │       │   ├── targz.go
+        │       │   └── zip.go
+        │       ├── config
+        │       │   ├── buildsettings.go
+        │       │   ├── defaults.go
+        │       │   ├── json.go
+        │       │   ├── json_test.go
+        │       │   ├── settings.go
+        │       │   ├── sliceflags.go
+        │       │   └── test-goxc.json
+        │       ├── core
+        │       │   ├── constants.go
+        │       │   ├── core.go
+        │       │   └── core_test.go
+        │       ├── darwin.goxc.json
+        │       ├── deb-contents
+        │       │   └── etc
+        │       │       └── init.d
+        │       │           └── dummy
+        │       ├── debian
+        │       │   ├── changelog
+        │       │   ├── control
+        │       │   ├── copyright
+        │       │   └── rules
+        │       ├── downloads.htpl
+        │       ├── downloads.tpl
+        │       ├── executils
+        │       │   ├── exec.go
+        │       │   └── exec_test.go
+        │       ├── exefileparse
+        │       │   └── parseexe.go
+        │       ├── goxc.go
+        │       ├── goxc_test.go
+        │       ├── htmltemplate.goxc.json
+        │       ├── notdarwin.goxc.json
+        │       ├── packaging
+        │       │   └── sdeb
+        │       │       ├── constants.go
+        │       │       ├── sdeb.go
+        │       │       └── sdeb_test.go
+        │       ├── platforms
+        │       │   ├── buildconstraints.go
+        │       │   ├── buildconstraints_test.go
+        │       │   └── platforms.go
+        │       ├── sample.goxc.local.json
+        │       ├── source
+        │       │   ├── parser.go
+        │       │   └── parser_test.go
+        │       ├── tasks
+        │       │   ├── archive.go
+        │       │   ├── bintray.go
+        │       │   ├── bump.go
+        │       │   ├── clean-destination.go
+        │       │   ├── codesign.go
+        │       │   ├── copy-resources.go
+        │       │   ├── deb-dev.go
+        │       │   ├── deb-source.go
+        │       │   ├── deb.go
+        │       │   ├── downloads-page.go
+        │       │   ├── go-clean.go
+        │       │   ├── go-fmt.go
+        │       │   ├── go-install.go
+        │       │   ├── go-test.go
+        │       │   ├── go-vet.go
+        │       │   ├── http.go
+        │       │   ├── interpolate-source.go
+        │       │   ├── rmbin.go
+        │       │   ├── tag.go
+        │       │   ├── tasks.go
+        │       │   ├── tasks_test.go
+        │       │   ├── toolchain.go
+        │       │   └── xc.go
+        │       └── typeutils
+        │           ├── mapstringinterfaceutils.go
+        │           ├── stringslices.go
+        │           └── stringslices_test.go
+        └── zxh0
+            └── jvm.go
+                ├── \ LICENSE.txt
+                ├── README.md
+                ├── jvmgo
+                │   ├── any
+                │   │   └── any.go
+                │   ├── classfile
+                │   │   ├── attr_code.go
+                │   │   ├── attr_constant_value.go
+                │   │   ├── attr_enclosing_method.go
+                │   │   ├── attr_exceptions.go
+                │   │   ├── attr_inner_classes.go
+                │   │   ├── attr_line_number_table.go
+                │   │   ├── attr_local_variable_table.go
+                │   │   ├── attr_local_variable_type_table.go
+                │   │   ├── attr_markers.go
+                │   │   ├── attr_signature.go
+                │   │   ├── attr_source_file.go
+                │   │   ├── attr_undefined.go
+                │   │   ├── attribute_info.go
+                │   │   ├── attribute_table.go
+                │   │   ├── class_file.go
+                │   │   ├── class_parser.go
+                │   │   ├── class_reader.go
+                │   │   ├── constant_info.go
+                │   │   ├── constant_pool.go
+                │   │   ├── cp_class_member.go
+                │   │   ├── cp_invoke_dynamic.go
+                │   │   ├── cp_name_and_type.go
+                │   │   ├── cp_utf8_string.go
+                │   │   ├── cp_value.go
+                │   │   └── member_info.go
+                │   ├── classpath
+                │   │   ├── class_path.go
+                │   │   ├── class_path_entry.go
+                │   │   ├── class_path_entry_asterisk.go
+                │   │   ├── class_path_entry_compound.go
+                │   │   ├── class_path_entry_dir.go
+                │   │   ├── class_path_entry_jar.go
+                │   │   └── class_path_test.go
+                │   ├── cmdline
+                │   │   ├── cmd_line.go
+                │   │   ├── cmd_line_args.go
+                │   │   ├── cmd_line_options.go
+                │   │   └── cmd_line_test.go
+                │   ├── jvm
+                │   │   ├── instructions
+                │   │   │   ├── aload.go
+                │   │   │   ├── arraylength.go
+                │   │   │   ├── astore.go
+                │   │   │   ├── athrow.go
+                │   │   │   ├── bootstrap.go
+                │   │   │   ├── checkcast.go
+                │   │   │   ├── d2x.go
+                │   │   │   ├── dcmp.go
+                │   │   │   ├── dload.go
+                │   │   │   ├── dstore.go
+                │   │   │   ├── dup.go
+                │   │   │   ├── f2x.go
+                │   │   │   ├── fcmp.go
+                │   │   │   ├── fload.go
+                │   │   │   ├── fstore.go
+                │   │   │   ├── getfiled.go
+                │   │   │   ├── goto.go
+                │   │   │   ├── i2x.go
+                │   │   │   ├── if_acmp.go
+                │   │   │   ├── if_icmp.go
+                │   │   │   ├── ifcond.go
+                │   │   │   ├── ifnull.go
+                │   │   │   ├── iinc.go
+                │   │   │   ├── iload.go
+                │   │   │   ├── instanceof.go
+                │   │   │   ├── instruction.go
+                │   │   │   ├── instruction_decoder.go
+                │   │   │   ├── instruction_decoder_test.go
+                │   │   │   ├── instruction_factory.go
+                │   │   │   ├── invoke_native.go
+                │   │   │   ├── invokedynamic.go
+                │   │   │   ├── invokeinterface.go
+                │   │   │   ├── invokespecial.go
+                │   │   │   ├── invokestatic.go
+                │   │   │   ├── invokevirtual.go
+                │   │   │   ├── istore.go
+                │   │   │   ├── l2x.go
+                │   │   │   ├── lcmp.go
+                │   │   │   ├── ldc.go
+                │   │   │   ├── lload.go
+                │   │   │   ├── lookupswitch.go
+                │   │   │   ├── lstore.go
+                │   │   │   ├── monitor.go
+                │   │   │   ├── new.go
+                │   │   │   ├── newarray.go
+                │   │   │   ├── nop.go
+                │   │   │   ├── pop.go
+                │   │   │   ├── putfield.go
+                │   │   │   ├── subroutine.go
+                │   │   │   ├── swap.go
+                │   │   │   ├── tableswitch.go
+                │   │   │   ├── wide.go
+                │   │   │   ├── xadd.go
+                │   │   │   ├── xaload.go
+                │   │   │   ├── xand.go
+                │   │   │   ├── xastore.go
+                │   │   │   ├── xconst.go
+                │   │   │   ├── xdiv.go
+                │   │   │   ├── xipush.go
+                │   │   │   ├── xmul.go
+                │   │   │   ├── xneg.go
+                │   │   │   ├── xor.go
+                │   │   │   ├── xrem.go
+                │   │   │   ├── xreturn.go
+                │   │   │   ├── xsh.go
+                │   │   │   ├── xsub.go
+                │   │   │   └── xxor.go
+                │   │   ├── interpreter
+                │   │   │   └── interpreter.go
+                │   │   ├── jerrors
+                │   │   │   └── class_not_found.go
+                │   │   ├── jvm.go
+                │   │   ├── keepalive
+                │   │   │   └── keep_alive.go
+                │   │   ├── options
+                │   │   │   └── options.go
+                │   │   └── rtda
+                │   │       ├── class
+                │   │       │   ├── access_flags.go
+                │   │       │   ├── array.go
+                │   │       │   ├── array_class.go
+                │   │       │   ├── array_obj.go
+                │   │       │   ├── class.go
+                │   │       │   ├── class_attributes.go
+                │   │       │   ├── class_factory.go
+                │   │       │   ├── class_hierarchy.go
+                │   │       │   ├── class_loader.go
+                │   │       │   ├── class_reflection.go
+                │   │       │   ├── constant_pool.go
+                │   │       │   ├── cp_class.go
+                │   │       │   ├── cp_fieldref.go
+                │   │       │   ├── cp_methodref.go
+                │   │       │   ├── cp_string.go
+                │   │       │   ├── cp_utf8.go
+                │   │       │   ├── descriptor_field_type.go
+                │   │       │   ├── descriptor_helper.go
+                │   │       │   ├── descriptor_helper_test.go
+                │   │       │   ├── descriptor_parser.go
+                │   │       │   ├── descriptors.go
+                │   │       │   ├── field.go
+                │   │       │   ├── member.go
+                │   │       │   ├── method.go
+                │   │       │   ├── method_exception_table.go
+                │   │       │   ├── method_reflection.go
+                │   │       │   ├── method_vtable.go
+                │   │       │   ├── native_method_registry.go
+                │   │       │   ├── obj_clone.go
+                │   │       │   ├── obj_instanceof.go
+                │   │       │   ├── obj_monitor.go
+                │   │       │   ├── obj_monitor_test.go
+                │   │       │   ├── object.go
+                │   │       │   ├── primitive_types.go
+                │   │       │   └── shim_methods.go
+                │   │       ├── frame.go
+                │   │       ├── jvm_stack.go
+                │   │       ├── jvm_stack_test.go
+                │   │       ├── local_vars.go
+                │   │       ├── local_vars_test.go
+                │   │       ├── native_frame.go
+                │   │       ├── operand_stack.go
+                │   │       ├── operand_stack_test.go
+                │   │       ├── shim_frames.go
+                │   │       ├── string_helper.go
+                │   │       ├── string_pool.go
+                │   │       ├── string_pool_test.go
+                │   │       ├── thread.go
+                │   │       ├── thread_init_class.go
+                │   │       └── thread_throw_exceptions.go
+                │   ├── main.go
+                │   ├── native
+                │   │   ├── java
+                │   │   │   ├── io
+                │   │   │   │   ├── FileDescriptor.go
+                │   │   │   │   ├── FileInputStream.go
+                │   │   │   │   ├── FileOutputStream.go
+                │   │   │   │   ├── FileSystem.go
+                │   │   │   │   ├── ObjectStreamClass.go
+                │   │   │   │   └── UnixFileSystem.go
+                │   │   │   ├── lang
+                │   │   │   │   ├── Class.go
+                │   │   │   │   ├── ClassLoader.go
+                │   │   │   │   ├── Class_annotations.go
+                │   │   │   │   ├── Class_getDeclaredConstructors0.go
+                │   │   │   │   ├── Class_getDeclaredFields0.go
+                │   │   │   │   ├── Class_getDeclaredMethods0.go
+                │   │   │   │   ├── Class_helper.go
+                │   │   │   │   ├── Class_static.go
+                │   │   │   │   ├── Double.go
+                │   │   │   │   ├── Float.go
+                │   │   │   │   ├── Object.go
+                │   │   │   │   ├── Package.go
+                │   │   │   │   ├── Runtime.go
+                │   │   │   │   ├── String.go
+                │   │   │   │   ├── System.go
+                │   │   │   │   ├── Thread.go
+                │   │   │   │   ├── Thread_static.go
+                │   │   │   │   ├── Throwable.go
+                │   │   │   │   └── reflect
+                │   │   │   │       ├── Array.go
+                │   │   │   │       └── Proxy.go
+                │   │   │   ├── security
+                │   │   │   │   └── AccessController.go
+                │   │   │   └── util
+                │   │   │       ├── TimeZone.go
+                │   │   │       ├── concurrent
+                │   │   │       │   └── atomic
+                │   │   │       │       └── AtomicLong.go
+                │   │   │       ├── jar
+                │   │   │       │   └── JarFile.go
+                │   │   │       └── zip
+                │   │   │           ├── CRC32.go
+                │   │   │           ├── Inflater.go
+                │   │   │           ├── ZipFile.go
+                │   │   │           └── zip_file_hack.go
+                │   │   ├── native_method.go
+                │   │   ├── native_methods.go
+                │   │   └── sun
+                │   │       ├── management
+                │   │       │   └── VMManagementImpl.go
+                │   │       ├── misc
+                │   │       │   ├── Perf.go
+                │   │       │   ├── Signal.go
+                │   │       │   ├── Unsafe.go
+                │   │       │   ├── Unsafe_class.go
+                │   │       │   ├── Unsafe_memory.go
+                │   │       │   ├── Unsafe_object.go
+                │   │       │   ├── VM.go
+                │   │       │   ├── malloc.go
+                │   │       │   └── malloc_test.go
+                │   │       └── reflect
+                │   │           ├── ConstantPool.go
+                │   │           ├── NativeConstructorAccessorImpl.go
+                │   │           ├── NativeMethodAccessorImpl.go
+                │   │           ├── Reflection.go
+                │   │           └── helper.go
+                │   ├── testing
+                │   │   └── assert.go
+                │   └── util
+                │       ├── atomic.go
+                │       ├── bigendian
+                │       │   ├── big_endian.go
+                │       │   └── big_endian_test.go
+                │       ├── panic.go
+                │       ├── strings.go
+                │       ├── strings_test.go
+                │       ├── unsafe.go
+                │       └── unsafe_test.go
+                ├── jvmgo.png
+                ├── jvmgo.sublime-project
+                ├── testclasses
+                │   ├── build.gradle
+                │   ├── settings.gradle
+                │   └── src
+                │       └── main
+                │           └── java
+                │               ├── HelloWorld.java
+                │               ├── PrintArgs.java
+                │               ├── UnitTests.java
+                │               ├── java7
+                │               │   ├── FieldsTest.java
+                │               │   ├── InheritanceTest.java
+                │               │   ├── MethodCall.java
+                │               │   ├── ObjectInit.java
+                │               │   ├── RuntimeTest.java
+                │               │   ├── StringTest.java
+                │               │   ├── SysProps.java
+                │               │   ├── TimeZoneTest.java
+                │               │   ├── cl
+                │               │   │   ├── ClassLoaderTest.java
+                │               │   │   ├── GetClassLoaderTest.java
+                │               │   │   └── UrlClassLoaderTest.java
+                │               │   ├── exception
+                │               │   │   ├── CatchTest.java
+                │               │   │   ├── FinallyTest.java
+                │               │   │   ├── JvmExTest.java
+                │               │   │   ├── StackTraceTest.java
+                │               │   │   └── UncaughtTest.java
+                │               │   ├── file
+                │               │   │   ├── FileDescriptorTest.java
+                │               │   │   ├── FileIoTest.java
+                │               │   │   └── FileTest.java
+                │               │   ├── instructions
+                │               │   │   ├── ANewArray.java
+                │               │   │   ├── AThrow.java
+                │               │   │   ├── CheckCast.java
+                │               │   │   ├── InvokeTest.java
+                │               │   │   ├── LookupSwitch.java
+                │               │   │   ├── MultiANewArrayTest.java
+                │               │   │   └── TableSwitch.java
+                │               │   ├── network
+                │               │   │   └── UrlTest.java
+                │               │   ├── nio
+                │               │   │   └── ByteBufferTest.java
+                │               │   ├── reflection
+                │               │   │   ├── ArrayClassTest.java
+                │               │   │   ├── CallerClassTest.java
+                │               │   │   ├── ClassInitTest.java
+                │               │   │   ├── ClassTest.java
+                │               │   │   ├── DeclaringClassTest.java
+                │               │   │   ├── FieldTest.java
+                │               │   │   ├── MethodTest.java
+                │               │   │   ├── PrimitiveClassTest.java
+                │               │   │   └── ReflectionHelper.java
+                │               │   ├── sunmisc
+                │               │   │   └── UnsafeTest.java
+                │               │   ├── thread
+                │               │   │   ├── AliveTest.java
+                │               │   │   ├── DaemonTest.java
+                │               │   │   ├── MainThreadTest.java
+                │               │   │   ├── RunnableTest.java
+                │               │   │   ├── SleepTest.java
+                │               │   │   ├── SynchronizedTest.java
+                │               │   │   ├── ThreadSubClassTest.java
+                │               │   │   └── WaitTest.java
+                │               │   └── util
+                │               │       └── ZipFileTest.java
+                │               ├── java8
+                │               │   └── InterfaceMethodTest.java
+                │               └── libs
+                │                   ├── gson
+                │                   │   └── GsonTest.java
+                │                   ├── jetty
+                │                   │   └── FileServer.java
+                │                   └── junit
+                │                       └── UnitTestRunner.java
+                └── tools
+                    └── list_native_methods.go
+
+

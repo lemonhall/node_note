@@ -1,0 +1,85 @@
+1、centos6
+
+2、postgresql
+yum install postgresql-server postgresql
+
+依赖关系解决
+
+========================================================================================================================
+ 软件包                             架构                    版本                            仓库                   大小
+========================================================================================================================
+正在安装:
+ postgresql                         x86_64                  8.4.20-1.el6_5                  base                  2.6 M
+ postgresql-server                  x86_64                  8.4.20-1.el6_5                  base                  3.4 M
+为依赖而安装:
+ postgresql-libs                    x86_64                  8.4.20-1.el6_5                  base                  201 k
+
+事务概要
+========================================================================================================================
+Install       3 Package(s)
+
+总下载量：6.2 M
+Installed size: 29 M
+确定吗？[y/N]：
+
+------------------------
+
+默认是8.4的安装，肯定不行
+
+========================================================================================================================
+
+3、实际安装
+#看一下是否有安装过，之前
+rpm -qa|grep postgres
+
+#给centos 6.6加装rpm仓库，到这里去找就行了http://yum.postgresql.org/
+rpm -i http://yum.postgresql.org/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-1.noarch.rpm
+
+#安装完仓库之后更新系统
+yum install postgresql94 postgresql94-server
+
+#初始化数据库
+[root@200248 ~]# /etc/init.d/postgresql-9.4 initdb
+正在初始化数据库：                                         [确定]
+[root@200248 ~]#
+
+#启动服务
+[root@200248 ~]# /etc/init.d/postgresql-9.4 start
+启动 postgresql-9.4 服务：                                 [确定]
+[root@200248 ~]#
+
+//#更改数据库用户密码
+su - postgres
+psql
+ALTER USER postgres WITH PASSWORD 'postgres';　　　　　　 
+select * from pg_shadow;
+
+#配置一个新密码，推荐：po7st9gre8
+#在root权限下
+passwd postgres
+
+#修改监听地址到*
+vim /var/lib/pgsql/9.4/data/postgresql.conf
+
+#修改密码登陆策略
+vim /var/lib/pgsql/9.4/data/pg_hba.conf
+host    all             all             0.0.0.0/0               md5
+
+#重启服务器
+[root@200248 ~]# service postgresql-9.4 restart
+Stopping postgresql-9.4 service:                           [  OK  ]
+Starting postgresql-9.4 service:                           [  OK  ]
+
+#开机自启动
+chkconfig postgresql-9.4 on                           //设置系统启动时启动服务
+
+========================================================================================================================
+
+4、mac的客户端
+4.1 Postico
+A Modern PostgreSQL Client for OS X
+https://eggerapps.at/postico/
+
+4.2 pgadmin
+http://pgadmin.org/download/
+
