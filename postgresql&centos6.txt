@@ -83,3 +83,6 @@ https://eggerapps.at/postico/
 4.2 pgadmin
 http://pgadmin.org/download/
 
+http://www.postgresql.org/ftp/pgadmin3/release/v1.20.0/osx/
+下载pgadmin的dmg之后安装即可
+

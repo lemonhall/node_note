@@ -27,4 +27,340 @@ vi dubbo.properties
 cd ../bin
 ./restart.sh
 
+=============================================================
+dubbox
 
+1、项目地址
+https://github.com/dangdangdotcom/dubbox.git
+
+-------------------------------------------
+
+2、编译
+git clone https://github.com/dangdangdotcom/dubbox.git
+
+cd dubbox/
+export MAVEN_OPTS="-Xms512m -Xmx1024m"
+mvn clean install -Dmaven.test.skip
+
+
+-------------------------------------------
+
+3、安装java环境
+
+安装JAVA----CENTOS 6.6，64位系统，JDK 7
+
+包是使用scp上传到目标机器的
+
+tar zxvf jdk.tar.gz
+mv jdk/ /opt/
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+验证
+java -version
+
+java version "1.7.0_60"
+Java(TM) SE Runtime Environment (build 1.7.0_60-b19)
+Java HotSpot(TM) 64-Bit Server VM (build 24.60-b09, mixed mode)
+
+-------------------------------------------
+
+4、安装zookeeper
+
+【参考资料1：http://www.iyunv.com/thread-18609-1-1.html】
+【参考资料2：http://my.oschina.net/u/1866130/blog/287363】
+
+http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/
+zk有依赖于jdk
+
+wget http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
+tar zxvf zookeeper-3.4.6.tar.gz
+mv zookeeper-3.4.6 /opt/zk
+mkdir tools
+mv jdk.tar.gz zookeeper-3.4.6.tar.gz tools/
+
+如果想把一个文件1的内容清空， 文件大小变成0， 又不删除这个文件，可以用：
+cat /dev/null > 文件1
+
+单机启用：
+cd /opt/zk/conf
+cp zoo_sample.cfg zoo.cfg
+cd ../bin
+./zkServer.sh start
+
+配置集群模式：三台机器上分别运行（一定要确保ping三个ip之间是正确的，FQDN的问题）
+
+echo '192.168.60.10  zk1' >>/etc/hosts
+echo '192.168.60.11  zk2' >>/etc/hosts
+echo '192.168.60.12  zk3' >>/etc/hosts
+
+cp /opt/zk/conf/zoo_sample.cfg /opt/zk/conf/zoo.cfg
+echo 'server.1=zk1:2888:3888' >> /opt/zk/conf/zoo.cfg
+echo 'server.2=zk2:2888:3888' >> /opt/zk/conf/zoo.cfg
+echo 'server.3=zk3:2888:3888' >> /opt/zk/conf/zoo.cfg
+
+mkdir /opt/zk/storage
+sed -i "s/\/tmp\/zookeeper/\/opt\/zk\/storage/g" /opt/zk/conf/zoo.cfg
+
+三台机器上分别执行：
+echo "1" > /opt/zk/storage/myid
+echo "2" > /opt/zk/storage/myid
+echo "3" > /opt/zk/storage/myid
+
+三台机器上分别运行：
+/opt/zk/bin/zkServer.sh start
+
+然后检查各个主机的状态是：
+/opt/zk/bin/zkServer.sh status
+
+=======================================================================
+
+5、安装maven
+wget http://mirror.bit.edu.cn/apache/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+
+tar zxvf apache-maven-3.2.5-bin.tar.gz
+mv apache-maven-3.2.5 /opt/maven
+
+vim /etc/profile
+export M2_HOME=/opt/maven
+export M2=$M2_HOME/bin
+export PATH=$M2:$PATH
+
+
+=======================================================================
+
+6、运行dubbox
+
+6.1、启动zk
+cd /opt/zk/conf
+cp zoo_sample.cfg zoo.cfg
+cd ../bin
+./zkServer.sh start
+
+6.2、启动admin
+cd ~/dubbo/dubbo-admin
+target里面的war包丢到tomcat的webapps目录下面去
+然后bin/statup.sh
+启动之后8080端口即可以向外服务
+http://xxxx:8080/dubbo-admin/
+会提示你输入用户名和密码，root,root......
+
+
+6.3、启动monitor
+cd ~/dubbo/dubbo-simple/dubbo-monitor-simple/target
+./start.sh
+vi dubbo.properties
+   - edit: dubbo.registry.adddress=dubbo://127.0.0.1:9090
+cd ../bin
+./restart.sh
+
+
+-------------------------------------
+-------------------------------------
+
+6.4 运行demo
+首先保证zk启动成功了，得注意/tmp下有没有脏数据
+然后进入dubbo-demo文件夹
+
+-------------------------------------
+6.4.1 运行消费方
+
+#pwd 消费者方
+/root/dubbox/dubbo-demo/dubbo-demo-consumer/target
+
+#解压消费方：
+tar zxvf dubbo-demo-consumer-2.8.4-SNAPSHOT-assembly.tar.gz
+
+[root@200248 target]# cd dubbo-demo-consumer-2.8.4-SNAPSHOT
+[root@200248 dubbo-demo-consumer-2.8.4-SNAPSHOT]# ls
+bin  conf  lib
+[root@200248 dubbo-demo-consumer-2.8.4-SNAPSHOT]# ll
+总用量 12
+drwxrwxrwx. 2 root root 4096 3月  17 13:45 bin
+drwxrwxrwx. 2 root root 4096 3月  17 13:26 conf
+drwxr-xr-x. 2 root root 4096 3月  17 13:52 lib
+
+#修改配置使用zk注册
+/root/dubbox/dubbo-demo/dubbo-demo-consumer/target/dubbo-demo-consumer-2.8.4-SNAPSHOT/conf
+
+vim dubbo.properties
+
+#################
+dubbo.container=log4j,spring
+dubbo.application.name=demo-consumer
+dubbo.application.owner=
+dubbo.registry.address=multicast://224.5.6.7:1234
+#dubbo.registry.address=zookeeper://127.0.0.1:2181
+#dubbo.registry.address=redis://127.0.0.1:6379
+#dubbo.registry.address=dubbo://127.0.0.1:9090
+dubbo.monitor.protocol=registry
+dubbo.log4j.file=logs/dubbo-demo-consumer.log
+dubbo.log4j.level=WARN
+#################
+注销掉2181那行
+
+#启动消费方
+/root/dubbox/dubbo-demo/dubbo-demo-consumer/target/dubbo-demo-consumer-2.8.4-SNAPSHOT/bin
+./start.sh
+就启动了消费方
+
+
+
+-------------------------------------
+
+6.4.2 运行服务方
+
+【安装tomcat】
+wget http://mirrors.cnnic.cn/apache/tomcat/tomcat-7/v7.0.59/bin/apache-tomcat-7.0.59.tar.gz
+tar zxvf apache-tomcat-7.0.59.tar.gz
+
+【拷贝war包】
+cp dubbo-demo-provider-2.8.4-SNAPSHOT.war apache-tomcat-7.0.59/webapps/
+
+【启动tomcat】
+/root/dubbox/dubbo-demo/dubbo-demo-provider/target/apache-tomcat-7.0.59/bin
+./startup.sh
+
+【看logs是否有报错】
+
+-------------------------------------
+
+6.4.3 运行顺序---
+
+反了，应该先服务方后消费方的
+
+-------------------------------------
+
+6.4.4 zk目录结构
+
+ls /dubbo
+[com.alibaba.dubbo.demo.user.facade.AnotherUserRestService, com.alibaba.dubbo.demo.user.facade.UserRestService, com.alibaba.dubbo.demo.bid.BidService, com.alibaba.dubbo.monitor.MonitorService, com.alibaba.dubbo.demo.user.UserService]
+
+ls /dubbo/com.alibaba.dubbo.demo.user.facade.AnotherUserRestService
+[consumers, routers, providers, configurators]
+
+ls /dubbo/com.alibaba.dubbo.demo.user.facade.AnotherUserRestService/consumers
+[consumer%3A%2F%2F172.17.42.1%2Fcom.alibaba.dubbo.demo.user.facade.AnotherUserRestService%3Fapplication%3Ddemo-consumer%26category%3Dconsumers%26check%3Dfalse%26dubbo%3D2.8.4-SNAPSHOT%26interface%3Dcom.alibaba.dubbo.demo.user.facade.AnotherUserRestService%26methods%3DgetUser%2CregisterUser%26organization%3Ddubbox%26owner%3Dprogrammer%26pid%3D16139%26revision%3D2.8.4-SNAPSHOT%26side%3Dconsumer%26timestamp%3D1426572244534]
+
+
+ls /dubbo/com.alibaba.dubbo.demo.user.facade.AnotherUserRestService/routers
+[]
+
+ls /dubbo/com.alibaba.dubbo.demo.user.facade.AnotherUserRestService/providers
+[rest%3A%2F%2F172.17.42.1%3A8888%2Fservices%2Fcom.alibaba.dubbo.demo.user.facade.AnotherUserRestService%3Faccepts%3D500%26anyhost%3Dtrue%26application%3Ddemo-provider%26connections%3D100%26dubbo%3D2.8.4-SNAPSHOT%26extension%3Dcom.alibaba.dubbo.demo.extension.TraceInterceptor%2C+++++++++++++++++++++com.alibaba.dubbo.demo.extension.TraceFilter%2C+++++++++++++++++++++com.alibaba.dubbo.demo.extension.ClientTraceFilter%2C+++++++++++++++++++++com.alibaba.dubbo.demo.extension.DynamicTraceBinding%2C+++++++++++++++++++++com.alibaba.dubbo.demo.extension.CustomExceptionMapper%2C+++++++++++++++++++++com.alibaba.dubbo.rpc.protocol.rest.support.LoggingFilter%26generic%3Dfalse%26interface%3Dcom.alibaba.dubbo.demo.user.facade.AnotherUserRestService%26methods%3DgetUser%2CregisterUser%26organization%3Ddubbox%26owner%3Dprogrammer%26pid%3D15860%26revision%3D2.8.4-SNAPSHOT%26server%3Dtomcat%26side%3Dprovider%26threads%3D500%26timeout%3D2000%26timestamp%3D1426572079232%26validation%3Dtrue]
+
+ls /dubbo/com.alibaba.dubbo.demo.user.facade.AnotherUserRestService/configurators
+[]
+
+
+-------------------------------------
+6.4.5 运行一个简单监控
+
+/root/dubbox/dubbo-simple/dubbo-monitor-simple/target
+
+#解压
+tar zxvf dubbo-monitor-simple-2.8.4-SNAPSHOT-assembly.tar.gz
+
+cd /root/dubbox/dubbo-simple/dubbo-monitor-simple/target/dubbo-monitor-simple-2.8.4-SNAPSHOT
+
+#进入conf目录
+dubbo.container=log4j,spring,registry,jetty
+dubbo.application.name=simple-monitor
+dubbo.application.owner=
+#dubbo.registry.address=multicast://224.5.6.7:1234
+dubbo.registry.address=zookeeper://127.0.0.1:2181
+#dubbo.registry.address=redis://127.0.0.1:6379
+#dubbo.registry.address=dubbo://127.0.0.1:9090
+dubbo.protocol.port=7070
+dubbo.jetty.port=8080
+dubbo.jetty.directory=${user.home}/monitor
+dubbo.charts.directory=${dubbo.jetty.directory}/charts
+dubbo.statistics.directory=${user.home}/monitor/statistics
+dubbo.log4j.file=logs/dubbo-monitor-simple.log
+dubbo.log4j.level=WARN
+
+￥￥￥￥￥￥￥￥￥￥￥￥￥
+
+打开zk开关，最后监听的端口是？8080
+
+
+cd ~/dubbo/dubbo-simple/dubbo-monitor-simple/target
+./start.sh
+vi dubbo.properties
+   - edit: dubbo.registry.adddress=dubbo://127.0.0.1:9019
+cd ../bin
+./restart.sh
+
+----------------------------------------------------
+
+统计数据存放在哪里？
+
+dubbo.jetty.directory=${user.home}/monitor
+dubbo.charts.directory=${dubbo.jetty.directory}/charts
+dubbo.statistics.directory=${user.home}/monitor/statistics
+dubbo.log4j.file=logs/dubbo-monitor-simple.log
+
+
+----------------------------------------------------
+之后
+zk下/dubbo/目录下会多一个目录
+com.alibaba.dubbo.monitor.MonitorService
+
+ls /dubbo/com.alibaba.dubbo.monitor.MonitorService
+[consumers, routers, providers, configurators]
+[zk: localhost:2181(CONNECTED) 18]
+
+
+----------------------------------------------------
+
+服务方的协议URL解析：
+
+rest://172.17.42.1:8888/services/
+com.alibaba.dubbo.demo.user.facade.AnotherUserRestService?
+accepts=500&
+anyhost=true&
+application=demo-provider&
+connections=100&
+dubbo=2.8.4-SNAPSHOT&
+extension=com.alibaba.dubbo.demo.extension.TraceInterceptor, 
+com.alibaba.dubbo.demo.extension.TraceFilter, 
+com.alibaba.dubbo.demo.extension.ClientTraceFilter, 
+com.alibaba.dubbo.demo.extension.DynamicTraceBinding, 
+com.alibaba.dubbo.demo.extension.CustomExceptionMapper, 
+com.alibaba.dubbo.rpc.protocol.rest.support.LoggingFilter&
+generic=false&
+interface=com.alibaba.dubbo.demo.user.facade.AnotherUserRestService&
+methods=getUser,registerUser&
+organization=dubbox&
+owner=programmer&
+pid=15860&
+revision=2.8.4-SNAPSHOT&
+server=tomcat&
+side=provider&
+threads=500&
+timeout=2000&
+timestamp=1426572079232&
+validation=true
+
+
+http://192.168.200.248:8888/com.alibaba.dubbo.demo.user.facade.AnotherUserRestService
+
+http://192.168.200.248:8888/com.alibaba.dubbo.demo.user.facade.AnotherUserRestService/getUser/
+
+=======================================================================
+
+http://dangdangdotcom.github.io/dubbox/rest.html
+
+接下来是最关键的部分，怎样调用这个玩意
+
+TODO:
+1、怎样拼装出来所有的提供者的接口地址？
+2、调用方怎样模拟monitor的那个机制，向monitor发请求？看设计文档吧

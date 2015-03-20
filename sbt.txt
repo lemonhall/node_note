@@ -1,0 +1,128 @@
+1、项目地址
+http://www.scala-sbt.org/
+
+scala社区的构建工具，有好有坏，好处是几乎所有的项目都是自带的启动脚本，坏处是从没深入过，导致不同的scala项目经常得使用自带的sbt编译才能编译成功
+
+现有的主要版本号为：
+0.12
+和
+0.13
+
+=============================================
+
+2、安装
+
+Unix 
+
+Put sbt-launch.jar in ~/bin.
+
+Create a script to run the jar, by creating ~/bin/sbt with these contents:
+
+SBT_OPTS="-Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M"
+java $SBT_OPTS -jar `dirname $0`/sbt-launch.jar "$@"
+Make the script executable:
+
+$ chmod u+x ~/bin/sbt
+
+=============================================
+
+3、文档
+http://www.scala-sbt.org/0.13/tutorial/index.html
+
+我们使用 sbt 创建、测试、运行和提交作业。该教程会解释你在我们的课程中将会用到的所有 sbt 命令。工具安装页说明了如何安装 sbt。
+启动 sbt
+要启动 sbt，打开一个终端（Windows 中的”命令提示符“）并切换到你正在解决的作业所在目录。输入sbt 将会打开 sbt 命令提示符。
+shell$ cd /path/to/progfun-project-directory #这是操作系统的壳
+shell$ sbt
+> _                                          #这是 sbt 的壳
+运行 Scala 解释器
+你可以使用 console 任务在 sbt 内启动 Scala 解释器。解释器（也叫做 REPL，代表”读算印复 (Read Eval Print Loop“）对于试验 Scala 代码小片段很有用。注意，只有当你的代码没有编译错误时，解释器才能启动。
+要退出解释器并返回 sbt，输入 ctrl-d。
+> console
+[info] 正在启动 Scala 解释器...
+欢迎来带 Scala 版本 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.7.0_04-ea).
+输入表达式得到运算值。
+输入 :help 获取更多信息。
+
+scala> println("Oh, hai!") # 这是Scala解释器，输入一些代码
+Oh, hai!
+
+scala> val l = List(1, 2, 3)
+l: List[Int] = List(1, 2, 3)
+
+scala> val squares = l.map(x => x * x)
+squares: List[Int] = List(1, 4, 9)
+
+scala>                      # 输入Ctrl + D退出Scala解释器
+[success] Total time: 20 s, completed Mar 21, 2013 11:02:31 AM
+>                           # 我们回到 sbt 壳
+编译你的代码
+compile 任务会编译作业的源代码，作业位于src/main/scala 目录。
+> compile
+[info] 正在编译4个Scala源文件到
+       /Users/aleksandar/example/target/scala-2.10.1/classes...
+[success] 总用时: 1秒,完成时刻 2013年5月21日 下午 11:04:46
+> 
+如果源代码中包含错误，来自编译器的错误信息会显示出来。
+测试你的代码
+src/test/scala 目录包含项目的单元测试。要在 sbt 中运行这些测试，你可以使用test命令。
+> test
+[info] ListsSuite:
+[info] - one plus one is two
+[info] - sum of a few numbers *** FAILED ***
+[info]   3 did not equal 2 (ListsSuite.scala:23)
+[info] - max of a few numbers
+[error] 失败: 总计 3, 失败 1, 错误 0, 通过 2, 忽略 0
+[error] 失败的测试:
+[error]   example.ListsSuite
+[error] {文件:/Users/luc/example/}assignment/test:test: 测试不成功
+[error] 总用时: 5 秒, 完成时刻 2012年8月10日 晚上 10:19:53
+> 
+运行你的代码
+如果你的项目有个对象带有方法（或者对象继承了 App 品质(trait)），那么你就可以通过输入 run 在 sbt 中运行代码。在 sbt 发现有多个 main 方法时，它会询问你想执行哪一个。
+> run
+多个 main classes 给检测到，选择一个执行:
+
+ [1] example.Lists
+ [2] example.M2
+
+输入号码: 1
+
+[info] 运行 example.Lists 中
+main method!
+[success] 总用时: 33 秒, 完成时刻 2012年8月10日 晚上 10:25:06
+>
+运行样式检查器
+在作业评分过程中，我们在你提交的源代码上运行样式检查器以发现常见的编码样式问题。要确保你的代码符合我们的全部样式规则，你可以在提交前运行样式检查器自己检查。sbt 的styleCheck任务执行如下。
+> styleCheck
+[info] 正在检查文件 /Users/luc/Documents/epfl/
+       teaching/progfun/assignments/
+       src/main/scala/example/Lists.scala... 没问题！
+[info] 处理 1 文件(s)
+[info] 发现 0 错误(s)
+[info] 发现 0 警告(s)
+[info] 样式得分: (百分之)100
+[success] 总用时: 1 秒, 完成时刻 2012年8月10日 晚上 11:34:02
+> 
+提交你的解答到 Coursera
+sbt 的submit任务用于你提交作业的解答。它会将你的源代码打包到一个.jar文件，然后上传到Coursera的服务器。注意，只有代码中没有编译错误时，代码才会被提交。
+submit任务接收两个参数：你的电子邮件地址和提交密码。注意：提交密码不是你的登录密码。相反，它是由Coursera生成的特殊密码。你可以在Assignments页中找到。
+> submit e-mail@university.org suBmISsioNPasSwoRd
+[info] 正在打包 /Users/luc/example/
+       target/scala-2.10.1/
+       progfun-example_2.10.1-1.0.0-sources.jar ...
+[info] 打包完成。
+[info] 编译 1 个 Scala 源文件 到 /Users/luc/example/
+       target/scala-2.10.1/classes...
+[info] 正在连接到 coursera。获取 challenge中...
+[info] 计算 challenge 响应中...
+[info] 提交作业中...
+[success] 你的代码被成功提交:你的提交已被接收，之后将会批改。
+[success] 总用时: 6 秒, 完成时刻 2012年8月10日 下午 10:35:53
+> 
+创建于2012年8月11日（周六）北京时间 凌晨 1:13
+修改于2013年3月22日（周五）北京时间 凌成 2:00
+
+=============================================
+
+4、

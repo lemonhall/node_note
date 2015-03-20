@@ -1,3 +1,106 @@
+实现一个客户端均衡以及容错降级以及灰度发布框架的核心内容是什么？
+
+1、参考dubbo的实现
+
+其实rpc包只是在实现点对点的调用
+cluster里面主要实现了负载均衡以及failover的功能，核心代码其实也就1000行不到
+最后就是需要实现一个monitor的功能
+
+============================================
+
+2、利用zk
+服务的提供方本质上是一个目录树结构
+
+============================================
+
+3、协议方法选择？
+
+所有的协议都走post就好了，不走get
+参考淘宝的前端文章：【前后端分离的思考与实践(一) 】
+
+里面有对http的agent的修改建议
+http://ued.taobao.org/blog/2014/05/midway-deploy/
+Nginx + Node.js + Java 的软件栈部署实践
+
+
+============================================
+
+4、对request库以及几个库的深入探索
+
+https://www.npmjs.com/package/request
+
+看是否需要request这种重度的库呢？需要评估
+
+
+============================================
+
+5、需要打锚点，给mertics
+
+https://www.npmjs.com/packages/statsd
+
+============================================
+
+6、需要形成几个策略的文档和算法描述？
+
+6.1 response-time
+"response time" is defined here as the elapsed time from when a request enters this middleware to when the headers are written out to the client.
+即服务器的处理时间
+
+6.2 
+============================================
+
+6.3 目录树设计
+
+6.3.1 提供方
+	lemonhjuice/appname/service_group_name/providers/10.0.1.1/
+	lemonhjuice/appname/service_group_name/providers/10.0.1.2/
+	lemonhjuice/appname/service_group_name/providers/10.0.1.3/
+	lemonhjuice/appname/service_group_name/providers/10.0.1.4/
+
+代表服务提供方的四个ip地址
+
+元数据设计：
+{   
+    port:"20080"
+    version:"V1",
+    methods:"[getMovieById(),getMovieByCity()]",
+    gray:"false"
+    author:"",
+    description:""
+}
+
+最终部署的时候，会得到这样的路径：http://hostname:port/appname/service_group_name/getMovieById
+
+
+元数据设计：
+{   
+    port:"20080"
+    version:"V1",
+    methods:"[getMovieById(),getMovieByCity()]",
+    gray:"true"
+    author:"",
+    description:""
+}
+
+--------------------------------------
+
+消费方:
+
+消费方与服务提供方建立长连接
+
+	lemonhjuice/appname/service_group_name/consumers/10.0.1.5/
+	lemonhjuice/appname/service_group_name/consumers/10.0.1.6/
+
+表示有两个消费者在消费着后面的四个服务提供者的服务
+
+消费方自己实现轮询算法
+
+这很简单，但是需要防止雪崩效应，以及自动failover等需要进一步实现，框架的核心内容基本上都在消费端
+
+
+=======================================================
+
+
 lemonhall 与2015年1月14日 第一版本
 
 =======================================================================

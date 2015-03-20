@@ -1,0 +1,165 @@
+1、项目地址
+https://github.com/coreos/etcd
+
+
+===============================================
+
+2、安装文档
+https://github.com/coreos/etcd/releases/
+
+#下载解压并启动
+
+curl -L  https://github.com/coreos/etcd/releases/download/v2.0.5/etcd-v2.0.5-linux-amd64.tar.gz -o etcd-v2.0.5-linux-amd64.tar.gz
+tar xzvf etcd-v2.0.5-linux-amd64.tar.gz
+cd etcd-v2.0.5-linux-amd64
+./etcd
+
+
+------------------------
+
+./etcd
+2015/03/17 10:30:20 no data-dir provided, using default data-dir ./default.etcd
+2015/03/17 10:30:20 etcd: listening for peers on http://localhost:2380
+2015/03/17 10:30:20 etcd: listening for peers on http://localhost:7001
+2015/03/17 10:30:20 etcd: listening for client requests on http://localhost:2379
+2015/03/17 10:30:20 etcd: listening for client requests on http://localhost:4001
+2015/03/17 10:30:20 etcdserver: name = default
+2015/03/17 10:30:20 etcdserver: data dir = default.etcd
+2015/03/17 10:30:20 etcdserver: member dir = default.etcd/member
+2015/03/17 10:30:20 etcdserver: heartbeat = 100ms
+2015/03/17 10:30:20 etcdserver: election = 1000ms
+2015/03/17 10:30:20 etcdserver: snapshot count = 10000
+2015/03/17 10:30:20 etcdserver: advertise client URLs = http://localhost:2379,http://localhost:4001
+2015/03/17 10:30:20 etcdserver: initial advertise peer URLs = http://localhost:2380,http://localhost:7001
+2015/03/17 10:30:20 etcdserver: initial cluster = default=http://localhost:2380,default=http://localhost:7001
+2015/03/17 10:30:20 etcdserver: start member ce2a822cea30bfca in cluster 7e27652122e8b2ae
+2015/03/17 10:30:20 raft: ce2a822cea30bfca became follower at term 0
+2015/03/17 10:30:20 raft: newRaft ce2a822cea30bfca [peers: [], term: 0, commit: 0, applied: 0, lastindex: 0, lastterm: 0]
+2015/03/17 10:30:20 raft: ce2a822cea30bfca became follower at term 1
+2015/03/17 10:30:20 etcdserver: added local member ce2a822cea30bfca [http://localhost:2380 http://localhost:7001] to cluster 7e27652122e8b2ae
+2015/03/17 10:30:22 raft: ce2a822cea30bfca is starting a new election at term 1
+2015/03/17 10:30:22 raft: ce2a822cea30bfca became candidate at term 2
+2015/03/17 10:30:22 raft: ce2a822cea30bfca received vote from ce2a822cea30bfca at term 2
+2015/03/17 10:30:22 raft: ce2a822cea30bfca became leader at term 2
+2015/03/17 10:30:22 raft.node: ce2a822cea30bfca elected leader ce2a822cea30bfca at term 2
+2015/03/17 10:30:22 etcdserver: published {Name:default ClientURLs:[http://localhost:2379 http://localhost:4001]} to cluster 7e27652122e8b2ae
+
+------------------------
+
+Open another terminal:
+
+# Press enter to background etcd
+./etcdctl set mykey "this is awesome"
+./etcdctl get mykey
+
+
+[root@200248 etcd-v2.0.5-linux-amd64]# ./etcdctl set mykey "this is awesome"
+this is awesome
+[root@200248 etcd-v2.0.5-linux-amd64]# ./etcdctl get mykey
+this is awesome
+[root@200248 etcd-v2.0.5-linux-amd64]#
+
+
+===============================================
+
+3、生产化配置
+
+3.1 集群自动发现地址
+
+【参考文档：https://github.com/coreos/etcd/blob/master/Documentation/clustering.md】
+#生成服务发现用地址
+curl https://discovery.etcd.io/new?size=3
+
+#配置环境变量
+ETCD_DISCOVERY=https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+
+#启动.....
+
+$ etcd -name infra0 -initial-advertise-peer-urls http://10.0.1.10:2380 \
+  -listen-peer-urls http://10.0.1.10:2380 \
+  -discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+$ etcd -name infra1 -initial-advertise-peer-urls http://10.0.1.11:2380 \
+  -listen-peer-urls http://10.0.1.11:2380 \
+  -discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+$ etcd -name infra2 -initial-advertise-peer-urls http://10.0.1.12:2380 \
+  -listen-peer-urls http://10.0.1.12:2380 \
+  -discovery https://discovery.etcd.io/3e86b59982e49066c5d813af1c2e2579cbf573de
+
+
+#############################################
+也就是说，仍旧需要一个得到自己ip地址的脚本？
+
+好吧
+
+------------------------------------
+
+3.2 配置
+【参考文档：https://github.com/coreos/etcd/blob/master/Documentation/configuration.md】
+
+其实，几乎没什么好配置的，但是启动时的错误捕获倒是需要一个解决方案
+
+------------------------------------
+
+3.3 管理
+
+3.3.1 控制台管理界面
+【参考文档：https://github.com/coreos/etcd/tree/master/etcdctl】
+命令行级别的管理使用这个就OK了
+
+Setting Key Values/Retrieving a key value/Deleting a key/Watching for changes
+
+--------------------
+
+3.3.2 WEB管理界面
+【参考文档：https://github.com/henszey/etcd-browser】
+
+=============================================
+
+4、自启动脚本
+
+
+=============================================
+
+5、监控
+
+=============================================
+
+6、node.js方案
+
+【参考资料：https://github.com/stianeikeland/node-etcd】
+
+
+=============================================
+
+7、配置中心方案
+
+【参考资料：http://www.douban.com/note/479122791/】
+
+node.js+zookeeper+nconf方案
+
+=============================================
+
+8、dubbo服务发现，zk目录树结构设计
+【参考资料：http://www.tuicool.com/articles/yma6R3u】
+【参考资料：http://huyumin.iteye.com/blog/1912346】
+
+流程说明：
+
+服务提供者启动时
+向/dubbo/com.foo.BarService/providers目录下写入自己的URL地址。
+服务消费者启动时
+订阅/dubbo/com.foo.BarService/providers目录下的提供者URL地址。
+并向/dubbo/com.foo.BarService/consumers目录下写入自己的URL地址。
+监控中心启动时
+订阅/dubbo/com.foo.BarService目录下的所有提供者和消费者URL地址。
+支持以下功能：
+
+当提供者出现断电等异常停机时，注册中心能自动删除提供者信息。
+当注册中心重启时，能自动恢复注册数据，以及订阅请求。
+当会话过期时，能自动恢复注册数据，以及订阅请求。
+当设置<dubbo:registry check="false" />时，记录失败注册和订阅请求，后台定时重试。
+可通过<dubbo:registry username="admin" password="1234" />设置zookeeper登录信息。
+可通过<dubbo:registry group="dubbo" />设置zookeeper的根节点，不设置将使用无根树。
+支持*号通配符<dubbo:reference group="*" version="*" />，可订阅服务的所有分组和所有版本的提供者。
+
+

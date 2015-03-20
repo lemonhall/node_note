@@ -1,0 +1,476 @@
+1、项目地址
+https://github.com/twitter/zipkin
+
+
+================================================================
+
+2、下载
+git clone https://github.com/twitter/zipkin.git
+
+【安装JDK】
+
+包是使用scp上传到目标机器的
+
+tar zxvf jdk.tar.gz
+mv jdk/ /opt/
+
+sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 300
+sudo update-alternatives --install /usr/bin/jar jar /opt/jdk/bin/jar 300
+sudo update-alternatives --config  java
+
+vim /etc/profile
+export JAVA_HOME=/opt/jdk
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+
+验证
+java -version
+
+java version "1.7.0_60"
+Java(TM) SE Runtime Environment (build 1.7.0_60-b19)
+Java HotSpot(TM) 64-Bit Server VM (build 24.60-b09, mixed mode)
+
+================================================================
+
+3、依赖组件
+
+3.1 依赖twitter-server
+http://twitter.github.io/twitter-server/
+
+TwitterServer
+TwitterServer defines a template from which servers at Twitter are built. It provides common application components such as an administrative HTTP server, tracing, stats, etc. These features are wired in correctly for use in production at Twitter.
+
+
+------------------------------------------------------------
+3.2 依赖facebook的scribe
+https://github.com/facebookarchive/scribe
+
+
+
+------------------------------------------------------------
+3.3 依赖zk
+The ScribeSpanReceiver will register itself to a configurable ZooKeeper host and advertise on a configurable path (see the flags for details)
+
+【安装zookeeper】
+
+【参考资料1：http://www.iyunv.com/thread-18609-1-1.html】
+【参考资料2：http://my.oschina.net/u/1866130/blog/287363】
+
+http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/
+zk有依赖于jdk
+
+wget http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
+tar zxvf zookeeper-3.4.6.tar.gz
+mv zookeeper-3.4.6 /opt/zk
+mkdir tools
+mv jdk.tar.gz zookeeper-3.4.6.tar.gz tools/
+
+如果想把一个文件1的内容清空， 文件大小变成0， 又不删除这个文件，可以用：
+cat /dev/null > 文件1
+
+单机启用：
+cd /opt/zk/conf
+cp zoo_sample.cfg zoo.cfg
+cd ../bin
+./zkServer.sh start
+
+配置集群模式：三台机器上分别运行（一定要确保ping三个ip之间是正确的，FQDN的问题）
+
+echo '192.168.60.10  zk1' >>/etc/hosts
+echo '192.168.60.11  zk2' >>/etc/hosts
+echo '192.168.60.12  zk3' >>/etc/hosts
+
+cp /opt/zk/conf/zoo_sample.cfg /opt/zk/conf/zoo.cfg
+echo 'server.1=zk1:2888:3888' >> /opt/zk/conf/zoo.cfg
+echo 'server.2=zk2:2888:3888' >> /opt/zk/conf/zoo.cfg
+echo 'server.3=zk3:2888:3888' >> /opt/zk/conf/zoo.cfg
+
+mkdir /opt/zk/storage
+sed -i "s/\/tmp\/zookeeper/\/opt\/zk\/storage/g" /opt/zk/conf/zoo.cfg
+
+三台机器上分别执行：
+echo "1" > /opt/zk/storage/myid
+echo "2" > /opt/zk/storage/myid
+echo "3" > /opt/zk/storage/myid
+
+三台机器上分别运行：
+/opt/zk/bin/zkServer.sh start
+
+然后检查各个主机的状态是：
+/opt/zk/bin/zkServer.sh status
+
+------------------------------------------------------------------
+
+
+3.4 cassandra
+wget http://mirror.bit.edu.cn/apache/cassandra/2.1.3/apache-cassandra-2.1.3-bin.tar.gz
+
+3、启动
+bin/cassandra -f
+前台启动
+
+===================================================================
+
+4、启动shell
+./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 2.1.2 | CQL spec 3.2.0 | Native protocol v3]
+Use HELP for help.
+cqlsh>
+
+
+监听在9042端口
+
+===================================================================
+
+5、CQL查询语言
+http://cassandra.apache.org/doc/cql3/CQL.html
+
+2与3之间貌似不兼容
+
+===================================================================
+参考文档：http://wiki.apache.org/cassandra/GettingStarted
+
+6、开始一个简单的例子
+
+建立键空间：
+
+CREATE KEYSPACE mykeyspace
+WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+
+-----------------------------------------------
+
+使用键空间：
+USE mykeyspace;
+
+-----------------------------------------------
+
+建立users表：
+CREATE TABLE users (
+  user_id int PRIMARY KEY,
+  fname text,
+  lname text
+);
+
+-----------------------------------------------
+
+插入数据：
+INSERT INTO users (user_id,  fname, lname)
+  VALUES (1745, 'john', 'smith');
+INSERT INTO users (user_id,  fname, lname)
+  VALUES (1744, 'john', 'doe');
+INSERT INTO users (user_id,  fname, lname)
+  VALUES (1746, 'john', 'smith');
+
+-----------------------------------------------
+
+查询数据：
+SELECT * FROM users;
+
+-----------------------------------------------
+
+建立索引并查询：
+
+CREATE INDEX ON users (lname);
+
+SELECT * FROM users WHERE lname = 'smith';
+
+ user_id | fname | lname
+---------+-------+-------
+    1745 |  john | smith
+    1746 |  john | smith
+
+cassandra有二级索引，所以可以这么做，但是因为是基于HASH的索引，所以要做范围查询的时候这么做是否OK？呢？
+
+再说。。。
+
+
+===================================================================
+
+7、客户端问题
+
+http://wiki.apache.org/cassandra/ClientOptions
+
+node.js这边有且只有一个选择，今天是：2014-12-10号，就是官方驱动
+项目地址：https://github.com/datastax/nodejs-driver
+
+示例工程位置：ssh root@119.254.110.72
+之后上传到github上去
+
+mkdir node_cassandra
+
+vim package.json
+
+{
+  "name": "node-cassandra",
+  "version": "0.0.1",
+  "description": "sf express",
+  "dependencies": {
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git"
+  },
+  "readmeFilename": "Readme.md",
+  "bugs": {
+    "url": "https://github.com/visionmedia/co/issues"
+  },
+  "homepage": "https://github.com/visionmedia/co"
+}
+
+npm install cassandra-driver --save
+
+
+-----------------------------------------------
+
+客户端提供以下功能：
+
+Node discovery
+Configurable load balancing
+Transparent failover
+Tunability
+Paging
+Client-to-node SSL support
+Row streaming
+Prepared statements and query batches
+
+-----------------------------------------------
+
+基础用法：
+
+var cassandra = require('cassandra-driver');
+var client = new cassandra.Client({contactPoints: ['host1', 'h2'], keyspace: 'ks1'});
+var query = 'SELECT email, last_name FROM user_profiles WHERE key=?';
+client.execute(query, ['guy'], function(err, result) {
+  assert.ifError(err);
+  console.log('got user profile with email ' + result.rows[0].email);
+});
+
+-----------------------------------------------
+
+日志：
+client.on('log', function(level, className, message, furtherInfo) {
+  console.log('log event: %s -- %s', level, message);
+});
+
+===================================================================
+
+8、监控预警
+
+http://sematext.com/spm/
+
+服务很强大，但是。。。。。收费，基于云
+
+
+===================================================================
+
+9、生态环境
+参考链接：http://wiki.apache.org/cassandra/IntegrationPoints
+
+http://esper.codehaus.org/
+
+
+===================================================================
+
+10、硬件配置
+
+内存：4G最小，32G也OK
+CPU：8核心
+硬盘：最好是2块以上，不包括操作系统本身的那部分
+
+===================================================================
+
+11、总体评价
+
+功能上，可以提供原生的二级索引，有CQL可用，用户界面相当友好，无中心节点，可配置的一致性级别，非常强健
+但是问题在于国内应用较少，HBase也很好用，但是缺少cassandra的不少功能
+
+================================================================
+
+4、运行第一个例子---感性认识篇
+
+#编译的时候按照官方的案例，还是启动一台4G 4核心的机器为最佳
+#并且输入以下编译前参数
+export SBT_OPTS='-Xms512m -Xmx4096m -XX:MaxPermSize=1024m'
+
+#最简单的例子
+./bin/sbt "zipkin-example/run -zipkin.storage.anormdb.install=true -genSampleTraces=true"
+
+
+---------------------------------------------
+
+#打包生成安装包
+./bin/sbt zipkin-example/package-dist
+
+java -jar zipkin-example-1.2.0-SNAPSHOT.jar -zipkin.web.cacheResources=true -zipkin.storage.anormdb.install=true -genSampleTraces=true
+
+---------------------------------------------
+
+#查看帮助
+java -jar zipkin-example-1.2.0-SNAPSHOT.jar -help
+
+三月 19, 2015 4:10:39 下午 com.twitter.finagle.http.HttpMuxer$$anonfun$5 apply
+信息: HttpMuxer[/stats.json] = com.twitter.finagle.stats.OstrichExporter(<function1>)
+三月 19, 2015 4:10:39 下午 com.twitter.finagle.http.HttpMuxer$$anonfun$5 apply
+信息: HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(<function1>)
+failed for com.twitter.util.events.package$approxNumEvents$
+failed for com.twitter.util.events.package$sinkEnabled$
+usage: com.twitter.mycollector.Main [<flag>...]
+
+
+flags:
+  -admin.port=<:9990>: Admin http server port
+  -close.gracePeriod=<Duration.Top>: Default closable grace period (deprecated)
+  -genSampleTraces=<false>: Generate sample traces
+  -genTraces=<5>: Number of traces to generate
+  -help=<false>: Show this help
+  -log.append=<true>: If true, appends to existing logfile. Otherwise, file is truncated.
+  -log.async=<true>: Log asynchronously
+  -log.async.maxsize=<4096>: Max queue size for async logging
+  -log.level=<INFO>: Log level
+  -log.output=</dev/stderr>: Output file
+  -log.rollPolicy=<Never>: When or how frequently to roll the logfile. See com.twitter.logging.Policy#parse documentation for DSL details.
+  -log.rotateCount=<-1>: How many rotated logfiles to keep around
+  -maxDepth=<7>: Max depth of generated traces
+  -zipkin.receiver.scribe.addr=<:1490>: the address to listen on
+  -zipkin.receiver.scribe.categories=<zipkin>: a whitelist of categories to process
+  -zipkin.receiver.scribe.zk.path=</com/twitter/zipkin/receiver/scribe>: the zookeeper path to announce on. blank does not announce
+  -zipkin.storage.anormdb.db=<sqlite::memory:>: JDBC location URL for the AnormDB
+  -zipkin.storage.anormdb.install=<false>: Create the tables
+  -zipkin.web.cacheResources=<false>: cache static resources and mustache templates
+  -zipkin.web.pinTtl=<30.days>: Length of time pinned traces should exist
+  -zipkin.web.port=<:8080>: Listening port for the zipkin web frontend
+  -zipkin.web.query.dest=<127.0.0.1:9411>: Location of the query server
+  -zipkin.web.resourcesRoot=<zipkin-web/src/main/resources>: on-disk location of resources
+  -zipkin.web.rootUrl=<http://localhost:8080/>: Url where the service is located
+  -zipkin.zookeeper.credentials=<[none]>: Optional credentials of the form 'username:password'
+  -zipkin.zookeeper.location=<:2181>: Location of the ZooKeeper server
+global flags:
+  -com.twitter.finagle.asyncDns=<true>: Resolve Internet addresses asynchronously.
+  -com.twitter.finagle.exception.host=<localhost:1463>: Host to scribe exception messages
+  -com.twitter.finagle.exp.scheduler=<local>: Which scheduler to use for futures <local> | <lifo> | <bridged>[:<num workers>] | <forkjoin>[:<num workers>]
+  -com.twitter.finagle.loadbalancer.defaultBalancer=<heap>: Default load balancer
+  -com.twitter.finagle.loadbalancer.exp.decayTime=<10.seconds>: The window of latency observations
+  -com.twitter.finagle.loadbalancer.exp.loadMetric=<leastReq>: Metric used to measure load across endpoints (leastReq | ewma)
+  -com.twitter.finagle.loadbalancer.perHostStats=<false>: enable/default per-host stats.
+	When enabled,the configured stats receiver will be used,
+	or the loaded stats receiver if none given.
+	When disabled, the configured stats receiver will be used,
+	or the NullStatsReceiver if none given.
+  -com.twitter.finagle.mux.gracefulShutdownEnabled=<true>: Graceful shutdown enabled.  Temporary measure to allow servers to deploy without hurting clients.
+  -com.twitter.finagle.mux.lease.exp.drainerDebug=<false>: GC drainer debug log (verbose)
+  -com.twitter.finagle.mux.lease.exp.drainerDiscountRange=<52428800.bytes,629145600.bytes>: Range of discount
+  -com.twitter.finagle.mux.lease.exp.drainerEnabled=<false>: GC drainer enabled
+  -com.twitter.finagle.mux.lease.exp.drainerPercentile=<95>: GC drainer cutoff percentile
+  -com.twitter.finagle.mux.lease.exp.nackOnExpiredLease=<false>: nack when the lease has expired
+  -com.twitter.finagle.netty3.numWorkers=<8>: Size of netty3 worker pool
+  -com.twitter.finagle.serverset2.chatty=<false>: Log resolved ServerSet2 addresses
+  -com.twitter.finagle.serverset2.client.chatty=<false>: Track ZooKeeper calls and responses
+  -com.twitter.finagle.stats.ostrichFilterRegex=<>: Ostrich filter regex
+  -com.twitter.finagle.stats.statsFilter=<>: Comma-separated regexes that indicate which metrics to filter out
+  -com.twitter.finagle.tracing.debugTrace=<false>: Print all traces to the console.
+  -com.twitter.finagle.zipkin.host=<localhost:1463>: Host to scribe traces to
+  -com.twitter.finagle.zipkin.initialSampleRate=<0.001>: Initial sample rate
+  -com.twitter.jvm.numProcs=<4.0>: number of logical cores
+  -com.twitter.newZk=<true>: If set to true, the new zk2 com.twitter.finagle.Resolver is used. Otherwise, an older, less reliable zookeeper client is used.
+  -com.twitter.server.announcerMap=<>: A list mapping service names to announcers (gizmoduck=zk!/gizmoduck)
+  -com.twitter.server.promoteBeforeServing=<true>: Promote objects in young generation to old generation before serving requests. May shorten the following gc pauses by avoiding the copying back and forth between survivor spaces of a service's long lived objects.
+  -com.twitter.server.resolverMap=<>: A list mapping service names to resolvers (gizmoduck=zk!/gizmoduck)
+  -socksPassword=<>: SOCKS password
+  -socksProxyHost=<>: SOCKS proxy host
+  -socksProxyPort=<0>: SOCKS proxy port
+  -socksUsername=<>: SOCKS username
+
+
+================================================================
+
+5、官方的quickstart
+
+This doc describes a quickstart to running zipkin with zookeeper and
+cassandra, which is the configuration most commonly used.  All of
+these services are running on one machine in the setup described here.
+It presumes you have a clean-ish Ubuntu 12.04 install, and a user with
+sudo capabilities (eg user is in wheel group and wheel group is
+allowed in /etc/sudoers)
+
+This includes building Zipkin from the current master branch from Github.
+Aaron Gooch March 11, 2013 - heavily based on the centos6-quickstart.txt (now deleted)
+
+--------------------------------
+Groundwork - perform this as ROOT
+--------------------------------
+
+1. Download and install Cassandra
+#Add the Datastax REPO, http://www.datastax.com/docs/quick_start/cassandra_quickstart#
+
+vi /etc/apt/sources.list
+#add
+deb http://debian.datastax.com/community stable main
+#save, then get the key
+curl -L http://debian.datastax.com/debian/repo_key | sudo apt-key add -
+
+2. Install Cassandra
+sudo apt-get update
+sudo apt-get install dsc12
+
+3. Install Java 7 JDK
+#we aren't a java shop so openjdk is fine for us
+sudo apt-get install openjdk-6-jre-headless
+
+4. Set up JAVA_HOME path var
+#in .bashrc or equivalent 
+export JAVA_HOME=/etc/alternatives/java
+export PATH=JAVA_HOME/bin:$PATH
+
+5. Start cassandra 
+sudo service cassandra start
+
+6. Install Zookeeper (optional)
+#I installed to /opt/zookeeper, follow the instructions
+http://zookeeper.apache.org/doc/trunk/zookeeperStarted.html
+
+8. Install GIT
+sudo apt-get install git
+
+--------------------------------
+Zipkin
+--------------------------------
+
+9. Install Zipkin
+
+mkdir -p ~/apps/
+git clone https://github.com/twitter/zipkin.git
+
+cd zipkin
+
+# note the 4gig memory usage. You can use less but your build may fail.
+export SBT_OPTS='-Xms512m -Xmx4096m -XX:MaxPermSize=1024m'
+#start a sbt shell and compile the 3 projects we need to run
+bin/sbt <enter>
+> project zipkin-web
+> compile
+#and wait, then repeat for zipkin-collector and zipkin-query ie project zipkin-collector <enter> compile <enter>
+> project zipkin-collector
+> compile
+#wait
+> project zipkin-query
+> compile
+#wait
+
+10. Start zookeeper (optional)
+
+cd <zookeeper install location>
+bin/zkServer.sh start
+
+11. Run it!
+
+bin/collector cassandra
+bin/query cassandra
+bin/web
+
+12. browse to http://localhost:8080/
+
+
+================================================================
+
