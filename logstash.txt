@@ -1,3 +1,6 @@
+lemonhall 2015年3月24日 第二版本  更加生产化，加入elasticsearch的centos 6.6安装笔记，并加入了node的示例工程
+lemonhall 2014年12月 第一版本
+
 1、安装JDK
 wget http://119.254.108.84:8080/jdk.tar.gz
 tar zxvf jdk.tar.gz
@@ -28,17 +31,105 @@ wget https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz
 
 解压：
 tar zxvf logstash-1.4.2.tar.gz
-cd logstash-1.4.2
+mv logstash-1.4.2 /opt/logstash
+cd /opt/logstash
 
 运行：
 bin/logstash -e 'input { stdin { } } output { stdout {} }'
 
+将bin加入PATH
+vim /etc/profile
+
+export LOGSTASH_HOME=/opt/logstash
+export LOGSTASH=$LOGSTASH_HOME/bin
+export PATH=$LOGSTASH:$PATH
+
+source /etc/profile
+
 ====================================================================================================
 
-3、kibana
+3、安装elasticsearch 
+CENTOS 6.6
+
+wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.5.0.noarch.rpm
+
+----------------------
+
+安装之：
+[root@200245 ~]# rpm -i elasticsearch-1.5.0.noarch.rpm
+### NOT starting on installation, please execute the following statements to configure elasticsearch to start automatically using chkconfig
+ sudo /sbin/chkconfig --add elasticsearch
+### You can start elasticsearch by executing
+ sudo service elasticsearch start
+[root@200245 ~]#
+
+----------------------
+自启动：
+ sudo /sbin/chkconfig --add elasticsearch
+
+----------------------
+启动服务：
+ sudo service elasticsearch start
+
+----------------------
+校验是否启动成功了
+
+netstat -nlp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address               Foreign Address             State       PID/Program name
+tcp        0      0 0.0.0.0:22                  0.0.0.0:*                   LISTEN      1412/sshd
+tcp        0      0 127.0.0.1:631               0.0.0.0:*                   LISTEN      1373/cupsd
+tcp        0      0 127.0.0.1:25                0.0.0.0:*                   LISTEN      1498/master
+tcp        0      0 :::9300                     :::*                        LISTEN      16359/java
+tcp        0      0 :::22                       :::*                        LISTEN      1412/sshd
+tcp        0      0 ::1:631                     :::*                        LISTEN      1373/cupsd
+tcp        0      0 ::1:25                      :::*                        LISTEN      1498/master
+tcp        0      0 :::9200                     :::*                        LISTEN      16359/java
+udp        0      0 0.0.0.0:631                 0.0.0.0:*                               1373/cupsd
+udp        0      0 192.168.200.242:123         0.0.0.0:*                               1421/ntpd
+udp        0      0 127.0.0.1:123               0.0.0.0:*                               1421/ntpd
+udp        0      0 0.0.0.0:123                 0.0.0.0:*                               1421/ntpd
+udp        0      0 :::54328                    :::*                                    16359/java
+udp        0      0 ::1:123                     :::*                                    1421/ntpd
+udp        0      0 fe80::250:56ff:febc:e6a1:123 :::*                                    1421/ntpd
+udp        0      0 :::123                      :::*                                    1421/ntpd
+
+---------------------------------
+数据存在：
+/var/lib/elasticsearch/elasticsearch
+
+
+---------------------------------
+日志存在：
+ls
+elasticsearch_index_indexing_slowlog.log  elasticsearch_index_search_slowlog.log  elasticsearch.log
+[root@200245 elasticsearch]# pwd
+/var/log/elasticsearch
+
+---------------------------------
+启动文件存在：
+/usr/share/elasticsearch
+
+---------------------------------
+不行就locate，谢谢，yum install mlocate之后updatedb，然后locate elasticseach
+
+
+
+====================================================================================================
+
+4、kibana
+项目主页：https://www.elastic.co/products/kibana
+
 下载：
 wget https://download.elasticsearch.org/kibana/kibana/kibana-3.1.2.tar.gz
+wget https://download.elasticsearch.org/kibana/kibana/kibana-4.0.1-linux-x64.tar.gz
 
+解压：
+tar zxvf kibana-4.0.1-linux-x64.tar.gz
+
+
+----------------------------------------------
+以下文档已经过期，是针对kibana-3.1.2的
 解压：
 yum install epel-release
 yum install nginx
@@ -55,11 +146,26 @@ cp -r kibana-3.1.2 /usr/share/nginx/kinana
 service nginx restart
 
 http://119.254.111.177:8080/index.html#/dashboard/file/logstash.json
+----------------------------------------------
+以下为官网文档，针对Kibana 4
+
+1、Download and unzip Kibana 4
+
+2、Extract your archive 
+
+3、Open config/kibana.yml in an editor 
+
+4、Set the elasticsearch_url to point at your Elasticsearch instance 
+
+5、Run ./bin/kibana (or bin\kibana.bat on windows) 
+
+6、Point your browser at http://yourhost.com:5601 Check out the README.md
 
 ====================================================================================================
 
-4、logstash和node.js的库配合
+5、logstash和node.js的库配合
 
+#对应的例子文档，为官网的
 https://github.com/nomiddlename/log4js-node/blob/master/examples/logstashUDP.js
 
 var log4js = require('../lib/log4js');
@@ -102,6 +208,16 @@ log4js.configure({
 var logger = log4js.getLogger("myLogger");
 logger.info("Test log message %s", "arg1", "arg2");
 
+npm install log4js --save
+npm WARN package.json WXPiao@0.0.1 No description
+npm WARN package.json WXPiao@0.0.1 No repository field.
+npm WARN package.json WXPiao@0.0.1 No README data
+log4js@0.6.22 node_modules/log4js
+├── semver@1.1.4
+├── async@0.2.10
+└── readable-stream@1.0.33 (isarray@0.0.1, inherits@2.0.1, string_decoder@0.10.31, core-util-is@1.0.1)
+
+
 -----------------------------------------
 http://www.logstash.net/docs/1.4.2/inputs/udp
 
@@ -126,12 +242,35 @@ output {
 
 另存为logstash-simple.conf
 
+input {
+  udp {
+    port  => 10001
+    codec => json
+  }
+}
+output {
+  elasticsearch {
+    host => localhost
+  }
+}
+
+另存为logstash-simple.conf
+===>
+解释：port，监听在10001端口，然后因为log4js的输出实际上是json，所以使用json的codec，作用在输入上
+之后elasticsearch就可以对level来建立索引了
+
+这个对于日志管理来说至为关键
+
 bin/logstash -f logstash-simple.conf
+
+[root@200245 bin]# vim logstash-simple.conf
+[root@200245 bin]# ./logstash -f logstash-simple.conf
+Using milestone 2 input plugin 'udp'. This plugin should be stable, but if you see strange behavior, please let us know! For more information on plugin milestones, see http://logstash.net/docs/1.4.2/plugin-milestones {:level=>:warn}
 
 
 ====================================================================================================
 
-5、elasticsearch的一个错误
+6、elasticsearch的一个错误
 
 [Spectral] Caught exception while handling client http traffic, closing connection [id: 0x6e14c2ea, /113.102.162.224:16640 => /192.168.60.7:9200]
 org.elasticsearch.common.netty.handler.codec.frame.TooLongFrameException: An HTTP line is larger than 4096 bytes.

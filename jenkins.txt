@@ -1,0 +1,129 @@
+lemonhall 于 2015年3月25日 周三  11:39
+
+TODOS:
+
+============================================================
+
+1、项目地址
+http://jenkins-ci.org/
+
+============================================================
+
+2、下载
+wget http://mirrors.hust.edu.cn/apache/tomcat/tomcat-7/v7.0.59/bin/apache-tomcat-7.0.59.tar.gz
+wget http://mirrors.jenkins-ci.org/war/latest/jenkins.war
+
+
+============================================================
+
+3、安装
+tar zxvf apache-tomcat-7.0.59.tar.gz
+mv apache-tomcat-7.0.59 /opt/tomcat
+cp jenkins.war /opt/tomcat/webapps/
+
+/opt/tomcat/bin
+./startup.sh
+
+启动：
+http://192.168.200.242:8080/jenkins/
+
+
+============================================================
+
+
+4、配置+调教
+
+插件更新不起作用？
+http://mirrors.jenkins-ci.org/status.html
+去这里看一下镜像的地址，然后选德国的那个
+
+	
+Git Client Plugin
+Shared library plugin for other Git related Jenkins plugins.
+1.16.1
+
+Gitlab Plugin
+https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin
+
+This plugin is a build trigger that makes GitLab think Jenkins is a GitLab CI. 
+
+
+============================================================
+
+5、手工构建步骤
+
+1、创建一个新任务====>输入名称====>自由风格
+
+2、构建====>构建command shell
+
+npm install
+npm test
+
+保存
+
+3、git 插件
+https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin
+
+4、安装完git插件后输入项目地址
+另外需要将jenkins的ssh加入到gitlab里面去
+
+5、构建后的动作里输入
+Publish JUnit test result report
+
+然后输入test-reports.xml
+
+6、之后就可以看构建的console输出
+
+7、要注意checkout的git的时候需要认证的
+
+
+============================================================
+
+6、构建自动触发器
+
+Build when a change is pushed to GitLab. GitLab CI Service URL: http://192.168.200.242:8080/jenkins/project/gondor	Help for feature: Build when a change is pushed to GitLab. GitLab CI Service URL: http://192.168.200.242:8080/jenkins/project/gondor
+ 	Build on Merge Request Events		
+ 	Build on Push Events		
+ 	Rebuild open Merge Requests on Push Events		
+ 	Set build description to build cause (eg. Merge request or Git Push )		
+ 	Add note with build status on merge requests		
+ 	All allow all branches (Ignoring Filtered Branches)		
+ 	Filter branches
+
+--------------------------
+
+然后在GitLab配置一下GitLab CI的service
+
+token随便填写
+URL填写上面的那个：http://192.168.200.242:8080/jenkins/project/gondor
+
+OK，push之后就开始了自动构建
+
+
+============================================================
+
+7、一些依赖
+
+jenkins上面需要安装git
+需要制定hosts
+需要生成publickey然后上传到GitLabs的ssh里面去
+最后设置好触发器之后就可以开始工作了
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

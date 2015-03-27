@@ -1,0 +1,125 @@
+lemonhall 于 2015年3月23日 周一 下午 5:33
+
+TODOS:
+*安装jenkins的文档里，带上java的安装吧
+*全部跑通一遍，然后再加一个最佳实践的工程
+*加上图和PDF文档输出
+=========================================================================
+
+【参考文档：https://blog.dylants.com/2013/06/21/jenkins-and-node/】
+
+5.1 安装 jenkins
+
+brew install jenkins
+==> Downloading http://mirrors.jenkins-ci.org/war/1.601/jenkins.war
+######################################################################## 100.0%
+==> jar xvf jenkins.war
+==> Caveats
+Note: When using launchctl the port will be 8080.
+
+To have launchd start jenkins at login:
+    ln -sfv /usr/local/opt/jenkins/*.plist ~/Library/LaunchAgents
+Then to load jenkins now:
+    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.jenkins.plist
+Or, if you don't want/need launchctl, you can just run:
+    jenkins
+==> Summary
+🍺  /usr/local/Cellar/jenkins/1.601: 6 files,  66M, built in 6.5 minutes
+lemonhall@HalldeMacBook-Pro:~$
+
+
+
+运行 jenkins
+
+jenkins
+
+
+Running from: /usr/local/Cellar/jenkins/1.601/libexec/jenkins.war
+webroot: $user.home/.jenkins
+三月 23, 2015 5:02:47 下午 winstone.Logger logInternal
+信息: Beginning extraction from war file
+三月 23, 2015 5:02:48 下午 org.eclipse.jetty.util.log.JavaUtilLog info
+信息: jetty-winstone-2.8
+三月 23, 2015 5:02:50 下午 org.eclipse.jetty.util.log.JavaUtilLog info
+信息: NO JSP Support for , did not find org.apache.jasper.servlet.JspServlet
+Jenkins home directory: /Users/lemonhall/.jenkins found at: $user.home/.jenkins
+三月 23, 2015 5:02:51 下午 org.eclipse.jetty.util.log.JavaUtilLog info
+信息: Started SelectChannelConnector@0.0.0.0:8080
+三月 23, 2015 5:02:51 下午 winstone.Logger logInternal
+信息: Winstone Servlet Engine v2.0 running: controlPort=disabled
+三月 23, 2015 5:02:51 下午 jenkins.InitReactorRunner$1 onAttained
+信息: Started initialization
+三月 23, 2015 5:03:02 下午 jenkins.InitReactorRunner$1 onAttained
+信息: Listed all plugins
+三月 23, 2015 5:03:02 下午 jenkins.InitReactorRunner$1 onAttained
+信息: Prepared all plugins
+三月 23, 2015 5:03:02 下午 jenkins.InitReactorRunner$1 onAttained
+信息: Started all plugins
+三月 23, 2015 5:03:02 下午 jenkins.InitReactorRunner$1 onAttained
+信息: Augmented all extensions
+三月 23, 2015 5:03:02 下午 jenkins.InitReactorRunner$1 onAttained
+信息: Loaded all jobs
+三月 23, 2015 5:03:06 下午 org.jenkinsci.main.modules.sshd.SSHD start
+信息: Started SSHD at port 52706
+三月 23, 2015 5:03:06 下午 hudson.model.AsyncPeriodicWork$1 run
+信息: Started Download metadata
+三月 23, 2015 5:03:06 下午 jenkins.InitReactorRunner$1 onAttained
+信息: Completed initialization
+三月 23, 2015 5:03:06 下午 hudson.WebAppMain$3 run
+信息: Jenkins is fully up and running
+三月 23, 2015 5:03:08 下午 hudson.model.UpdateSite updateData
+严重: ERROR: Signature verification failed in update site &#039;default&#039; <a href='#' class='showDetails'>(show details)</a><pre style='display:none'>java.security.cert.CertPathValidatorException: timestamp check failed
+        at sun.security.provider.certpath.PKIXMasterCertPathValidator.validate(PKIXMasterCertPathValidator.java:129)
+        at sun.security.provider.certpath.PKIXCertPathValidator.validate(PKIXCertPathValidator.java:212)
+        at sun.security.provider.certpath.PKIXCertPathValidator.validate(PKIXCertPathValidator.java:140)
+        at sun.security.provider.certpath.PKIXCertPathValidator.engineValidate(PKIXCertPathValidator.java:79)
+        at java.security.cert.CertPathValidator.validate(CertPathValidator.java:292)
+        at org.jvnet.hudson.crypto.CertificateUtil.validatePath(CertificateUtil.java:93)
+        at jenkins.util.JSONSignatureValidator.verifySignature(JSONSignatureValidator.java:76)
+        at hudson.model.UpdateSite.verifySignature(UpdateSite.java:219)
+        at hudson.model.UpdateSite.updateData(UpdateSite.java:198)
+        at hudson.model.UpdateSite.updateDirectlyNow(UpdateSite.java:170)
+        at hudson.PluginManager.doCheckUpdatesServer(PluginManager.java:890)
+        at jenkins.model.DownloadSettings$DailyCheck.execute(DownloadSettings.java:118)
+        at hudson.model.AsyncPeriodicWork$1.run(AsyncPeriodicWork.java:53)
+        at java.lang.Thread.run(Thread.java:745)
+Caused by: java.security.cert.CertificateExpiredException: NotAfter: Wed Jan 28 05:04:07 CST 2015
+        at sun.security.x509.CertificateValidity.valid(CertificateValidity.java:274)
+        at sun.security.x509.X509CertImpl.checkValidity(X509CertImpl.java:629)
+        at sun.security.provider.certpath.BasicChecker.verifyTimestamp(BasicChecker.java:190)
+        at sun.security.provider.certpath.BasicChecker.check(BasicChecker.java:144)
+        at sun.security.provider.certpath.PKIXMasterCertPathValidator.validate(PKIXMasterCertPathValidator.java:119)
+        ... 13 more
+</pre>
+三月 23, 2015 5:03:08 下午 hudson.model.AsyncPeriodicWork$1 run
+信息: Finished Download metadata. 1,970 ms
+
+访问jenkins
+
+http://localhost:8080/
+
+
+1、创建一个新任务====>输入名称====>自由风格
+
+2、构建====>构建command shell
+
+npm install
+npm test
+
+保存
+
+3、git 插件
+https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin
+
+
+4、安装完git插件后输入项目地址
+
+
+5、构建后的动作里输入
+Publish JUnit test result report
+
+然后输入test-reports.xml
+
+6、之后就可以看构建的console输出
+
+7、要注意checkout的git的时候需要认证的

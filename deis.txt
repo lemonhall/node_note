@@ -1,0 +1,19 @@
+1、装viturlbox
+
+
+=================================================
+
+2、装vargrant
+http://www.vagrantup.com/downloads
+
+下载dmg即可
+
+=================================================
+
+3、参考文档
+http://docs.deis.io/en/latest/installing_deis/vagrant/
+
+vagrant plugin install vagrant-triggers
+
+
+

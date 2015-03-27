@@ -21,6 +21,13 @@ yum update
 =============================================
 2、安装常用工具
 yum install vim wget
+yum install openssh-clients
+
+yum install tmux
+#防止断线
+tmux #开启tmux
+tmux ls #显示已有tmux列表（C-b s）
+tmux attach-session -t 数字 #选择tmux
 
 =============================================
 3、4 安装检测工具
@@ -109,6 +116,26 @@ root@i-5ygfjuik:~#
 
 然后再切一下就回去咯~~~~爽歪歪
 
+
+----------------------------
+设定一下默认启动的版本号，比如iojs
+
+nvm alias default iojs
+
+重启机器后，可以看到
+
+nvm list
+
+[root@200245 ~]# nvm list
+->  iojs-v1.6.1
+default -> iojs (-> iojs-v1.6.1)
+node -> stable (-> N/A) (default)
+iojs -> iojs-v1.6 (-> iojs-v1.6.1) (default)
+[root@200245 ~]#
+
+反正重启机器之后node可启动
+
+
 ===============================================
 2、安装maven
 wget http://mirror.bit.edu.cn/apache/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
@@ -120,3 +147,171 @@ vim /etc/profile
 export M2_HOME=/opt/maven
 export M2=$M2_HOME/bin
 export PATH=$M2:$PATH
+
+
+===============================================
+
+2、安装ntp
+
+配置参考资料：
+http://www.uptimemadeeasy.com/networking/setup-ntp-on-centos-linux/
+
+yum install ntp
+
+chkconfig --list ntpd
+chkconfig ntpd on
+
+cat >> /etc/ntp.conf <<EOF
+server 0.north-america.pool.ntp.org
+server 1.north-america.pool.ntp.org
+server 2.north-america.pool.ntp.org
+server 3.north-america.pool.ntp.org
+EOF
+
+cat >> /etc/ntp/step-tickers <<EOF
+0.north-america.pool.ntp.org
+1.north-america.pool.ntp.org
+2.north-america.pool.ntp.org
+3.north-america.pool.ntp.org
+EOF
+
+ntpdate -db 0.north-america.pool.ntp.org
+
+===============================================
+
+3、时区校准
+
+http://www.jb51.net/os/RedHat/139029.html
+
+
+用ROOT用户登陆系统
+复制相应的时区文件，替换CentOS系统时区文件；或者创建链接文件
+
+cp /usr/share/zoneinfo/$主时区/$次时区 /etc/localtime
+
+在中国可以使用：
+cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+然后reboot重启系统，重启好后再用date命令查看一下系统的当前时间是否以前变成了中国的当前时间。
+
+===============================================
+
+4、防火墙
+
+centos 6.6的系统里，防火墙是iptables
+
+直接iptables --list之后发现比较麻烦，所以需要搞定它
+
+service iptables stop即可
+
+=============================================
+
+5、检查DNS
+
+nameserver 192.168.200.71
+
+=============================================
+
+6、hosts指向
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+=============================================
+7、安装nginx
+
+[root@200245 ~]# chkconfig nginx --list
+nginx           0:关闭  1:关闭  2:关闭  3:关闭  4:关闭  5:关闭  6:关闭
+[root@200245 ~]#
+
+=============================================
+
+8、部署的安全问题
+
+http://segmentfault.com/blog/news/1190000002425164
+
+useradd -s /bin/bash -m -d /home/node -c "node.js" node
+
+passwd node
+n0d3@w3pia0
+
+然后需要部署到3000端口，之后用nginx作转发
+
+=============================================
+9、开新工程
+
+vim package.json
+
+{
+  "name": "WXPiao",
+  "version": "0.0.1",
+  "description": "",
+  "repository": "",
+  "author": "lemonhall",
+  "license": "Commercial",
+  "dependencies": {
+  }
+}
+
+
+npm install nock --save
+
+然后引用nock
+
+【参考文档：https://www.npmjs.com/package/nock#readme】
+
+例子：
+
+-----------------------------
+
+var nock = require('nock');
+
+var scope = nock('http://www.google.com')
+                .get('/')
+                .reply(200, 'Hello from Google!');
+
+-----------------------------
+装一个request试试
+
+npm install request --save
+
+
+var request = require('request');
+request('http://www.google.com', function (error, response, body) {
+   if (!error && response.statusCode == 200) {
+    console.log(body);
+   }
+});
+
+最终的文件长相是：
+
+var nock    = require('nock');
+var request = require('request');
+var scope   = nock('http://www.google.com')
+              .get('/')
+              .reply(200, 'Hello from Google!');
+
+request('http://www.google.com', function (error, response, body) {
+   if (!error && response.statusCode == 200) {
+    console.log(body);
+   }
+});
+
+-----------------------------
+
+运行之后的结果是：
+
+[root@200245 nock_demo]# node test
+Hello from Google!
+[root@200245 nock_demo]#
+
+达到了预期
+
+
+-----------------------------
+=============================================
+
+
+
+
+=============================================
