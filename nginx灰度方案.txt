@@ -1,0 +1,335 @@
+http {
+
+        split_clients "${remote_addr}" $redirectSite {
+            50% "1";
+            50% "0";
+        }
+
+        upstream tts_V6 {
+                server 127.0.0.1:3000 max_fails=1 fail_timeout=60;
+        }
+
+        upstream tts_V7 {
+               server 127.0.0.1:3001 max_fails=1 fail_timeout=60;
+        }
+
+        server {
+            listen 80;
+            server_name  *;
+            access_log  logs/test.taotaosou.com.log  main buffer=32k;
+            #match cookie
+            #set $group "default";
+            if ($redirectSite = "1") {
+                    set $group tts_V6;
+            }
+            if ($redirectSite = "0") {
+                    set $group tts_V7;
+            }
+            location / {                       
+                    proxy_pass http://$group;
+                    proxy_set_header   Host             $host;
+                    proxy_set_header   X-Real-IP        $remote_addr;
+                    proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+                    index  index.html index.htm;
+           }
+        }
+}
+
+==========================================================
+0、安装依赖
+yum install gcc gcc-c++ make openssl-devel
+
+
+==========================================================
+
+1、下载nginx
+http://wiki.nginx.org/Install
+wget http://nginx.org/download/nginx-1.8.0.tar.gz
+
+==========================================================
+
+2、编译
+./configure
+make
+
+==========================================================
+
+3、安装默认目录
+/usr/local/nginx/
+
+==========================================================
+
+4、配置文件
+
+#!/bin/sh 
+# 
+# nginx - this script starts and stops the nginx daemin 
+# 
+# chkconfig: - 85 15 
+# description: Nginx is an HTTP(S) server, HTTP(S) reverse \ 
+# proxy and IMAP/POP3 proxy server 
+# processname: nginx 
+# config: /usr/local/nginx/conf/nginx.conf 
+# pidfile: /usr/local/nginx/logs/nginx.pid 
+
+# Source function library. 
+. /etc/rc.d/init.d/functions 
+
+# Source networking configuration. 
+. /etc/sysconfig/network 
+
+# Check that networking is up. 
+[ "$NETWORKING" = "no" ] && exit 0 
+
+nginx="/usr/local/nginx/sbin/nginx" 
+prog=$(basename $nginx) 
+
+NGINX_CONF_FILE="/usr/local/nginx/conf/nginx.conf" 
+
+lockfile=/var/lock/subsys/nginx 
+
+start() { 
+[ -x $nginx ] || exit 5 
+[ -f $NGINX_CONF_FILE ] || exit 6 
+echo -n $"Starting $prog: " 
+daemon $nginx -c $NGINX_CONF_FILE 
+retval=$? 
+echo 
+[ $retval -eq 0 ] && touch $lockfile 
+return $retval 
+} 
+
+stop() { 
+echo -n $"Stopping $prog: " 
+killproc $prog -QUIT 
+retval=$? 
+echo 
+[ $retval -eq 0 ] && rm -f $lockfile 
+return $retval 
+} 
+
+restart() { 
+configtest || return $? 
+stop 
+start 
+} 
+
+reload() { 
+configtest || return $? 
+echo -n $"Reloading $prog: " 
+killproc $nginx -HUP 
+RETVAL=$? 
+echo 
+} 
+
+force_reload() { 
+restart 
+} 
+
+configtest() { 
+$nginx -t -c $NGINX_CONF_FILE 
+} 
+
+rh_status() { 
+status $prog 
+} 
+
+rh_status_q() { 
+rh_status >/dev/null 2>&1 
+} 
+
+case "$1" in 
+start) 
+rh_status_q && exit 0 
+$1 
+;;
+stop)
+rh_status_q || exit 0 
+$1 
+;;
+restart|configtest)
+$1 
+;;
+
+reload)
+rh_status_q || exit 7 
+$1 
+;;
+force-reload)
+force_reload 
+;;
+status)
+rh_status 
+;;
+condrestart|try-restart)
+rh_status_q || exit 0 
+;;
+*) 
+
+echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload|configtest}" 
+exit 2
+;; 
+esac 
+
+
+==========================================================
+
+5、安装配置文件到/etc/init.d/nginx
+
+==========================================================
+
+6、chmod +x /etc/init.d/nginx
+
+==========================================================
+
+7、启动
+
+[root@i-v788f9x0 init.d]# /etc/init.d/nginx status
+nginx.service - SYSV: Nginx is an HTTP(S) server, HTTP(S) reverse proxy and IMAP/POP3 proxy server
+   Loaded: loaded (/etc/rc.d/init.d/nginx)
+   Active: active (running) since 四 2015-05-07 11:12:11 CST; 41s ago
+  Process: 8159 ExecStart=/etc/rc.d/init.d/nginx start (code=exited, status=0/SUCCESS)
+ Main PID: 8071 (nginx)
+   CGroup: /system.slice/nginx.service
+           ‣ 8071 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
+
+5月 07 11:12:11 i-v788f9x0 systemd[1]: Started SYSV: Nginx is an HTTP(S) server, HTTP(S) reverse proxy and IMAP/POP3 proxy server.
+[root@i-v788f9x0 init.d]# /etc/init.d/nginx status
+nginx.service - SYSV: Nginx is an HTTP(S) server, HTTP(S) reverse proxy and IMAP/POP3 proxy server
+   Loaded: loaded (/etc/rc.d/init.d/nginx)
+   Active: active (running) since 四 2015-05-07 11:12:11 CST; 43s ago
+  Process: 8159 ExecStart=/etc/rc.d/init.d/nginx start (code=exited, status=0/SUCCESS)
+ Main PID: 8071 (nginx)
+   CGroup: /system.slice/nginx.service
+           ‣ 8071 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
+
+5月 07 11:12:11 i-v788f9x0 systemd[1]: Started SYSV: Nginx is an HTTP(S) server, HTTP(S) reverse proxy and IMAP/POP3 proxy server.
+[root@i-v788f9x0 init.d]# ps aux | grep nginx
+root      8071  0.0  0.0  24796   760 ?        Ss   11:09   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
+nobody    8073  0.0  0.1  25232  1464 ?        S    11:09   0:00 nginx: worker process
+root      8201  0.0  0.0 112656   936 pts/0    D+   11:12   0:00 grep --color=auto nginx
+
+
+==========================================================
+
+8、nvm安装node
+https://github.com/creationix/nvm
+
+curl https://raw.githubusercontent.com/creationix/nvm/v0.25.1/install.sh | bash
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  7045  100  7045    0     0   1357      0  0:00:05  0:00:05 --:--:--  1791
+=> Downloading nvm as script to '/root/.nvm'
+
+=> Appending source string to /root/.bashrc
+=> Close and reopen your terminal to start using nvm
+
+
+nvm install iojs
+######################################################################## 100.0%
+WARNING: checksums are currently disabled for io.js
+Now using io.js v2.0.0 (npm v2.9.0)
+[root@i-v788f9x0 ~]#
+
+
+
+[root@i-v788f9x0 ~]# nvm use iojs
+Now using io.js v2.0.0 (npm v2.9.0)
+[root@i-v788f9x0 ~]# nvm alias default iojs
+default -> iojs (-> iojs-v2.0.0)
+[root@i-v788f9x0 ~]#
+[root@i-v788f9x0 ~]#
+[root@i-v788f9x0 ~]#
+
+
+==========================================================
+
+9、安装ntp
+
+配置参考资料：
+http://www.uptimemadeeasy.com/networking/setup-ntp-on-centos-linux/
+
+yum install ntp
+
+chkconfig --list ntpd
+chkconfig ntpd on
+
+cat >> /etc/ntp.conf <<EOF
+server 0.north-america.pool.ntp.org
+server 1.north-america.pool.ntp.org
+server 2.north-america.pool.ntp.org
+server 3.north-america.pool.ntp.org
+EOF
+
+cat >> /etc/ntp/step-tickers <<EOF
+0.north-america.pool.ntp.org
+1.north-america.pool.ntp.org
+2.north-america.pool.ntp.org
+3.north-america.pool.ntp.org
+EOF
+==========================================================
+
+
+10、创建两个工程
+mkdir 1
+mkdir 2
+
+npm install express
+
+vim server.js
+
+----------------
+global.express = require('express');
+
+global.app     = express();
+
+process.on('uncaughtException', function(err) {
+    console.error('Error caught in uncaughtException event:', err);
+});
+
+app.get('/',function(req,res,next) {
+        res.send("1");
+});
+
+var server = app.listen(3000, function() {
+    console.log('Listening on port %d', server.address().port);
+});
+
+
+
+npm install express
+
+vim server.js
+
+----------------
+global.express = require('express');
+
+global.app     = express();
+
+process.on('uncaughtException', function(err) {
+    console.error('Error caught in uncaughtException event:', err);
+});
+
+app.get('/',function(req,res,next) {
+        res.send("2");
+});
+
+var server = app.listen(3001, function() {
+    console.log('Listening on port %d', server.address().port);
+});
+
+
+==========================================================
+
+11、nginx的编译参数
+
+nginx 版本是1.6 
+
+--with-http_stub_status_module 
+--with-http_ssl_module --with-http_sub_module  
+
+目前的编译参数
+
+==========================================================
+

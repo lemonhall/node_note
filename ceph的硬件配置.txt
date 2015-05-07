@@ -1,0 +1,73 @@
+ceph的硬件配置
+【参考文档：http://ceph.com/docs/master/start/hardware-recommendations/】
+====================================
+
+1、CPU
+metadata servers：属于CPU敏感型的角色服务器
+OSDs：负责运行RADOS service，使用CRUSH算法计算数据分布，复制数据，并维护它们自己的拷贝，所以CPU也需要较好的
+Monitors：监控服务器芝士简单的维护一份集群mapping的主拷贝，所以并非是CPU敏感的
+
+2、内存
+metadata servers和monitors需要快速响应它们存储的数据，所以它们需要不少的内存
+每个daemon实例最少1GB
+OSDs不需要太多的内存做日常的操作，500MB即可，但是在recovery阶段
+每1TB的存储，需要消耗约1GB的内存，所以说，内存是越多越好
+
+3、文件系统
+btrfs作为日志型文件系统是最佳的选择，但其本身并不稳定
+XFS以及ext4则不属于日志型文件系统
+
+4、硬盘
+OSDs：建议最小1TB
+最好的方式是操作系统以及软件在一块硬盘上。
+OSD的数据在一块硬盘上。
+OSD的日志再另一块硬盘上
+
+5、SSD？
+可以将OSD的日志放在上面，显著加快集群吞吐
+
+6、一个HOST里如果有多个OSD？
+kernel.pid_max会超
+/etc/sysctl.conf
+kernel.pid_max = 4194303
+
+7、网卡
+每台机器最少是两块前兆网卡（物理交换机也需要隔离）
+最少是10Gbps在机架
+
+
+8、最佳实践的最小配置
+
+Process	Criteria	Minimum Recommended
+ceph-osd	Processor	
+1x 64-bit AMD-64
+1x 32-bit ARM dual-core or better
+1x i386 dual-core
+RAM	~1GB for 1TB of storage per daemon
+Volume Storage	1x storage drive per daemon
+Journal	1x SSD partition per daemon (optional)
+Network	2x 1GB Ethernet NICs
+ceph-mon	Processor	
+1x 64-bit AMD-64/i386
+1x 32-bit ARM dual-core or better
+1x i386 dual-core
+RAM	1 GB per daemon
+Disk Space	10 GB per daemon
+Network	2x 1GB Ethernet NICs
+ceph-mds	Processor	
+1x 64-bit AMD-64 quad-core
+1x 32-bit ARM quad-core
+1x i386 quad-core
+RAM	1 GB minimum per daemon
+Disk Space	1 MB per daemon
+Network	2x 1GB Ethernet NICs
+
+===============================================
+
+9、内核版本号
+3.16.3----->0-2的都不行
+
+
+===============================================
+
+

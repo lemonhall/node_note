@@ -1,0 +1,124 @@
+1、meso
+UBUNTU 14.04 LTS 64位版本，AMD64的内核
+内核版本号为 3.13.0
+
+========================================================================
+
+2、下载
+wget http://www.apache.org/dist/mesos/0.20.1/mesos-0.20.1.tar.gz
+
+3、依赖
+ # Ensure apt-get is up to date.
+ $ sudo apt-get update
+
+ # Install build tools.
+ $ sudo apt-get install build-essential
+
+ # Install OpenJDK java.
+ $ sudo apt-get install openjdk-6-jdk
+
+ # Install devel python.
+ $ sudo apt-get install python-dev python-boto
+
+ # Install devel libcurl
+ $ sudo apt-get install libcurl4-nss-dev
+
+ # Install devel libsasl (***Only required for Mesos 0.14.0 or newer***).
+ $ sudo apt-get install libsasl2-dev
+
+ # Install Maven (***Only required for Mesos 0.18.1 or newer***).
+ $ sudo apt-get install maven
+
+ # Install devel libapr1 (***Only required for Mesos 0.21.0 or newer***)
+ $ sudo apt-get install libapr1-dev
+
+ # Install devel libsvn (***Only required for Mesos 0.21.0 or newer***)
+ $ sudo apt-get install libsvn-dev
+
+ # 官方文档里少了这个
+ $ sudo apt-get install libcurl4-openssl-dev
+
+========================================================================
+
+4、构建
+
+# Change working directory.
+$ cd mesos
+
+# Bootstrap (***Skip this if you are not building from git repo***).
+$ ./bootstrap
+
+# Configure and build.
+$ mkdir build
+$ cd build
+$ ../configure
+$ make
+
+# Run test suite.
+$ make check
+
+# Install (***Optional***).
+$ make install
+
+# 4:25分开始编译
+
+========================================================================
+5、运行
+
+ # Change into build directory.
+ $ cd build
+
+ # Start mesos master (***Ensure work directory exists and has proper permissions***).
+ $ ./bin/mesos-master.sh --ip=127.0.0.1 --work_dir=/var/lib/mesos
+
+ # Start mesos slave.
+ $ ./bin/mesos-slave.sh --master=127.0.0.1:5050
+ ./bin/mesos-slave.sh --master=0.0.0.0:5050
+
+ # Visit the mesos web page.
+ $ http://127.0.0.1:5050
+
+ # Run C++ framework (***Exits after successfully running some tasks.***).
+ $ ./src/test-framework --master=127.0.0.1:5050
+
+ # Run Java framework (***Exits after successfully running some tasks.***).
+ $ ./src/examples/java/test-framework 127.0.0.1:5050
+
+ # Run Python framework (***Exits after successfully running some tasks.***).
+ $ ./src/examples/python/test-framework 127.0.0.1:5050
+
+
+##网络上的问题
+
+你需要将master和slave绑定到eth0下去，否则对外网来说是不可见的
+
+http://207.226.142.117:5050/#/
+
+另外需要开放防火墙以及端口转发
+========================================================================
+
+6、概念
+
+一个master，然后多个salve
+
+master似乎需要做HA
+
+另外就是task的概念，以及Frameworks的概念
+
+Frameworks貌似是一种所谓的插件架构的概念
+
+比如想跑Marathon的话，就是meso的一个Frameworks
+
+具体可以看生态圈
+
+========================================================================
+7、meso的生态圈
+
+http://mesos.apache.org/documentation/latest/mesos-frameworks/
+
+========================================================================
+
+8、marathon
+https://github.com/mesosphere/marathon
+
+
