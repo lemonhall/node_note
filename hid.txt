@@ -1,0 +1,249 @@
+1、德州仪器的wiki页面
+==================
+http://processors.wiki.ti.com/index.php/HIDEmuKbd_SensorTag#Tutorial_Step_4:_HID_Descriptor_Tool
+
+讲解HID_Descriptor_Tool的用法
+
+http://processors.wiki.ti.com/images/4/43/Descriptor.PNG
+
+主要是看这张图
+
+
+2、node-hid的issues页面
+======================
+https://github.com/node-hid/node-hid/issues/190
+
+里面有提及chrome.hid的API使用
+
+
+3、hidapi
+=========
+编译：
+先去hidapi页面：
+
+进入mac子目录
+cd mac
+make all -f Makefile
+
+进入testgui目录
+cd testgui
+make all -f Makefile.mac
+
+两部编译完成之后
+在testgui目录下即可运行
+
+另外，这个鬼玩意的gui实际上是有依赖的：http://www.fox-toolkit.org
+用brew install fox即可安装
+当然这个fox又依赖X11
+
+mac下自省解决吧
+
+4、按照hidapi列出来的
+==================
+小米遥控器是：
+USAGE_PAGE ---01 Gernic Desktop
+UASGE---------06 Keyboard
+
+5、HID知识讲解：
+==================
+https://docs.mbed.com/docs/ble-hid/en/latest/HID/
+
+简要的说就是：
+[modifier, reserved, Key1, Key2, Key3, Key4, Key6, Key7]
+
+HID设备一次向操作系统传输6个键位，顺序并不重要，因为操作系统自己会维护up/down的记录
+
+reserved 生产商可能会用，但基本没什么意义
+
+按下a会产生： 'a' report:     [0, 0, 4, 0, 0, 0, 0, 0]
+释放a会产生：null report:    [0, 0, 0, 0, 0, 0, 0, 0]
+
+然后下面解释了modifier的作用，简要的说就是用来识别其它复合键的
+
+For an uppercase ‘A’, the report will also need to contain a ‘Left Shift’
+modifier. The modifier byte is actually a bitmap, which means that each bit
+corresponds to one key:
+
+bit 0: left control
+bit 1: left shift
+bit 2: left alt
+bit 3: left GUI (Win/Apple/Meta key)
+bit 4: right control
+bit 5: right shift
+bit 6: right alt
+bit 7: right GUI
+With left shift pressed, out report will look like that:
+
+'A' report:     [2, 0, 4, 0, 0, 0, 0, 0]
+
+OK，键盘的就大概讲这些，详细得看英文
+
+
+
+
+6、HID-over-GATT
+==================
+https://docs.mbed.com/docs/ble-hid/en/latest/HIDService/
+
+然后进入下一章节，描述HID怎样在GATT上构建出来的
+
+你要作为一个HID的蓝牙设备，你要实现三个蓝牙的服务
+
+HID.
+Battery.
+Device information.
+
+然后两边的术语有冲突，大概要这么映射
+
+BLE这边叫做Report Map，而传统的USB的HID那边叫做Report Descriptor，就是上面那张01 06表
+Report Reference Characteristic Descriptor 是BLE这边来设置report元数据的方式；
+有(Input/Output/Feature)
+and ID of a report.
+
+Report Map: what the USB HID calls Report Descriptor.
+Report Reference Characteristic Descriptor is the BLE way of setting a report
+characteristic’s metadata. It contains the type (Input/Output/Feature)
+and ID of a report.
+
+6.1 其余的两个
+Battery.
+Device information.
+
+这两个就不讲了，基本上所有的ble的外围设备库里，都有examples，而且很固定，好抄
+
+
+6.2 重点看The HID Service 
+
+  1、Protocol Mode: 
+  	默认为Report mode，但是也没说这个默认的值是什么
+
+  	the default is Report mode, but you can change that to Boot mode.
+
+  2、Report Map: 
+    就是刚才那个描述表了
+  the HID Report descriptor, defining the possible format for
+Input/Output/Feature reports.
+
+  3、Report
+     这段没大看懂，暂时放下
+
+Report: a characteristic used as a vehicle for HID reports. Unlike USB, where
+the ID is sent as a prefix when there is more than one report per type, the ID
+is stored in a characteristic descriptor. This means that there will be one
+characteristic per report described in the Report Map.
+
+  4、Boot Keyboard Input Report
+  如果设备是 Keyborad，那么必须定义boot reports
+Boot Keyboard Input Report: when the device is a keyboard, it must define
+boot reports.
+
+  5、Boot Keyboard Output Report
+Boot Keyboard Output Report.
+
+  6、 Boot Mouse Input Report
+Boot Mouse Input Report.
+
+  7、 HID Information: HID version
+HID Information: HID version, localization and some capability flags.
+
+  8、 HID Control Point
+HID Control Point: inform the device that the host is entering or leaving suspend
+state.
+
+然后就是这一句：Instead of USB interrupt pipes, input reports are sent using notifications.
+They can also be read by the host.
+
+BLE是使用notifications来发送report的
+
+
+7、某些不能跑的代码供参考
+http://forum.arduino.cc/index.php?topic=450243.0
+
+他首先初始化了一堆：
+
+HID Service (0x1812)
+* Protocol Model (0x2A42)
+* Boot Mouse Report (0x2A33)
+* HID Information (0x2A4A)
+* HID Report Map (0x2A4B)
+* HID Control Point (0x2A4C)
+* Report (0x2A4D)
+
+Battery Service (0x180F)
+* Battery Level (0x2A19)
+
+Device Information (0x180A)
+* PnP ID (0x2A50)
+
+
+关键是主要就是：
+BLECharacteristic mouseReport("2A4D", BLERead | BLENotify, 3); //the report value
+BLECharacteristic bootMouseReport("2A33", BLERead | BLENotify,3);//Seting up the mouse specific characteristic
+
+我感觉这份代码主要的问题是在于
+ bootMouseReport.setValue(bleValue,3);
+
+8、 另一份header文件
+https://docs.mbed.com/docs/ble-hid/en/latest/api/MouseService_8h_source.html
+
+
+9、自己的程序
+===========
+on -> stateChange: poweredOn
+on -> advertisingStart: success
+on -> servicesSet: success
+setServices: success
+on -> accept, client: 34:36:3b:cd:fc:19
+on -> mtuChange: 104
+on -> rssiUpdate: -59
+HIDInformationCharacteristic:
+<Buffer 00 00 00>
+HIDReportMapCharacteristic
+
+
+10、 别人的程序
+https://github.com/jpbrucker/BLE_HID
+
+
+11、silabs里的gatt.xml
+//http://community.silabs.com/t5/Bluetooth-Wi-Fi/BLE113-HID-keyboard-emulation/td-p/148466
+//从silabs上找到的一篇文章
+//有gatt.xml来对照
+
+12、 再从标准入手
+1812里有些啥？
+
+Name: Protocol Mode
+Type: org.bluetooth.characteristic.protocol_modeDownload / View
+Assigned Number: 0x2A4E
+
+Name: Report
+Type: org.bluetooth.characteristic.reportDownload / View
+Assigned Number: 0x2A4D
+
+Name: Report Map
+Type: org.bluetooth.characteristic.report_mapDownload / View
+Assigned Number: 0x2A4B
+
+Name: Boot Keyboard Input Report
+Type: org.bluetooth.characteristic.boot_keyboard_input_reportDownload / View
+Assigned Number: 0x2A22
+
+Name: Boot Keyboard Output Report
+Type: org.bluetooth.characteristic.boot_keyboard_output_reportDownload / View
+Assigned Number: 0x2A32
+
+Name: Boot Mouse Input Report
+Type: org.bluetooth.characteristic.boot_mouse_input_reportDownload / View
+Assigned Number: 0x2A33
+
+Name: HID Information
+Type: org.bluetooth.characteristic.hid_informationDownload / View
+Assigned Number: 0x2A4A
+
+Name: HID Control Point
+Type: org.bluetooth.characteristic.hid_control_pointDownload / View
+Assigned Number: 0x2A4C
+
+
+ 

@@ -1,0 +1,388 @@
+1、购买
+https://item.taobao.com/item.htm?spm=a1z09.2.0.0.YlzJbD&id=543632306389&_u=s1ka3ne79008
+
+买的是安信可的开发板，很小，价格稍贵，但板子质量很好，焊接的很漂亮
+
+
+2、安装刷工具
+https://github.com/espressif/esptool
+
+pip install esptool
+
+mac下面：
+lemonhall@HalldeMacBook-Pro:~$ pip install esptool
+Collecting esptool
+  Downloading esptool-1.3.tar.gz
+Collecting pyserial>=2.5 (from esptool)
+  Downloading pyserial-3.3-py2.py3-none-any.whl (189kB)
+    100% |████████████████████████████████| 194kB 2.3MB/s
+Building wheels for collected packages: esptool
+  Running setup.py bdist_wheel for esptool ... done
+  Stored in directory: /Users/lemonhall/Library/Caches/pip/wheels/36/10/52/d64ec3a050fdfb8561af3c52958fe514937bfaa6e1e676f084
+Successfully built esptool
+Installing collected packages: pyserial, esptool
+Successfully installed esptool-1.3 pyserial-3.3
+lemonhall@HalldeMacBook-Pro:~$
+
+3、build rom
+
+到这里去build
+https://nodemcu-build.com/
+
+另外，QQ的邮箱是不行的。。卧槽
+
+好吧。换一个邮箱：
+
+Strike!
+You successfully commissioned a NodeMCU custom build from the master branch. You selected the following 7 modules: file gpio net node tmr uart wifi.
+
+We'll keep you posted by email about the progress of your build.
+
+In the meantime I suggest you take a look at the build stats to find out how your firmware configuration compares to others in the community.
+
+看到这段提示就是build成功了；
+
+然后，邮件会收到两封，一封说正在进行，一封里有生成的链接；
+
+记得去垃圾箱里找邮件
+
+我下载的是float版本的，估计是浮点数吧
+
+
+4、实验一下
+lemonhall@HalldeMacBook-Pro:~/Downloads/nodemcu$ esptool.py --port /dev/tty.SLAB_USBtoUART chip_id
+esptool.py v1.3
+Connecting........
+Chip ID: 0x0017a01e
+lemonhall@HalldeMacBook-Pro:~/Downloads/nodemcu$
+
+
+我能直接用？
+
+恩，那是因为给mac安装过驱动了，具体的驱动看
+
+
+CP2102 USB to UART Bridge Controller：
+
+  产品 ID：	0xea60
+  厂商 ID：	0x10c4  (Silicon Laboratories, Inc.)
+  版本：	1.00
+  序列号：	0001
+  速度：	最大 12 Mb/秒
+  制造商：	Silicon Labs
+  位置 ID：	0x14100000 / 17
+  可用电流 (mA)：	500
+  所需电流 (mA)：	100
+  额外的操作电流 (mA)：	0
+
+
+去Mac--->工具
+
+系统信息：USB一栏里会看到这个东西，这个开发板果然用的和我的9轴传感器是一个芯片
+
+CP2102
+
+这个驱动很好装，不再说了
+
+然后用chip_id命令得到了板子的id，说明能用，板子也是一闪一闪亮晶晶的
+
+
+5、开始烧录
+
+关于flash，一定要仔细看官方文档：
+https://nodemcu.readthedocs.io/en/master/en/flash/
+
+另外我使用的是安可信的封装：所以还需要参考：
+http://wiki.ai-thinker.com/esp8266/sdk
+
+看文档，看安可信的说明：http://wiki.ai-thinker.com/esp_download
+
+安可信的rom似乎是支持自动升级的，暂时不管
+
+esptool.py --port <serial-port-of-ESP8266> write_flash -fm <mode> 0x00000 <nodemcu-firmware>.bin
+esptool.py --port /dev/tty.SLAB_USBtoUART write_flash -fm qio 0x00000 nodemcu-master-7-modules-2017-04-28-13-19-59-float.bin
+
+然后就开始了：
+lemonhall@HalldeMacBook-Pro:~/Downloads/nodemcu$ esptool.py --port /dev/tty.SLAB_USBtoUART write_flash -fm qio 0x00000 nodemcu-master-7-modules-2017-04-28-13-19-59-float.bin
+esptool.py v1.3
+Connecting...
+Auto-detected Flash size: 32m
+Running Cesanta flasher stub...
+Flash params set to 0x0040
+Wrote 413696 bytes at 0x0 in 35.9 seconds (92.2 kbit/s)...
+Leaving...
+
+结果工具自动探测了，是30m的Flash。。。好吧，模式不应该用qio的
+见文档：https://nodemcu.readthedocs.io/en/master/en/flash/
+
+mode is qio for 512 kByte modules and dio for >=4 MByte modules (qio might work as well, YMMV).
+
+不管了，先这样；
+
+6、看Flash
+esptool.py --port /dev/tty.SLAB_USBtoUART flash_id
+
+esptool.py v1.3
+Connecting........
+Manufacturer: e0
+Device: 4016
+
+The chip ID can then be looked up in https://code.coreboot.org/p/flashrom/source/tree/HEAD/trunk/flashchips.h. This leads to a manufacturer name and a chip model name/number e.g. AMIC_A25LQ032. That information can then be fed into your favorite search engine to find chip descriptions and data sheets.
+
+By convention the last two or three digits in the module name denote the capacity in megabits. So,  A25LQ032 in the example above is a 32Mb(=4MB) module.
+
+注意，大B，小b的区别；
+
+恩
+
+7、接下来是Hello World时间
+https://github.com/4refr0nt/ESPlorer
+
+先安装IDE
+
+上面的IDE好似有点小问题：
+
+https://github.com/kmpm/nodemcu-uploader
+
+换一个：pip install nodemcu-uploader
+https://github.com/kmpm/nodemcu-uploader/blob/master/doc/USAGE.md
+
+nodemcu-uploader --port /dev/tty.SLAB_USBtoUART file list
+
+操，这鬼玩意也是废柴
+
+esptool.py --port /dev/tty.SLAB_USBtoUART erase_flash
+
+8、折腾了半天
+esptool.py --port /dev/tty.SLAB_USBtoUART write_flash -fm dio 0x00000 nodemcu-1.5.4.1-final-21-modules-2017-04-28-15-12-06-float.bin
+
+记得一定要build出来一个小一点的，否则会怪怪的
+
+
+然后在串口工具里打入：
+
+前置注意点：
+https://github.com/espressif/esptool
+
+pip install esptool
+
+安装esptool
+
+esptool.py --port /dev/tty.SLAB_USBtoUART write_flash -fm dio 0x00000 nodemcu-master-7-modules-2017-04-28-13-19-59-float.bin
+
+一定要走DIO，另外32Mb是小b，除以8，其实就是4M，然后就是1M，3M的flash分布
+
+这个ESP-12E实际上内存是非常小的，我这次就启wifi/net/mdns三个就可以了，能小一点就小一点儿吧
+
+串口调试工具，驱动是CP2102的，这个mac下的驱动很好，装好后插入设备就能看到/dev/tty.SLAB_USBtoUART
+这个设备了
+
+然后写入的时候不用去管波特率，那个是esptool.py自动
+
+和设备交互的时候要用9600、启动新行
+
+
+一、启动wifi
+
+这个是2.4g，802.11n的
+wifi.sta.config("lemon_2.4g", "密码")
+
+拿到wifi的模式：
+print(wifi.getmode())
+
+station是1
+
+拿到wifi的物理模式:
+print(wifi.getphymode())
+
+802.11n是3
+
+拿到当前的channle()
+l=wifi.getchannel()print(l)
+
+拿到当前的hostname
+print(wifi.sta.gethostname())
+
+我的是：NODE-17A01E
+
+设置当前模式为station:
+wifi.setmode(wifi.STATION)
+
+设置为802.11n模式
+wifi.setphymode(wifi.PHYMODE_N)
+
+打开自动连接模式:
+wifi.sta.autoconnect(1)
+
+wifi.sta.connect()
+
+然后打印ip地址信息：
+print(wifi.sta.getip())
+
+然后就拿到了：
+> print(wifi.sta.getip())
+192.168.1.112	255.255.255.0	192.168.1.1
+
+要求列印当前wifi状态：
+print(wifi.sta.status())
+
+> print(wifi.sta.status())
+5
+
+
+print(wifi.sta.getmac())
+
+
+问题在于。。。。tp-link里，能看到这家伙，但是没办法帮它去绑定一个IP地址。。。
+
+好奇怪啊
+
+二、通用的一些判断系统是否正常的lua语句
+
+打印 node.info()
+
+majorVer, minorVer, devVer, chipid, flashid, flashsize, flashmode, flashspeed = node.info()print("NodeMCU "..majorVer.."."..minorVer.."."..devVer)
+
+Hello World:
+tmr.alarm(0, 1000, tmr.ALARM_AUTO, function()print("Hello NodeMCU!\n")end)
+
+三、实战代码部分：
+https://nodemcu.readthedocs.io/en/master/en/modules/net/#netcreateserver
+
+1、搞个server出来，10秒超时
+-- creates a server
+sv = net.createServer(net.TCP, 10)
+-- closes the server
+sv:close()
+
+2、搞个server出来，然后接受数据
+
+-- server listens on 80, if data received, print data to console and send "hello world" back to caller
+-- 30s time out for a inactive client
+sv = net.createServer(net.TCP, 30)
+
+function receiver(sck, data)
+  print(data)
+  sck:close()
+end
+
+if sv then
+  sv:listen(80, function(conn)
+    conn:on("receive", receiver)
+    conn:send("hello world")
+  end)
+end
+
+3、搞个server出来，而且还有res
+srv = net.createServer(net.TCP)
+
+function receiver(sck, data)
+  local response = {}
+
+  -- if you're sending back HTML over HTTP you'll want something like this instead
+  -- local response = {"HTTP/1.0 200 OK\r\nServer: NodeMCU on ESP8266\r\nContent-Type: text/html\r\n\r\n"}
+
+  response[#response + 1] = "lots of data"
+  response[#response + 1] = "even more data"
+  response[#response + 1] = "e.g. content read from a file"
+
+  -- sends and removes the first element from the 'response' table
+  local function send(localSocket)
+    if #response > 0 then
+      localSocket:send(table.remove(response, 1))
+    else
+      localSocket:close()
+      response = nil
+    end
+  end
+
+  -- triggers the send() function again once the first chunk of data was sent
+  sck:on("sent", send)
+
+  send(sck)
+end
+
+srv:listen(80, function(conn)
+  conn:on("receive", receiver)
+end)
+If you do not or can not keep all the data you send back in memory at one time (remember that  response is an aggregation) you may use explicit callbacks instead of building up a table like so:
+
+sck:send(header, function() 
+  local data1 = "some large chunk of dynamically loaded data"
+  sck:send(data1, function()
+    local data2 = "even more dynamically loaded data"
+    sck:send(data2, function(sk) 
+      sk:close()
+    end)
+  end)
+end)
+
+
+4、搞个udp的server出来
+
+Example:
+
+udpSocket = net.createUDPSocket()
+udpSocket:listen(5000)
+udpSocket:on("receive", function(s, data, port, ip)
+    print(string.format("received '%s' from %s:%d", data, ip, port))
+    s:send(port, ip, "echo: " .. data)
+end)
+port, ip = udpSocket:getaddr()
+print(string.format("local UDP socket address / port: %s:%d", ip, port))
+
+On *nix systems that can then be tested by issuing
+
+echo -n "foo" | nc -w1 -u <device-IP-address> 5000
+
+5、读取dnt
+https://nodemcu.readthedocs.io/en/master/en/modules/dht/
+
+pin = 5
+status, temp, humi, temp_dec, humi_dec = dht.read(pin)
+
+if status == dht.OK then
+    -- Float firmware using this example
+    print("DHT Temperature:"..temp..";".."Humidity:"..humi)
+elseif status == dht.ERROR_CHECKSUM then
+    print( "DHT Checksum error." )
+elseif status == dht.ERROR_TIMEOUT then
+    print( "DHT timed out." )
+end
+
+
+6、结合udp和dht
+
+pin = 5
+udpSocket = net.createUDPSocket()
+udpSocket:listen(5000)
+udpSocket:on("receive", function(s, data, port, ip)
+	status, temp, humi, temp_dec, humi_dec = dht.read(pin)
+    print(string.format("received '%s' from %s:%d", data, ip, port))
+    if status == dht.OK then
+	    -- Float firmware using this example
+	    print("DHT Temperature:"..temp..";".."Humidity:"..humi)
+	    res = "DHT Temperature:"..temp..";".."Humidity:"..humi
+	elseif status == dht.ERROR_CHECKSUM then
+	    print( "DHT Checksum error." )
+	    res = "DHT Checksum error."
+	elseif status == dht.ERROR_TIMEOUT then
+	    print( "DHT timed out." )
+	    res = "DHT timed out."
+	end
+    s:send(port, ip, "echo: " .. res)
+end)
+
+7、再高级一点，搞个mDns吧
+https://nodemcu.readthedocs.io/en/master/en/modules/mdns/
+
+mdns.register("dht", { description="temp service", service="udp", port=5000, location='Living Room' })
+
+8、把前面调试好的东西都写入文件，并且让系统boot的时候就去跑
+
+
+
+
+参考资料：
+http://www.jianshu.com/p/78b1400aa56e
+有点不太对，是针对windows的，另外官方已经不推荐使用哪个flash tool了，这个作者都不看

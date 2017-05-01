@@ -1,0 +1,239 @@
+Swarm入门：
+
+1、文档地址：
+
+2、概念：
+swarm是一组docker引擎的集群
+
+node是单个docker引擎的实例，可以在一个物理机上
+也可以在多个
+
+application是应用
+
+部署应用的时候会有一个manager node节点
+
+对应的就是Worker nodes
+
+然后service是一堆被workder执行的任务
+
+replicated services就是负载均衡节点了啦
+
+global services则是全局的，在所有节点上都会执行的一个服务
+
+一个task就是一个docker的容器
+
+2.2 ingress load balancing
+我们的swarm的manager节点使用 ingress load balancing来做负载均衡
+
+swarm会自动分配一个PublishedPort
+
+30000-32767是这个port的范围
+
+然后就是internal load balancing，是每个节点都给分配了一个DNS名称
+
+3、教程
+https://docs.docker.com/engine/swarm/swarm-tutorial/
+
+3.1 初始化一个swarm集群
+3.2 给集群里添加节点
+3.3 给集群里部署应用服务
+3.4 管理集群
+
+我再简要一下，三台机器：
+m上运行：docker swarm init --advertise-addr 192.168.99.100
+w1上运行：docker swarm join-token 192.168.99.100:2377
+w2上运行：docker swarm join-token 192.168.99.100:2377
+
+join-token在建立的时候会有
+
+docker info
+和
+docker node ls
+可以用来看集群
+
+部署：
+$ docker service create --replicas 1 --name helloworld alpine ping docker.com
+
+以下是命令的解释：
+The docker service create command creates the service.
+The --name flag names the service helloworld.
+The --replicas flag specifies the desired state of 1 running instance.
+The arguments alpine ping docker.com define the service as an Alpine Linux container that executes the command ping docker.com
+
+然后看一下：
+docker service ls
+
+$ docker service ls
+
+ID            NAME        SCALE  IMAGE   COMMAND
+9uk4639qpg7n  helloworld  1/1    alpine  ping docker.com
+
+单独检查一下：
+docker service inspect --pretty helloworld
+
+然后看一下哪些节点在运行这个服务：
+docker service ps helloworld
+
+扩展一下：
+docker service scale helloworld=5
+
+然后两个节点上就运行了五个：
+$ docker service ps helloworld
+
+NAME                                    IMAGE   NODE      DESIRED STATE  CURRENT STATE
+helloworld.1.8p1vev3fq5zm0mi8g0as41w35  alpine  worker2   Running        Running 7 minutes
+helloworld.2.c7a7tcdq5s0uk3qr88mf8xco6  alpine  worker1   Running        Running 24 seconds
+helloworld.3.6crl09vdcalvtfehfh69ogfb1  alpine  worker1   Running        Running 24 seconds
+helloworld.4.auky6trawmdlcne8ad8phb0f1  alpine  manager1  Running        Running 24 seconds
+helloworld.5.ba19kca06l18zujfwxyc5lkyn  alpine  worker2   Running        Running 24 seconds
+
+管理节点上：
+docker service rm helloworld
+
+删除了服务
+
+
+OK，接下来做所谓的滚动部署：
+
+管理节点上：
+
+docker service create \
+  --replicas 3 \
+  --name redis \
+  --update-delay 10s \
+  redis:3.0.6
+
+0u6a4s31ybk7yw2wyvtikmu50
+
+每10秒在node上启动一个task，然后共有3份儿要启动
+
+前一个，等后一个RUNNING后才会搞起
+
+就这个意思
+
+
+inpect一下：
+
+$ docker service inspect --pretty redis
+
+ID:             0u6a4s31ybk7yw2wyvtikmu50
+Name:           redis
+Service Mode:   Replicated
+ Replicas:      3
+Placement:
+ Strategy:	    Spread
+UpdateConfig:
+ Parallelism:   1
+ Delay:         10s
+ContainerSpec:
+ Image:         redis:3.0.6
+Resources:
+Endpoint Mode:  vip
+
+
+升级开始： docker service update --image redis:3.0.7 redis
+redis
+
+主要是看上面的那个UpdateConfig：
+ Parallelism:   1
+ Delay:         10s
+
+ 并列度为1，延迟10s
+
+ 就是一个升完，下一个升，就是所谓的滚动升级了
+
+
+ 接下来DRAIN node
+
+ 还是管理节点上
+
+ 先搞个3.0.6的redis集群
+ $ docker service create --replicas 3 --name redis --update-delay 10s redis:3.0.6
+
+ 然后看到了：
+ docker service ps redis
+
+NAME                               IMAGE        NODE     DESIRED STATE  CURRENT STATE
+redis.1.7q92v0nr1hcgts2amcjyqg3pq  redis:3.0.6  manager1 Running        Running 26 seconds
+redis.2.7h2l8h3q3wqy5f66hlv9ddmi6  redis:3.0.6  worker1  Running        Running 26 seconds
+redis.3.9bg7cezvedmkgg6c8yzvbhwsd  redis:3.0.6  worker2  Running 
+
+然后开始
+docker node update --availability drain worker1
+
+worker1
+
+ docker node inspect --pretty worker1
+
+ ID:			38ciaotwjuritcdtn9npbnkuz
+Hostname:		worker1
+Status:
+ State:			Ready
+ Availability:		Drain
+
+ 然后worker1就被系甘啦
+
+ 然后恢复node的能力：
+
+  docker node update --availability active worker1
+
+worker1
+
+docker node inspect --pretty worker1
+
+ID:			38ciaotwjuritcdtn9npbnkuz
+Hostname:		worker1
+Status:
+ State:			Ready
+ Availability:		Active
+
+
+
+#Use swarm mode routing mesh
+===========================
+
+ingress routing mesh是个大家伙都参与了的网状网，你就这么理解就好了
+
+Port 7946 TCP/UDP for container network discovery.
+Port 4789 UDP for the container ingress network.
+
+7946是容器的网络发现端口，TCP
+4789是容器的ingress网络，UDP
+
+docker service create \
+  --name my-web \
+  --publish 8080:80 \
+  --replicas 2 \
+  nginx
+
+简单，一句话就是，创建一个my-web的servie然后对外暴露8080端口，内部你监听的是80端口
+然后用的image叫nginx
+
+然后你访问node上的8080端口，任何一个node节点上的，swarm就会自动帮你路由到对应的nginx上去
+
+深不神奇？
+
+对已有的服务？
+
+docker service update \
+  --publish-add <PUBLISHED-PORT>:<TARGET-PORT> \
+  <SERVICE>
+
+用这个命令就好了
+
+然后是
+
+$ docker service create --name dns-cache -p 53:53 dns-cache
+
+$ docker service create --name dns-cache -p 53:53/tcp dns-cache
+
+这两个是TCP ONLY的命令，等价
+
+同时TCP和UDP
+
+$ docker service create --name dns-cache -p 53:53/tcp -p 53:53/udp dns-cache
+
+仅仅UDP
+docker service create --name dns-cache -p 53:53/udp dns-cache
+
+

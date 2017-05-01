@@ -1,0 +1,154 @@
+0、参考文档：
+http://esp-idf.readthedocs.io/en/latest/get-started/macos-setup-scratch.html
+
+1、下载工具链
+  cd ~/esp
+  tar -xzf ~/Downloads/xtensa-esp32-elf-osx-1.22.0-61-gab8375a-5.2.0.tar.gz
+
+2、下载框架本身
+git clone --recursive https://github.com/espressif/esp-idf.git
+
+Cloning into 'esp-idf'...
+remote: Counting objects: 25311, done.
+remote: Compressing objects: 100% (1605/1605), done.
+remote: Total 25311 (delta 869), reused 1 (delta 1), pack-reused 23671
+Receiving objects: 100% (25311/25311), 25.52 MiB | 2.11 MiB/s, done.
+Resolving deltas: 100% (16745/16745), done.
+Submodule 'components/aws_iot/aws-iot-device-sdk-embedded-C' (https://github.com/espressif/aws-iot-device-sdk-embedded-C.git) registered for path 'components/aws_iot/aws-iot-device-sdk-embedded-C'
+Submodule 'components/bt/lib' (https://github.com/espressif/esp32-bt-lib.git) registered for path 'components/bt/lib'
+Submodule 'components/coap/libcoap' (https://github.com/obgm/libcoap.git) registered for path 'components/coap/libcoap'
+Submodule 'components/esp32/lib' (https://github.com/espressif/esp32-wifi-lib.git) registered for path 'components/esp32/lib'
+Submodule 'components/esptool_py/esptool' (https://github.com/espressif/esptool.git) registered for path 'components/esptool_py/esptool'
+Submodule 'components/micro-ecc/micro-ecc' (https://github.com/kmackay/micro-ecc.git) registered for path 'components/micro-ecc/micro-ecc'
+Cloning into '/Users/lemonhall/esp/esp-idf/components/aws_iot/aws-iot-device-sdk-embedded-C'...
+remote: Counting objects: 838, done.
+remote: Total 838 (delta 0), reused 0 (delta 0), pack-reused 837
+Receiving objects: 100% (838/838), 750.29 KiB | 130.00 KiB/s, done.
+Resolving deltas: 100% (402/402), done.
+Cloning into '/Users/lemonhall/esp/esp-idf/components/bt/lib'...
+remote: Counting objects: 94, done.
+remote: Total 94 (delta 0), reused 0 (delta 0), pack-reused 94
+Cloning into '/Users/lemonhall/esp/esp-idf/components/coap/libcoap'...
+remote: Counting objects: 4221, done.
+remote: Compressing objects: 100% (6/6), done.
+remote: Total 4221 (delta 1), reused 0 (delta 0), pack-reused 4214
+Receiving objects: 100% (4221/4221), 1.02 MiB | 186.00 KiB/s, done.
+Resolving deltas: 100% (2913/2913), done.
+Cloning into '/Users/lemonhall/esp/esp-idf/components/esp32/lib'...
+remote: Counting objects: 1373, done.
+remote: Compressing objects: 100% (116/116), done.
+remote: Total 1373 (delta 83), reused 0 (delta 0), pack-reused 1257
+Receiving objects: 100% (1373/1373), 25.33 MiB | 2.49 MiB/s, done.
+Resolving deltas: 100% (1060/1060), done.
+Cloning into '/Users/lemonhall/esp/esp-idf/components/esptool_py/esptool'...
+remote: Counting objects: 1219, done.
+remote: Compressing objects: 100% (19/19), done.
+remote: Total 1219 (delta 7), reused 0 (delta 0), pack-reused 1200
+Receiving objects: 100% (1219/1219), 4.61 MiB | 822.00 KiB/s, done.
+Resolving deltas: 100% (722/722), done.
+Cloning into '/Users/lemonhall/esp/esp-idf/components/micro-ecc/micro-ecc'...
+remote: Counting objects: 1065, done.
+remote: Total 1065 (delta 0), reused 0 (delta 0), pack-reused 1065
+Receiving objects: 100% (1065/1065), 639.87 KiB | 114.00 KiB/s, done.
+Resolving deltas: 100% (626/626), done.
+Submodule path 'components/aws_iot/aws-iot-device-sdk-embedded-C': checked out '7132505b00d2dd57f48478e75efa636021919aae'
+Submodule path 'components/bt/lib': checked out '0986936c6d21a009d7d4249cbae8a23b0f3bd20b'
+Submodule path 'components/coap/libcoap': checked out '6468887a12666f88b8704d797fc176cd4f40ee4c'
+Submodule path 'components/esp32/lib': checked out '02334033213e18101abc25bd51b1ea06a0974b58'
+Submodule path 'components/esptool_py/esptool': checked out '96698a3da9acc6e357741663830f97524b688ade'
+Submodule path 'components/micro-ecc/micro-ecc': checked out '14222e062d77f45321676e813d9525f32a88e8fa'
+
+3、环境变量
+ export PATH=$PATH:$HOME/esp/xtensa-esp32-elf/bin
+ export IDF_PATH=~/esp/esp-idf
+
+
+4、依赖的那些个gnu工具
+
+
+5、HelloWorld一下
+http://esp-idf.readthedocs.io/en/latest/get-started/index.html#get-started-start-project
+
+lemonhall@HalldeMacBook-Pro:~$ cd ~/esp
+lemonhall@HalldeMacBook-Pro:~/esp$ cp -r $IDF_PATH/examples/get-started/hello_world .
+lemonhall@HalldeMacBook-Pro:~/esp$ ls
+esp-idf          hello_world      xtensa-esp32-elf
+lemonhall@HalldeMacBook-Pro:~/esp$
+
+
+OK， 现在就有hello_world目录了
+
+
+6、配置
+hello_world目录下：
+make menuconfig
+
+配置串口地址：
+Serial flasher config > Default serial port
+
+改成：/dev/tty.SLAB_USBtoUART
+
+7、开始build
+make flash
+
+一句话就全部结束了
+
+8、然后连接上串口
+
+115200就会看到输出
+
+9、只编译app本身
+
+http://esp-idf.readthedocs.io/en/latest/get-started/make-project.html
+
+
+make app - build just the app.
+make app-flash - flash just the app.
+make app-flash will automatically rebuild the app if it needs it.
+
+很简单
+
+10、接下来是整个API文档：
+http://esp-idf.readthedocs.io/en/latest/api-reference/index.html
+
+Wi-Fi
+	Wi-Fi
+	Smart Config
+Bluetooth
+	Bluetooth Controller && VHCI
+	Bluetooth Common
+	Bluetooth LE
+	Bluetooth Classic BT
+Ethernet
+	Ethernet
+Peripherals
+	ADC
+	DAC
+	GPIO (including RTC low power I/O)
+	I2C
+	I2S
+	LED Control
+	Pulse Counter
+	SD/MMC Card Host
+	Sigma-delta Modulation
+	SPI Master
+	SPI Slave
+	Remote Control
+	Timer
+	UART
+System
+	Memory Allocation
+	Interrupt Allocation
+	Watchdogs
+	Over The Air Updates (OTA)
+	Deep Sleep
+	Logging
+Storage
+	SPI Flash and Partition APIs
+	SD/MMC
+	Non-Volatile Storage
+	Virtual Filesystem
+	FAT Filesystem
+	Wear Levelling
+Protocols
+	mDNS

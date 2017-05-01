@@ -1,0 +1,1204 @@
+
+1、地址：
+https://mongoose-os.com/docs/#/overview/
+
+提到了，本地安装的方法
+~/.mos/bin/mos build --local --repo PATH_TO_CLONED_MONGOOSE_OS_REPO --verbose
+
+2、然后试试
+我们把mongoose-os的repos clone 下来
+
+然后输入,初始化一个项目
+~/.mos/bin/mos init --arch esp32 # cc3200, esp8266, esp32
+
+~/.mos/bin/mos build --local --repo /Users/lemonhall/Downloads/mongoose-os --verbose
+
+
+3、没装docker，装
+
+docker
+http://blog.csdn.net/zhouhuakang/article/details/51005861
+brew install docker
+
+brew install docker-machine
+
+docker-machine create --driver virtualbox default
+
+
+docker-machine start
+
+lemonhall@HalldeMacBook-Pro:~/Downloads/esp32$ docker-machine start
+Starting "default"...
+(default) Check network to re-create if needed...
+(default) Waiting for an IP...
+Machine "default" was started.
+Waiting for SSH to be available...
+Detecting the provisioner...
+Started machines may have new IP addresses. You may need to re-run the `docker-machine env` command.
+lemonhall@HalldeMacBook-Pro:~/Downloads/esp32$
+
+
+docker-machine env default
+
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.99.100:2376"
+export DOCKER_CERT_PATH="/Users/lemonhall/.docker/machine/machines/default"
+export DOCKER_MACHINE_NAME="default"
+# Run this command to configure your shell:
+# eval $(docker-machine env default)
+
+
+
+4、开始试着编译
+
+~/.mos/bin/mos build --local --repo /Users/lemonhall/Downloads/mongoose-os --verbose
+
+
+
+Using mongoose-os located at "/Users/lemonhall/Downloads/mongoose-os"
+Building...
+Make arguments: -j -f /Users/lemonhall/Downloads/mongoose-os/fw/platforms/esp32/Makefile APP_SOURCES=src/*.c src/*.cpp APP_FS_FILES=fs/* BUILD_DIR=build/objs GEN_DIR=build/gen APP_VERSION=1.0 FFI_SYMBOLS= APP=esp32 APP_CONF_SCHEMA=src/conf_schema.yaml MGOS_PATH=/Users/lemonhall/Downloads/mongoose-os FS_STAGING_DIR=build/fs PLATFORM=esp32 FW_DIR=build/fw
+Using docker.cesanta.com/esp32-build:2.0-r2
+Unable to find image 'docker.cesanta.com/esp32-build:2.0-r2' locally
+2.0-r2: Pulling from esp32-build
+e2d7e96004fd: Pulling fs layer
+1bacd3c8ccb1: Pulling fs layer
+869d5d3f92f8: Pulling fs layer
+f8a4e25b40ce: Pulling fs layer
+f40e1388890a: Pulling fs layer
+d9e2999a445d: Pulling fs layer
+e75209314ac6: Pulling fs layer
+f1195331a602: Pulling fs layer
+863674f85f69: Pulling fs layer
+e84611b52e3d: Pulling fs layer
+ad932dd304d1: Pulling fs layer
+ee45df2db1b8: Pulling fs layer
+e8b16bfece0d: Pulling fs layer
+521f60ab5b82: Pulling fs layer
+babd45fa4e9d: Pulling fs layer
+f8a4e25b40ce: Waiting
+f40e1388890a: Waiting
+d9e2999a445d: Waiting
+e75209314ac6: Waiting
+f1195331a602: Waiting
+863674f85f69: Waiting
+e84611b52e3d: Waiting
+ad932dd304d1: Waiting
+ee45df2db1b8: Waiting
+e8b16bfece0d: Waiting
+521f60ab5b82: Waiting
+babd45fa4e9d: Waiting
+869d5d3f92f8: Verifying Checksum
+869d5d3f92f8: Download complete
+1bacd3c8ccb1: Verifying Checksum
+1bacd3c8ccb1: Download complete
+f8a4e25b40ce: Verifying Checksum
+f8a4e25b40ce: Download complete
+f40e1388890a: Verifying Checksum
+f40e1388890a: Download complete
+d9e2999a445d: Verifying Checksum
+d9e2999a445d: Download complete
+f1195331a602: Verifying Checksum
+f1195331a602: Download complete
+
+
+
+lemonhall@HalldeMacBook-Pro:~/Downloads/esp32$ ~/.mos/bin/mos build --local --repo /Users/lemonhall/Downloads/mongoose-os --verbose
+Using mongoose-os located at "/Users/lemonhall/Downloads/mongoose-os"
+Building...
+Make arguments: -j -f /Users/lemonhall/Downloads/mongoose-os/fw/platforms/esp32/Makefile GEN_DIR=build/gen APP=esp32 BUILD_DIR=build/objs APP_VERSION=1.0 APP_SOURCES=src/*.c src/*.cpp APP_CONF_SCHEMA=src/conf_schema.yaml FW_DIR=build/fw APP_FS_FILES=fs/* PLATFORM=esp32 FS_STAGING_DIR=build/fs FFI_SYMBOLS= MGOS_PATH=/Users/lemonhall/Downloads/mongoose-os
+Using docker.cesanta.com/esp32-build:2.0-r2
+/opt/Espressif/esp-idf/make/project.mk:53: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/make/project.mk:222: warning: undefined variable 'CPPFLAGS'
+/opt/Espressif/esp-idf/make/project.mk:266: warning: undefined variable 'CXXFLAGS'
+/opt/Espressif/esp-idf/make/project.mk:282: warning: undefined variable 'OBJCOPY'
+/opt/Espressif/esp-idf/make/project.mk:283: warning: undefined variable 'SIZE'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:76: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/make/project_config.mk:45: warning: undefined variable 'MAKE_RESTARTS'
+/opt/Espressif/esp-idf/make/project.mk:53: warning: undefined variable 'OS'
+CC esp_ota_ops.o
+CC spi_master.o
+CC uart.o
+CC sigmadelta.o
+CC i2s.o
+CC periph_ctrl.o
+CC gpio.o
+CC pcnt.o
+CC rmt.o
+CC ledc.o
+CC sdmmc_transaction.o
+CC src/secure_boot.o
+CC i2c.o
+CC src/secure_boot_signatures.o
+CC sdmmc_host.o
+CC timer.o
+CC rtc_module.o
+CC src/esp_image_format.o
+CC src/bootloader_random.o
+CC emac_dev.o
+CC emac_main.o
+CC log.o
+CC eth_phy/phy_common.o
+CC library/xmltok.o
+CC panic.o
+CC library/xmlparse.o
+CC core_dump.o
+CC micro-ecc/uECC.o
+CC lib_printf.o
+CC system_api.o
+CC port/chardata.o
+CC gdbstub.o
+CC crosscore_int.o
+CC phy_init.o
+CC deep_sleep.o
+CC ringbuf.o
+CC heap_regions_debug.o
+CC freertos_hooks.o
+CC syscalls.o
+CC queue.o
+CC cpu_start.o
+CC cache_err_int.o
+CC locks.o
+CC croutine.o
+CC list.o
+CXX src/nvs_types.o
+CC intr_alloc.o
+CXX src/nvs_item_hash_list.o
+CC heap_alloc_caps.o
+CC port.o
+CXX src/nvs_pagemanager.o
+CC event_groups.o
+CXX src/nvs_api.o
+CC tasks.o
+CC timers.o
+CC int_wdt.o
+CXX src/nvs_storage.o
+CC event_loop.o
+CXX src/nvs_page.o
+CC esp32/rtc_clk.o
+CC FreeRTOS-openocd.o
+CC tcpip_adapter_lwip.o
+CC event_default_handlers.o
+CC partition.o
+CC cache_utils.o
+CC hwcrypto/sha.o
+CC flash_ops.o
+CC vfs_uart.o
+CC flash_mmap.o
+CC vfs.o
+CC trax.o
+  MKDIR /app/build/fw
+CC api/netbuf.o
+CC api/pppapi.o
+CC spiffs_cache.o
+CC api/api_lib.o
+CC spiffs_gc.o
+CC spiffs_nucleus.o
+CC spiffs_check.o
+CC api/tcpip.o
+CC spiffs_hydrogen.o
+CC api/netdb.o
+CC spiffs_vfs.o
+CC lib/atca_command.o
+CC api/err.o
+CC lib/atca_iface.o
+CC api/api_msg.o
+CC src/crypto/aes-internal-enc.o
+CC api/sockets.o
+CC src/crypto/sha256-internal.o
+CC src/crypto/md5-internal.o
+CC apps/sntp/sntp.o
+CC src/crypto/aes-internal.o
+CC apps/ping/ping.o
+CC src/crypto/sha1.o
+CC lib/basic/atca_basic.o
+CC apps/ping/esp_ping.o
+CC src/crypto/aes-internal-dec.o
+CC apps/dhcpserver.o
+CC lib/basic/atca_helpers.o
+CC lib/host/atca_host.o
+CC core/ipv4/ip_frag.o
+CC core/ipv4/dhcp.o
+CC core/ipv4/ip4_addr.o
+CC core/ipv4/igmp.o
+CC src/crypto/aes-unwrap.o
+CC core/ipv4/ip4.o
+CC core/ipv4/autoip.o
+CC src/crypto/crypto_internal-rsa.o
+CC src/crypto/des-internal.o
+CC core/ipv4/icmp.o
+CC src/crypto/dh_groups.o
+CC core/ipv6/ip6_frag.o
+CC src/crypto/ms_funcs.o
+CC core/ipv6/dhcp6.o
+CC src/crypto/aes-wrap.o
+CC core/ipv6/inet6.o
+CC core/ipv6/ip6_addr.o
+CC src/crypto/sha1-internal.o
+CC core/ipv6/ip6.o
+CC core/ipv6/nd6.o
+CC src/crypto/dh_group5.o
+CC src/crypto/md4-internal.o
+CC src/crypto/sha256.o
+CC core/ipv6/mld6.o
+CC src/crypto/rc4.o
+CC core/ipv6/ethip6.o
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:76: warning: undefined variable 'OS'
+CC src/crypto/aes-cbc.o
+CC core/mem.o
+CC core/init.o
+CC core/memp.o
+CC src/crypto/sha1-pbkdf2.o
+CC core/ipv6/icmp6.o
+CC port/os_xtensa.o
+CC core/sys.o
+CC core/tcp.o
+CC core/dns.o
+CC src/crypto/bignum.o
+CC core/ip.o
+CC core/pbuf.o
+CC src/crypto/crypto_internal-modexp.o
+CC core/raw.o
+CC core/tcp_in.o
+CC core/def.o
+CC core/netif.o
+CC core/stats.o
+CC core/timers.o
+CC core/inet_chksum.o
+CC core/udp.o
+CC core/tcp_out.o
+CC netif/etharp.o
+CC netif/ethernet.o
+CC netif/lowpan6.o
+CC netif/ethernetif.o
+CC port/freertos/sys_arch.o
+CC port/netif/wlanif.o
+CC port/netif/ethernetif.o
+CC port/debug/lwip_debug.o
+AR liblog.a
+CC spi_flash_rom_patch.o
+CC bootloader_start.o
+AR libmicro-ecc.a
+CC esp32/rtc_clk.o
+CC esp32/rtc_sleep.o
+CC esp32/brownout.o
+CC src/secure_boot_signatures.o
+CC src/flash_partitions.o
+CC src/esp_image_format.o
+CC src/flash_encrypt.o
+CC bt.o
+CC bluedroid/bta/dm/bta_dm_api.o
+CC bluedroid/bta/dm/bta_dm_sco.o
+CC bluedroid/bta/dm/bta_dm_ci.o
+CC bluedroid/bta/dm/bta_dm_act.o
+CC bluedroid/bta/dm/bta_dm_pm.o
+CC bluedroid/bta/dm/bta_dm_main.o
+CC bluedroid/bta/dm/bta_dm_cfg.o
+CC bluedroid/bta/gatt/bta_gattc_main.o
+CC bluedroid/bta/gatt/bta_gattc_cache.o
+CC bluedroid/bta/gatt/bta_gatts_main.o
+CC bluedroid/bta/gatt/bta_gatts_api.o
+CC bluedroid/bta/gatt/bta_gattc_utils.o
+CC bluedroid/bta/gatt/bta_gattc_ci.o
+CC bluedroid/bta/gatt/bta_gattc_act.o
+CC bluedroid/bta/gatt/bta_gattc_api.o
+CC bluedroid/bta/gatt/bta_gatts_act.o
+CC bluedroid/bta/gatt/bta_gatts_utils.o
+CC bluedroid/bta/hh/bta_hh_le.o
+CC bluedroid/bta/hh/bta_hh_main.o
+CC bluedroid/bta/hh/bta_hh_cfg.o
+CC bluedroid/bta/sdp/bta_sdp.o
+CC bluedroid/bta/sdp/bta_sdp_act.o
+CC bluedroid/bta/sdp/bta_sdp_cfg.o
+CC bluedroid/bta/sdp/bta_sdp_api.o
+CC bluedroid/bta/av/bta_av_api.o
+CC bluedroid/bta/av/bta_av_cfg.o
+CC bluedroid/bta/av/bta_av_ci.o
+CC bluedroid/bta/av/bta_av_ssm.o
+CC bluedroid/bta/av/bta_av_sbc.o
+CC bluedroid/bta/av/bta_av_aact.o
+CC bluedroid/bta/ar/bta_ar.o
+CC bluedroid/bta/sys/bta_sys_main.o
+CC bluedroid/bta/sys/bta_sys_conn.o
+CC bluedroid/btcore/bdaddr.o
+CC bluedroid/btif/bta_gatts_co.o
+CC bluedroid/btif/bta_dm_co.o
+CC bluedroid/btif/bta_gattc_co.o
+CC bluedroid/device/interop.o
+CC bluedroid/device/controller.o
+CC bluedroid/gki/gki_ulinux.o
+CC bluedroid/gki/gki_buffer.o
+CC bluedroid/hci/packet_fragmenter.o
+CC bluedroid/hci/hci_layer.o
+CC bluedroid/hci/hci_packet_factory.o
+CC bluedroid/main/bte_main.o
+CC bluedroid/main/bte_init.o
+CC bluedroid/osi/future.o
+CC bluedroid/osi/hash_map.o
+CC bluedroid/osi/fixed_queue.o
+CC bluedroid/osi/allocator.o
+CC bluedroid/osi/config.o
+CC bluedroid/osi/list.o
+CC bluedroid/osi/alarm.o
+CC bluedroid/osi/buffer.o
+CC bluedroid/osi/osi_arch.o
+CC bluedroid/external/sbc/decoder/srce/synthesis-sbc.o
+CC bluedroid/external/sbc/decoder/srce/synthesis-dct8.o
+CC bluedroid/external/sbc/decoder/srce/bitalloc.o
+CC bluedroid/external/sbc/decoder/srce/alloc.o
+CC bluedroid/external/sbc/decoder/srce/framing-sbc.o
+CC bluedroid/external/sbc/decoder/srce/dequant.o
+CC bluedroid/btc/core/btc_task.o
+CC bluedroid/btc/core/btc_main.o
+CC bluedroid/btc/core/btc_util.o
+CC bluedroid/btc/core/btc_storage.o
+CC bluedroid/btc/core/btc_ble_storage.o
+CC bluedroid/btc/core/btc_sm.o
+CC bluedroid/btc/core/btc_profile_queue.o
+CC bluedroid/btc/core/btc_alarm.o
+CC bluedroid/btc/core/btc_manage.o
+CC bluedroid/btc/core/btc_config.o
+CC bluedroid/btc/core/btc_dev.o
+CC bluedroid/btc/core/btc_dm.o
+CC bluedroid/btc/profile/esp/blufi/blufi_prf.o
+CC bluedroid/btc/profile/esp/blufi/blufi_protocol.o
+CC bluedroid/btc/profile/std/gap/btc_gap_bt.o
+CC bluedroid/btc/profile/std/gap/btc_gap_ble.o
+CC bluedroid/btc/profile/std/gatt/btc_gatts.o
+CC bluedroid/btc/profile/std/gatt/btc_gattc.o
+CC bluedroid/btc/profile/std/gatt/btc_gatt_util.o
+CC bluedroid/btc/profile/std/a2dp/bta_av_co.o
+CC bluedroid/btc/profile/std/a2dp/btc_media_task.o
+CC bluedroid/btc/profile/std/a2dp/btc_avk.o
+CC bluedroid/btc/profile/std/avrc/btc_avrc.o
+CC bluedroid/stack/btm/btm_ble_batchscan.o
+CC bluedroid/stack/btm/btm_ble_cont_energy.o
+CC bluedroid/stack/btm/btm_sec.o
+CC bluedroid/stack/btm/btm_ble.o
+CC bluedroid/stack/btm/btm_pm.o
+CC bluedroid/stack/btm/btm_ble_adv_filter.o
+CC bluedroid/stack/btm/btm_inq.o
+CC bluedroid/stack/btm/btm_main.o
+CC bluedroid/stack/btm/btm_sco.o
+CC bluedroid/stack/btm/btm_ble_privacy.o
+CC bluedroid/stack/btm/btm_ble_bgconn.o
+CC bluedroid/stack/btm/btm_acl.o
+CC bluedroid/stack/btm/btm_ble_gap.o
+CC bluedroid/stack/btm/btm_dev.o
+CC bluedroid/stack/btm/btm_ble_addr.o
+CC bluedroid/stack/btm/btm_devctl.o
+CC bluedroid/stack/btm/btm_ble_multi_adv.o
+CC bluedroid/stack/btu/btu_hcif.o
+CC bluedroid/stack/btu/btu_task.o
+CC bluedroid/stack/btu/btu_init.o
+CC bluedroid/stack/gap/gap_ble.o
+CC bluedroid/stack/gap/gap_api.o
+CC bluedroid/stack/gap/gap_conn.o
+CC bluedroid/stack/gap/gap_utils.o
+CC bluedroid/stack/gatt/gatt_db.o
+CC bluedroid/stack/gatt/gatt_cl.o
+CC bluedroid/stack/gatt/gatt_attr.o
+CC bluedroid/stack/gatt/gatt_sr.o
+CC bluedroid/stack/gatt/gatt_main.o
+CC bluedroid/stack/gatt/att_protocol.o
+CC bluedroid/stack/gatt/gatt_auth.o
+CC bluedroid/stack/gatt/gatt_api.o
+CC bluedroid/stack/gatt/gatt_utils.o
+CC bluedroid/stack/hcic/hciblecmds.o
+CC bluedroid/stack/hcic/hcicmds.o
+CC bluedroid/stack/l2cap/l2c_main.o
+CC bluedroid/stack/l2cap/l2c_csm.o
+CC bluedroid/stack/l2cap/l2c_ucd.o
+CC bluedroid/stack/l2cap/l2c_api.o
+CC bluedroid/stack/l2cap/l2c_utils.o
+CC bluedroid/stack/l2cap/l2c_fcr.o
+CC bluedroid/stack/l2cap/l2c_link.o
+CC bluedroid/stack/l2cap/l2c_ble.o
+CC bluedroid/stack/sdp/sdp_utils.o
+CC bluedroid/stack/sdp/sdp_db.o
+CC bluedroid/stack/sdp/sdp_discovery.o
+CC bluedroid/stack/sdp/sdp_main.o
+CC bluedroid/stack/sdp/sdp_server.o
+CC bluedroid/stack/smp/smp_main.o
+CC bluedroid/stack/smp/smp_api.o
+CC bluedroid/stack/smp/smp_act.o
+CC bluedroid/stack/smp/smp_keys.o
+CC bluedroid/stack/smp/smp_br_main.o
+CC bluedroid/stack/smp/aes.o
+CC bluedroid/stack/smp/smp_cmac.o
+CC bluedroid/stack/smp/smp_utils.o
+CC bluedroid/stack/smp/p_256_multprecision.o
+CC bluedroid/stack/smp/smp_l2c.o
+CC bluedroid/stack/avct/avct_lcb.o
+CC bluedroid/stack/avct/avct_lcb_act.o
+CC bluedroid/stack/avct/avct_l2c.o
+CC bluedroid/stack/avct/avct_api.o
+CC bluedroid/stack/avrc/avrc_pars_ct.o
+CC bluedroid/stack/avrc/avrc_opt.o
+CC bluedroid/stack/avrc/avrc_pars_tg.o
+CC bluedroid/stack/avrc/avrc_bld_tg.o
+  CC mgos_debug.o
+CC bluedroid/stack/avrc/avrc_api.o
+  CC mgos_atca.o
+CC bluedroid/stack/avrc/avrc_utils.o
+  CC mgos_atca_service.o
+  CC mgos_aws_shadow.o
+  CC mgos_bitbang.o
+  CC mgos_rpc.o
+  CC mg_rpc.o
+  CC mgos_service_config.o
+CC bluedroid/stack/avrc/avrc_sdp.o
+  CC mgos_service_filesystem.o
+CC bluedroid/stack/avdt/avdt_l2c.o
+CC bluedroid/stack/avdt/avdt_scb_act.o
+  CC mgos_gpio_service.o
+CC bluedroid/stack/avdt/avdt_ccb.o
+  CC mgos_i2c_service.o
+CC bluedroid/stack/avdt/avdt_msg.o
+  CC mg_rpc_channel_http.o
+CC bluedroid/stack/avdt/avdt_ccb_act.o
+CC bluedroid/stack/avdt/avdt_ad.o
+  CC mg_rpc_channel_loopback.o
+CC bluedroid/stack/a2dp/a2d_sbc.o
+CC bluedroid/stack/a2dp/a2d_api.o
+  CC mgos_rpc_channel_mqtt.o
+  CC mgos_rpc_channel_uart.o
+CC bluedroid/api/esp_avrc_api.o
+  CC mg_rpc_channel_ws.o
+CC bluedroid/api/esp_bt_main.o
+CC bluedroid/api/esp_bt_device.o
+  CC mgos_mdns.o
+CC bluedroid/api/esp_gap_bt_api.o
+  CC mgos_dns_sd.o
+CC bluedroid/api/esp_a2dp_api.o
+CC bluedroid/api/esp_gatts_api.o
+  CC mgos_i2c.o
+CC bluedroid/api/esp_blufi_api.o
+  CC mgos_i2c_gpio.o
+CC bluedroid/api/esp_gap_ble_api.o
+CC bluedroid/api/esp_gattc_api.o
+  CC mgos_mqtt.o
+  CC mgos_sntp.o
+  CC mgos_updater_common.o
+  CC mgos_updater_http.o
+  CC mgos_updater_rpc.o
+  CC mgos_wifi.o
+  CC mgos_config.o
+  CC mgos_gpio.o
+  CC mgos_init.o
+  CC mgos_mongoose.o
+  CC mgos_sys_config.o
+  CC /app/build/gen/sys_config.o
+  CC sys_ro_vars.o
+  CC mgos_timers_mongoose.o
+  CC mgos_uart.o
+  CC mgos_utils.o
+  CC esp32_crypto.o
+  CC esp32_fs.o
+  CC esp32_fs_crypt.o
+  CC esp32_gpio.o
+  CC esp32_hal.o
+  CC esp32_mdns.o
+  CC esp32_main.o
+  CC esp32_uart.o
+  CC esp32_updater.o
+  CC esp32_wifi.o
+  CC cs_file.o
+  CC cs_crc32.o
+  CC cs_rbuf.o
+  CC json_utils.o
+  CC frozen.o
+  CC mongoose.o
+  CC main.o
+AR libmicro-ecc.a
+AR libnvs_flash.a
+AR libspi_flash.a
+AR libxtensa-debug-module.a
+AR libnewlib.a
+AR libsoc.a
+xtensa-esp32-elf-gcc: internal compiler error: Killed (program cc1)
+Please submit a full bug report,
+with preprocessed source if appropriate.
+See <http://gcc.gnu.org/bugs.html> for instructions.
+/opt/Espressif/esp-idf/make/component_wrapper.mk:186: recipe for target 'library/xmltok.o' failed
+make[1]: *** [library/xmltok.o] Error 4
+make[1]: *** Waiting for unfinished jobs....
+xtensa-esp32-elf-gcc: internal compiler error: Killed (program cc1)
+Please submit a full bug report,
+with preprocessed source if appropriate.
+See <http://gcc.gnu.org/bugs.html> for instructions.
+/opt/Espressif/esp-idf/make/component_wrapper.mk:186: recipe for target 'library/xmlparse.o' failed
+make[1]: *** [library/xmlparse.o] Error 4
+make: *** [all] Error 137
+Error: exit status 2
+
+
+5、出错了
+
+操，好吧，开始看哪里有问题
+
+6、纠正
+在修改了虚拟机的内存，删除了目录，清干净之后又重试了一遍后
+
+lemonhall@HalldeMacBook-Pro:~/Downloads/esp32$ ~/.mos/bin/mos build --local --repo /Users/lemonhall/Downloads/mongoose-os --verbose
+Using mongoose-os located at "/Users/lemonhall/Downloads/mongoose-os"
+Building...
+Make arguments: -j -f /Users/lemonhall/Downloads/mongoose-os/fw/platforms/esp32/Makefile FFI_SYMBOLS= APP_CONF_SCHEMA=src/conf_schema.yaml APP=esp32 APP_FS_FILES=fs/* GEN_DIR=build/gen FW_DIR=build/fw APP_SOURCES=src/*.c src/*.cpp APP_VERSION=1.0 MGOS_PATH=/Users/lemonhall/Downloads/mongoose-os PLATFORM=esp32 FS_STAGING_DIR=build/fs BUILD_DIR=build/objs
+Using docker.cesanta.com/esp32-build:2.0-r2
+/opt/Espressif/esp-idf/make/project.mk:53: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/make/project.mk:222: warning: undefined variable 'CPPFLAGS'
+/opt/Espressif/esp-idf/make/project.mk:266: warning: undefined variable 'CXXFLAGS'
+/opt/Espressif/esp-idf/make/project.mk:282: warning: undefined variable 'OBJCOPY'
+/opt/Espressif/esp-idf/make/project.mk:283: warning: undefined variable 'SIZE'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:76: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/make/project_config.mk:45: warning: undefined variable 'MAKE_RESTARTS'
+/opt/Espressif/esp-idf/make/project.mk:53: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:76: warning: undefined variable 'OS'
+  MKDIR /app/build/fw
+LD bootloader.elf
+/app/build/objs/bootloader/main/libmain.a(bootloader_start.o):(.literal.load_partition_table+0x48): undefined reference to `bootloader_mmap'
+/app/build/objs/bootloader/main/libmain.a(bootloader_start.o):(.literal.load_partition_table+0x4c): undefined reference to `bootloader_munmap'
+/app/build/objs/bootloader/main/libmain.a(bootloader_start.o):(.literal.bootloader_main+0x104): undefined reference to `bootloader_flash_erase_range'
+/app/build/objs/bootloader/main/libmain.a(bootloader_start.o):(.literal.bootloader_main+0x108): undefined reference to `bootloader_flash_write'
+/app/build/objs/bootloader/main/libmain.a(bootloader_start.o): In function `load_partition_table':
+/opt/Espressif/esp-idf/components/bootloader/src/main/./bootloader_start.c:142: undefined reference to `bootloader_mmap'
+/opt/Espressif/esp-idf/components/bootloader/src/main/./bootloader_start.c:158: undefined reference to `bootloader_munmap'
+/app/build/objs/bootloader/main/libmain.a(bootloader_start.o): In function `bootloader_main':
+/opt/Espressif/esp-idf/components/bootloader/src/main/./bootloader_start.c:280: undefined reference to `bootloader_mmap'
+/opt/Espressif/esp-idf/components/bootloader/src/main/./bootloader_start.c:294: undefined reference to `bootloader_munmap'
+/opt/Espressif/esp-idf/components/bootloader/src/main/./bootloader_start.c:304: undefined reference to `bootloader_flash_erase_range'
+/opt/Espressif/esp-idf/components/bootloader/src/main/./bootloader_start.c:320: undefined reference to `bootloader_flash_write'
+/app/build/objs/bootloader/main/libmain.a(bootloader_start.o): In function `esp_flash_encryption_enabled':
+/opt/Espressif/esp-idf/components/bootloader_support/include/esp_flash_encrypt.h:37: undefined reference to `bootloader_flash_write'
+/app/build/objs/bootloader/main/libmain.a(bootloader_start.o): In function `unpack_load_app':
+/opt/Espressif/esp-idf/components/bootloader/src/main/./bootloader_start.c:508: undefined reference to `bootloader_mmap'
+/opt/Espressif/esp-idf/components/bootloader/src/main/./bootloader_start.c:524: undefined reference to `bootloader_munmap'
+/app/build/objs/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o):(.literal.esp_image_load_header+0x14): undefined reference to `bootloader_flash_read'
+/app/build/objs/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o): In function `esp_image_load_header':
+/opt/Espressif/esp-idf/components/bootloader_support/src/esp_image_format.c:30: undefined reference to `bootloader_flash_read'
+/app/build/objs/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o): In function `esp_image_load_segment_header':
+/opt/Espressif/esp-idf/components/bootloader_support/src/esp_image_format.c:72: undefined reference to `bootloader_flash_read'
+/app/build/objs/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o): In function `esp_image_basic_verify':
+/opt/Espressif/esp-idf/components/bootloader_support/src/esp_image_format.c:142: undefined reference to `bootloader_flash_read'
+/opt/Espressif/esp-idf/components/bootloader_support/src/esp_image_format.c:176: undefined reference to `bootloader_flash_read'
+collect2: error: ld returned 1 exit status
+/opt/Espressif/esp-idf/make/project.mk:331: recipe for target '/app/build/objs/bootloader/bootloader.elf' failed
+make[1]: *** [/app/build/objs/bootloader/bootloader.elf] Error 1
+/opt/Espressif/esp-idf/components/bootloader/Makefile.projbuild:32: recipe for target '/app/build/objs/bootloader/bootloader.bin' failed
+make: *** [/app/build/objs/bootloader/bootloader.bin] Error 2
+make: *** Waiting for unfinished jobs....
+make: *** [all] Error 2
+Error: exit status 2
+lemonhall@HalldeMacBook-Pro:~/Downloads/esp32$ cd ..
+lemonhall@HalldeMacBook-Pro:~/Downloads$ rm -rf esp32
+lemonhall@HalldeMacBook-Pro:~/Downloads$ mkdir esp32
+lemonhall@HalldeMacBook-Pro:~/Downloads$ cd esp32
+lemonhall@HalldeMacBook-Pro:~/Downloads/esp32$ ~/.mos/bin/mos init --arch esp32 # cc3200, esp8266, esp32
+Connecting to http://mongoose.cloud, user  ...
+Downloading project skeleton...
+Unpacking...
+Setting arch "esp32"...
+lemonhall@HalldeMacBook-Pro:~/Downloads/esp32$ ~/.mos/bin/mos build --local --repo /Users/lemonhall/Downloads/mongoose-os --verbose
+Using mongoose-os located at "/Users/lemonhall/Downloads/mongoose-os"
+Building...
+Make arguments: -j -f /Users/lemonhall/Downloads/mongoose-os/fw/platforms/esp32/Makefile APP_CONF_SCHEMA=src/conf_schema.yaml MGOS_PATH=/Users/lemonhall/Downloads/mongoose-os FW_DIR=build/fw APP_VERSION=1.0 PLATFORM=esp32 APP_FS_FILES=fs/* FFI_SYMBOLS= BUILD_DIR=build/objs GEN_DIR=build/gen FS_STAGING_DIR=build/fs APP=esp32 APP_SOURCES=src/*.c src/*.cpp
+Using docker.cesanta.com/esp32-build:2.0-r2
+/opt/Espressif/esp-idf/make/project.mk:53: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/make/common.mk:10: /app/build/objs/include/config/auto.conf: No such file or directory
+/opt/Espressif/esp-idf/make/project.mk:179: warning: undefined variable 'CONFIG_SECURE_BOOT_ENABLED'
+/opt/Espressif/esp-idf/make/project.mk:222: warning: undefined variable 'CPPFLAGS'
+/opt/Espressif/esp-idf/make/project.mk:241: warning: undefined variable 'CONFIG_OPTIMIZATION_LEVEL_RELEASE'
+/opt/Espressif/esp-idf/make/project.mk:266: warning: undefined variable 'CXXFLAGS'
+/opt/Espressif/esp-idf/make/project.mk:282: warning: undefined variable 'OBJCOPY'
+/opt/Espressif/esp-idf/make/project.mk:283: warning: undefined variable 'SIZE'
+/opt/Espressif/esp-idf/make/project.mk:288: warning: undefined variable 'CONFIG_TOOLPREFIX'
+/opt/Espressif/esp-idf/make/project.mk:289: warning: undefined variable 'CONFIG_TOOLPREFIX'
+/opt/Espressif/esp-idf/make/project.mk:290: warning: undefined variable 'CONFIG_TOOLPREFIX'
+/opt/Espressif/esp-idf/make/project.mk:291: warning: undefined variable 'CONFIG_TOOLPREFIX'
+/opt/Espressif/esp-idf/make/project.mk:292: warning: undefined variable 'CONFIG_TOOLPREFIX'
+/opt/Espressif/esp-idf/make/project.mk:293: warning: undefined variable 'CONFIG_TOOLPREFIX'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:17: warning: undefined variable 'CONFIG_PYTHON'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:18: warning: undefined variable 'CONFIG_ESPTOOLPY_PORT'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:18: warning: undefined variable 'CONFIG_ESPTOOLPY_BEFORE'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:18: warning: undefined variable 'CONFIG_ESPTOOLPY_AFTER'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:21: warning: undefined variable 'CONFIG_PYTHON'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:22: warning: undefined variable 'CONFIG_PYTHON'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:25: warning: undefined variable 'CONFIG_ESPTOOLPY_FLASHFREQ'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:74: warning: undefined variable 'CONFIG_PYTHON'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:76: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:88: warning: undefined variable 'CONFIG_MONITOR_BAUD'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:88: warning: undefined variable 'CONFIG_ESPTOOLPY_PORT'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:88: warning: undefined variable 'CONFIG_TOOLPREFIX'
+/opt/Espressif/esp-idf/components/partition_table/Makefile.projbuild:12: warning: undefined variable 'CONFIG_PYTHON'
+/opt/Espressif/esp-idf/make/project_config.mk:45: warning: undefined variable 'MAKE_RESTARTS'
+/opt/Espressif/esp-idf/make/project.mk:337: warning: undefined variable 'CONFIG_SECURE_BOOT_ENABLED'
+/opt/Espressif/esp-idf/make/project.mk:337: warning: undefined variable 'CONFIG_SECURE_BOOT_BUILD_SIGNED_BINARIES'
+GENCONFIG
+/opt/Espressif/esp-idf/make/project.mk:53: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/make/project.mk:222: warning: undefined variable 'CPPFLAGS'
+/opt/Espressif/esp-idf/make/project.mk:266: warning: undefined variable 'CXXFLAGS'
+/opt/Espressif/esp-idf/make/project.mk:282: warning: undefined variable 'OBJCOPY'
+/opt/Espressif/esp-idf/make/project.mk:283: warning: undefined variable 'SIZE'
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:76: warning: undefined variable 'OS'
+/opt/Espressif/esp-idf/make/project.mk:53: warning: undefined variable 'OS'
+Building partitions from /mongoose-os/fw/platforms/esp32/src/partitions_mgos.csv...
+CC esp_ota_ops.o
+CC src/secure_boot_signatures.o
+CC src/esp_ota_select.o
+CC src/bootloader_flash.o
+CC src/flash_partitions.o
+CC src/efuse.o
+CC src/secure_boot.o
+CC src/flash_encrypt.o
+CC src/esp_image_format.o
+CC src/bootloader_random.o
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:76: warning: undefined variable 'OS'
+CC emac_dev.o
+CC spi_master.o
+CC emac_main.o
+CC sigmadelta.o
+CC uart.o
+CC i2s.o
+CC periph_ctrl.o
+CC ledc.o
+CC gpio.o
+CC pcnt.o
+CC eth_phy/phy_common.o
+CC eth_phy/phy_tlk110.o
+CC eth_phy/phy_lan8720.o
+CC rmt.o
+CC sdmmc_transaction.o
+CC i2c.o
+CC sdmmc_host.o
+CC timer.o
+CC rtc_module.o
+CC panic.o
+CC core_dump.o
+CC lib_printf.o
+CC library/xmlparse.o
+CC library/xmltok.o
+CC library/xmlrole.o
+CC library/xmltok_impl.o
+CC library/xmltok_ns.o
+CC task_wdt.o
+CC system_api.o
+CC port/expat_element.o
+CC port/chardata.o
+CC port/minicheck.o
+CC gdbstub.o
+CC crosscore_int.o
+CC log.o
+CC phy_init.o
+CC deep_sleep.o
+CC clk.o
+CC freertos_hooks.o
+CC cpu_start.o
+CC cache_err_int.o
+CC ipc.o
+CC ringbuf.o
+CC intr_alloc.o
+CC heap_regions_debug.o
+CC heap_alloc_caps.o
+CC xtensa_intr.o
+CC queue.o
+CC app_trace.o
+CC int_wdt.o
+CC croutine.o
+CC list.o
+CC event_loop.o
+CC hw_random.o
+CC xtensa_init.o
+CC event_default_handlers.o
+CC port.o
+CC heap_regions.o
+CC event_groups.o
+CC tasks.o
+CC timers.o
+CC FreeRTOS-openocd.o
+CC micro-ecc/uECC.o
+CC xtensa_overlay_os_hook.o
+AS xtensa_intr_asm.o
+AS xtensa_context.o
+AS xtensa_vectors.o
+AS portasm.o
+CC time.o
+CC reent_init.o
+CC syscalls.o
+CC hwcrypto/sha.o
+CC hwcrypto/aes.o
+CC syscall_table.o
+CC locks.o
+CXX src/nvs_types.o
+CXX src/nvs_pagemanager.o
+CXX src/nvs_item_hash_list.o
+CXX src/nvs_storage.o
+CXX src/nvs_api.o
+CXX src/nvs_page.o
+CC flash_mmap.o
+CC partition.o
+CC spi_flash_rom_patch.o
+CC esp32/cpu_util.o
+CC esp32/rtc_pm.o
+CC esp32/rtc_clk.o
+CC esp32/rtc_time.o
+CC esp32/rtc_init.o
+CC esp32/rtc_sleep.o
+CC esp32/brownout.o
+CC cache_utils.o
+CC flash_ops.o
+CC tcpip_adapter_lwip.o
+CC vfs_uart.o
+CC vfs.o
+CC apps/dhcpserver.o
+/opt/Espressif/esp-idf/make/project.mk:53: warning: undefined variable 'OS'
+CC eri.o
+CC trax.o
+  MKDIR /app/build/objs/fw_temp
+CC core/mem.o
+CC core/init.o
+CC core/memp.o
+CC core/sys.o
+CC core/tcp.o
+  MKDIR /app/build/fw
+CC core/dns.o
+CC core/ip.o
+CC core/pbuf.o
+CC core/raw.o
+CC core/tcp_in.o
+CC core/def.o
+CC core/netif.o
+  MKDIR /app/build/gen
+CC core/stats.o
+CC core/timers.o
+CC core/inet_chksum.o
+CC core/udp.o
+CC core/tcp_out.o
+CC spiffs_cache.o
+CC spiffs_gc.o
+CC spiffs_nucleus.o
+CC src/crypto/aes-internal-enc.o
+CC src/crypto/sha256-internal.o
+CC src/crypto/aes-internal.o
+CC src/crypto/md5-internal.o
+CC src/crypto/sha1.o
+CC src/crypto/aes-internal-dec.o
+CC src/crypto/des-internal.o
+CC src/crypto/dh_group5.o
+CC src/crypto/ms_funcs.o
+CC src/crypto/crypto_internal-rsa.o
+CC src/crypto/dh_groups.o
+CC src/crypto/sha256.o
+CC src/crypto/aes-wrap.o
+CC src/crypto/sha1-internal.o
+CC src/crypto/md4-internal.o
+CC src/crypto/crypto_internal.o
+CC src/crypto/aes-unwrap.o
+CC src/crypto/rc4.o
+CC src/crypto/crypto_internal-cipher.o
+CC src/crypto/bignum.o
+CC src/crypto/md5.o
+CC src/crypto/sha1-pbkdf2.o
+CC src/crypto/aes-cbc.o
+CC src/crypto/crypto_internal-modexp.o
+CC spiffs_check.o
+CC port/os_xtensa.o
+CC api/pppapi.o
+CC api/tcpip.o
+CC api/api_lib.o
+CC api/netbuf.o
+CC api/err.o
+CC api/api_msg.o
+CC api/sockets.o
+CC api/netifapi.o
+CC api/netdb.o
+CC spiffs_hydrogen.o
+CC apps/sntp/sntp.o
+CC spiffs_vfs.o
+CC apps/ping/ping.o
+CC apps/ping/esp_ping.o
+/opt/Espressif/esp-idf/components/esptool_py/Makefile.projbuild:76: warning: undefined variable 'OS'
+CC core/ipv4/ip_frag.o
+CC core/ipv4/ip4.o
+CC core/ipv4/autoip.o
+CC core/ipv4/igmp.o
+CC core/ipv4/ip4_addr.o
+CC core/ipv4/icmp.o
+CC core/ipv4/dhcp.o
+CC core/ipv6/ip6_frag.o
+CC core/ipv6/dhcp6.o
+CC core/ipv6/ip6_addr.o
+CC core/ipv6/nd6.o
+CC core/ipv6/mld6.o
+CC core/ipv6/ip6.o
+CC core/ipv6/ethip6.o
+CC core/ipv6/inet6.o
+CC core/ipv6/icmp6.o
+CC netif/slipif.o
+CC netif/lowpan6.o
+CC netif/etharp.o
+CC netif/ethernetif.o
+CC netif/ethernet.o
+CC port/freertos/sys_arch.o
+CC port/netif/wlanif.o
+CC port/netif/ethernetif.o
+CC port/debug/lwip_debug.o
+CC bt.o
+CC lib/atca_command.o
+CC lib/atca_cfgs.o
+CC lib/atca_iface.o
+CC lib/atca_device.o
+CC lib/basic/atca_helpers.o
+CC lib/basic/atca_basic.o
+CC lib/host/atca_host.o
+CC log.o
+CC spi_flash_rom_patch.o
+CC micro-ecc/uECC.o
+CC bootloader_start.o
+CC flash_qio_mode.o
+CC src/esp_ota_select.o
+CC src/bootloader_flash.o
+CC src/efuse.o
+CC src/secure_boot.o
+CC src/esp_image_format.o
+CC src/flash_partitions.o
+CC src/secure_boot_signatures.o
+CC src/bootloader_random.o
+CC src/flash_encrypt.o
+CC esp32/rtc_pm.o
+CC esp32/cpu_util.o
+CC esp32/rtc_time.o
+CC esp32/rtc_clk.o
+CC esp32/rtc_sleep.o
+CC esp32/rtc_init.o
+CC esp32/brownout.o
+  GEN   /app/build/gen/sys_config.c
+  GEN   /app/build/gen/sys_ro_vars.c
+CC bluedroid/bta/dm/bta_dm_sco.o
+CC bluedroid/bta/dm/bta_dm_main.o
+CC bluedroid/bta/dm/bta_dm_api.o
+CC bluedroid/bta/dm/bta_dm_pm.o
+CC bluedroid/bta/dm/bta_dm_ci.o
+CC bluedroid/bta/dm/bta_dm_act.o
+CC bluedroid/bta/dm/bta_dm_cfg.o
+CC bluedroid/bta/gatt/bta_gattc_cache.o
+CC bluedroid/bta/gatt/bta_gatts_api.o
+CC bluedroid/bta/gatt/bta_gattc_main.o
+CC bluedroid/bta/gatt/bta_gattc_utils.o
+CC bluedroid/bta/gatt/bta_gatts_main.o
+CC bluedroid/bta/gatt/bta_gatts_utils.o
+CC bluedroid/bta/gatt/bta_gatts_act.o
+CC bluedroid/bta/gatt/bta_gattc_api.o
+CC bluedroid/bta/gatt/bta_gattc_act.o
+CC bluedroid/bta/gatt/bta_gattc_ci.o
+CC bluedroid/bta/hh/bta_hh_act.o
+CC bluedroid/bta/hh/bta_hh_le.o
+CC bluedroid/bta/hh/bta_hh_main.o
+CC bluedroid/bta/hh/bta_hh_cfg.o
+CC bluedroid/bta/hh/bta_hh_utils.o
+CC bluedroid/bta/hh/bta_hh_api.o
+CC bluedroid/bta/sdp/bta_sdp_api.o
+CC bluedroid/bta/sdp/bta_sdp_cfg.o
+CC bluedroid/bta/sdp/bta_sdp_act.o
+CC bluedroid/bta/sdp/bta_sdp.o
+CC bluedroid/bta/av/bta_av_act.o
+CC bluedroid/bta/av/bta_av_sbc.o
+CC bluedroid/bta/av/bta_av_ssm.o
+CC bluedroid/bta/av/bta_av_cfg.o
+CC bluedroid/bta/av/bta_av_ci.o
+CC bluedroid/bta/av/bta_av_api.o
+CC bluedroid/bta/av/bta_av_main.o
+CC bluedroid/bta/av/bta_av_aact.o
+CC bluedroid/bta/ar/bta_ar.o
+CC bluedroid/bta/sys/bta_sys_main.o
+CC bluedroid/bta/sys/bta_sys_conn.o
+CC bluedroid/bta/sys/utl.o
+CC bluedroid/btcore/bdaddr.o
+CC bluedroid/btif/bta_gatts_co.o
+CC bluedroid/btif/bta_dm_co.o
+CC bluedroid/btif/bta_gattc_co.o
+CC bluedroid/device/controller.o
+CC bluedroid/device/interop.o
+CC bluedroid/gki/gki_ulinux.o
+CC bluedroid/gki/gki_buffer.o
+CC bluedroid/hci/buffer_allocator.o
+CC bluedroid/hci/hci_packet_factory.o
+CC bluedroid/hci/packet_fragmenter.o
+CC bluedroid/hci/hci_packet_parser.o
+CC bluedroid/hci/hci_hal_h4.o
+CC bluedroid/hci/hci_layer.o
+CC bluedroid/main/bte_main.o
+CC bluedroid/main/bte_init.o
+CC bluedroid/osi/allocator.o
+CC bluedroid/osi/list.o
+CC bluedroid/osi/osi_arch.o
+CC bluedroid/osi/hash_functions.o
+CC bluedroid/osi/alarm.o
+CC bluedroid/osi/config.o
+CC bluedroid/osi/fixed_queue.o
+CC bluedroid/osi/buffer.o
+CC bluedroid/osi/future.o
+CC bluedroid/osi/hash_map.o
+CC bluedroid/external/sbc/decoder/srce/decoder-oina.o
+CC bluedroid/external/sbc/decoder/srce/bitalloc.o
+CC bluedroid/external/sbc/decoder/srce/alloc.o
+CC bluedroid/external/sbc/decoder/srce/oi_codec_version.o
+CC bluedroid/external/sbc/decoder/srce/dequant.o
+CC bluedroid/external/sbc/decoder/srce/synthesis-8-generated.o
+CC bluedroid/external/sbc/decoder/srce/decoder-sbc.o
+CC bluedroid/external/sbc/decoder/srce/framing-sbc.o
+CC bluedroid/external/sbc/decoder/srce/framing.o
+CC bluedroid/external/sbc/decoder/srce/synthesis-sbc.o
+CC bluedroid/external/sbc/decoder/srce/decoder-private.o
+CC bluedroid/external/sbc/decoder/srce/bitstream-decode.o
+CC bluedroid/external/sbc/decoder/srce/bitalloc-sbc.o
+CC bluedroid/external/sbc/decoder/srce/synthesis-dct8.o
+CC bluedroid/btc/core/btc_task.o
+CC bluedroid/btc/core/btc_storage.o
+CC bluedroid/btc/core/btc_util.o
+CC bluedroid/btc/core/btc_main.o
+CC bluedroid/btc/core/btc_profile_queue.o
+CC bluedroid/btc/core/btc_dm.o
+CC bluedroid/btc/core/btc_sm.o
+CC bluedroid/btc/core/btc_alarm.o
+CC bluedroid/btc/core/btc_dev.o
+CC bluedroid/btc/core/btc_manage.o
+CC bluedroid/btc/core/btc_config.o
+CC bluedroid/btc/core/btc_sec.o
+CC bluedroid/btc/core/btc_ble_storage.o
+CC bluedroid/btc/profile/esp/blufi/blufi_prf.o
+CC bluedroid/btc/profile/esp/blufi/blufi_protocol.o
+CC bluedroid/btc/profile/std/gap/btc_gap_ble.o
+CC bluedroid/btc/profile/std/gap/btc_gap_bt.o
+CC bluedroid/btc/profile/std/gatt/btc_gatts.o
+CC bluedroid/btc/profile/std/gatt/btc_gatt_util.o
+CC bluedroid/btc/profile/std/gatt/btc_gattc.o
+CC bluedroid/btc/profile/std/a2dp/btc_media_task.o
+CC bluedroid/btc/profile/std/a2dp/btc_avk.o
+CC bluedroid/btc/profile/std/a2dp/bta_av_co.o
+CC bluedroid/btc/profile/std/avrc/btc_avrc.o
+CC bluedroid/stack/btm/btm_ble_cont_energy.o
+CC bluedroid/stack/btm/btm_ble_batchscan.o
+CC bluedroid/stack/btm/btm_inq.o
+CC bluedroid/stack/btm/btm_pm.o
+CC bluedroid/stack/btm/btm_sec.o
+CC bluedroid/stack/btm/btm_acl.o
+CC bluedroid/stack/btm/btm_main.o
+CC bluedroid/stack/btm/btm_ble_privacy.o
+CC bluedroid/stack/btm/btm_ble_multi_adv.o
+CC bluedroid/stack/btm/btm_sco.o
+CC bluedroid/stack/btm/btm_ble.o
+CC bluedroid/stack/btm/btm_ble_gap.o
+CC bluedroid/stack/btm/btm_ble_bgconn.o
+CC bluedroid/stack/btm/btm_dev.o
+CC bluedroid/stack/btm/btm_ble_addr.o
+CC bluedroid/stack/btm/btm_ble_adv_filter.o
+CC bluedroid/stack/btm/btm_devctl.o
+CC bluedroid/stack/btu/btu_hcif.o
+CC bluedroid/stack/btu/btu_task.o
+CC bluedroid/stack/btu/btu_init.o
+CC bluedroid/stack/gap/gap_api.o
+CC bluedroid/stack/gap/gap_utils.o
+CC bluedroid/stack/gap/gap_ble.o
+CC bluedroid/stack/gap/gap_conn.o
+CC bluedroid/stack/gatt/gatt_utils.o
+CC bluedroid/stack/gatt/gatt_attr.o
+CC bluedroid/stack/gatt/gatt_api.o
+CC bluedroid/stack/gatt/gatt_main.o
+CC bluedroid/stack/gatt/gatt_sr.o
+CC bluedroid/stack/gatt/gatt_cl.o
+CC bluedroid/stack/gatt/gatt_db.o
+CC bluedroid/stack/gatt/gatt_auth.o
+CC bluedroid/stack/gatt/att_protocol.o
+CC bluedroid/stack/hcic/hciblecmds.o
+CC bluedroid/stack/hcic/hcicmds.o
+CC bluedroid/stack/l2cap/l2c_main.o
+CC bluedroid/stack/l2cap/l2c_ucd.o
+CC bluedroid/stack/l2cap/l2c_csm.o
+CC bluedroid/stack/l2cap/l2c_api.o
+CC bluedroid/stack/l2cap/l2cap_client.o
+CC bluedroid/stack/l2cap/l2c_utils.o
+CC bluedroid/stack/l2cap/l2c_fcr.o
+CC bluedroid/stack/l2cap/l2c_link.o
+CC bluedroid/stack/l2cap/l2c_ble.o
+AS esp32_nsleep100.o
+CC bluedroid/stack/sdp/sdp_server.o
+CC bluedroid/stack/sdp/sdp_utils.o
+CC bluedroid/stack/sdp/sdp_discovery.o
+CC bluedroid/stack/sdp/sdp_main.o
+CC bluedroid/stack/sdp/sdp_db.o
+CC bluedroid/stack/sdp/sdp_api.o
+CC bluedroid/stack/smp/smp_keys.o
+CC bluedroid/stack/smp/smp_api.o
+CC bluedroid/stack/smp/p_256_ecc_pp.o
+CC bluedroid/stack/smp/smp_main.o
+CC bluedroid/stack/smp/smp_utils.o
+CC bluedroid/stack/smp/smp_act.o
+CC bluedroid/stack/smp/smp_cmac.o
+CC bluedroid/stack/smp/smp_l2c.o
+CC bluedroid/stack/smp/aes.o
+CC bluedroid/stack/smp/p_256_multprecision.o
+CC bluedroid/stack/smp/p_256_curvepara.o
+CC bluedroid/stack/smp/smp_br_main.o
+CC bluedroid/stack/avct/avct_lcb_act.o
+CC bluedroid/stack/avct/avct_lcb.o
+CC bluedroid/stack/avct/avct_ccb.o
+CC bluedroid/stack/avct/avct_api.o
+CC bluedroid/stack/avct/avct_l2c.o
+CC bluedroid/stack/avrc/avrc_pars_tg.o
+CC bluedroid/stack/avrc/avrc_utils.o
+CC bluedroid/stack/avrc/avrc_sdp.o
+CC bluedroid/stack/avrc/avrc_opt.o
+CC bluedroid/stack/avrc/avrc_bld_ct.o
+CC bluedroid/stack/avrc/avrc_api.o
+CC bluedroid/stack/avrc/avrc_pars_ct.o
+CC bluedroid/stack/avrc/avrc_bld_tg.o
+CC bluedroid/stack/avdt/avdt_l2c.o
+CC bluedroid/stack/avdt/avdt_scb.o
+CC bluedroid/stack/avdt/avdt_api.o
+CC bluedroid/stack/avdt/avdt_ccb.o
+CC bluedroid/stack/avdt/avdt_msg.o
+CC bluedroid/stack/avdt/avdt_scb_act.o
+CC bluedroid/stack/avdt/avdt_ccb_act.o
+CC bluedroid/stack/avdt/avdt_ad.o
+CC bluedroid/stack/a2dp/a2d_sbc.o
+CC bluedroid/stack/a2dp/a2d_api.o
+CC bluedroid/utils/bt_utils.o
+CC bluedroid/api/esp_avrc_api.o
+CC bluedroid/api/esp_bt_device.o
+CC bluedroid/api/esp_bt_main.o
+CC bluedroid/api/esp_gatts_api.o
+CC bluedroid/api/esp_blufi_api.o
+CC bluedroid/api/esp_gap_ble_api.o
+CC bluedroid/api/esp_gap_bt_api.o
+CC bluedroid/api/esp_a2dp_api.o
+CC bluedroid/api/esp_gattc_api.o
+  CC mgos_atca_service.o
+  CC mgos_aws_shadow.o
+  CC mgos_service_config.o
+  CC mgos_atca.o
+  CC mgos_gpio_service.o
+  CC mg_rpc_channel_http.o
+  CC mgos_rpc_channel_mqtt.o
+  CC mgos_mdns.o
+  CC mgos_updater_common.o
+  CC mgos_debug.o
+  CC mgos_i2c_service.o
+  CC mg_rpc.o
+  CC mgos_bitbang.o
+  CC mgos_sntp.o
+  CC mgos_service_filesystem.o
+  CC mgos_i2c_gpio.o
+  CC mgos_i2c.o
+  CC mgos_rpc.o
+  CC mgos_dns_sd.o
+  CC mg_rpc_channel_ws.o
+  CC mgos_rpc_channel_uart.o
+  CC mgos_updater_http.o
+  CC mgos_mqtt.o
+  CC mg_rpc_channel_loopback.o
+  CC mgos_mongoose.o
+  CC sys_ro_vars.o
+  CC mgos_sys_config.o
+  CC mgos_utils.o
+  CC mgos_timers_mongoose.o
+  CC mgos_uart.o
+  CC /app/build/gen/sys_config.o
+  CC esp32_crypto.o
+  CC mgos_dlsym.o
+  CC esp32_fs.o
+  CC mgos_config.o
+  CC mgos_gpio.o
+  CC esp32_updater.o
+  CC esp32_mdns.o
+  CC mgos_init.o
+  CC mgos_wifi.o
+  CC esp32_debug.o
+  CC mgos_updater_rpc.o
+  CC esp32_gpio.o
+  CC esp32_main.o
+  CC esp32_wifi.o
+  CC esp32_uart.o
+  CC esp32_hal.o
+  CC cs_file.o
+  CC cs_dbg.o
+  CC frozen.o
+  CC cs_crc32.o
+  CC esp32_fs_crypt.o
+  CC cs_rbuf.o
+  CC mongoose.o
+  CC main.o
+  CC json_utils.o
+AR libmicro-ecc.a
+AR libnvs_flash.a
+AR libmicro-ecc.a
+AR libspi_flash.a
+AR libvfs.a
+AR libexpat.a
+AR libxtensa-debug-module.a
+AR libsoc.a
+AR libspiffs.a
+AR libnewlib.a
+AR liblog.a
+AR libbootloader_support.a
+AR libapp_update.a
+AR libsoc.a
+AR libfreertos.a
+AR libtcpip_adapter.a
+AR liblog.a
+AR libcryptoauthlib.a
+AR libspi_flash.a
+AR libdriver.a
+AR libethernet.a
+AR libesp32.a
+AR liblwip.a
+AR libbootloader_support.a
+AR libwpa_supplicant.a
+AR libbt.a
+AR libmain.a
+LD bootloader.elf
+esptool.py v2.0-beta3
+  GEN   /app/build/gen/symbols_dump.txt
+  GEN   /app/build/gen/build_info.c
+  GEN   /app/build/gen/mg_build_info.c
+  GEN   /app/build/gen/ffi_exports.c
+  CC build_info.o
+  CC /app/build/objs/ffi_exports.o
+  CC mg_build_info.o
+AR libsrc.a
+LD esp32.elf
+esptool.py v2.0-beta3
+  Generating breakdown
+  CP    /mongoose-os/fw/skeleton/fs/ca.pem -> build/fs
+  CP    /mongoose-os/fw/skeleton/fs/index.html -> build/fs
+  CP    /app/fs/example.txt -> build/fs
+  CP    /app/build/gen/conf0.json -> build/fs
+  CP    /app/build/gen/sys_config_schema.json -> build/fs
+  CP    /app/build/gen/sys_ro_vars_schema.json -> build/fs
+  MKFS  build/fs (131072) -> /app/build/objs/fw_temp/fs.img
+     Adding ca.pem: 2740
+     Adding conf0.json: 2876
+     Adding example.txt: 113
+     Adding index.html: 825
+     Adding sys_config_schema.json: 8016
+     Adding sys_ro_vars_schema.json: 332
+     Image stats: size=131072, space: total=113201, used=17068, free=96133
+  GEN    /app/build/objs/fw_temp/manifest.json
+  ZIP    /app/build/fw/esp32-esp32-last.zip
+     Adding /app/build/objs/fw_temp/bootloader.bin
+     Adding /app/build/objs/fw_temp/esp32.bin
+     Adding /app/build/objs/fw_temp/fs.img
+     Adding /app/build/objs/fw_temp/partitions_mgos.bin
+  Built esp32/esp32 version 1.0 (20170430-101613/???)
+To flash all build output, run 'make flash' or:
+python /opt/Espressif/esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 1500000 --before default_reset --after hard_reset write_flash -z --flash_mode qio --flash_freq 40m --flash_size detect 0x1000 /app/build/objs/bootloader/bootloader.bin 0x10000 /app/build/objs/esp32.bin 0x8000 /app/build/objs/partitions_mgos.bin
+Success, built esp32/esp32 version 1.0 (20170430-101613/???).
+Firmware saved to build/fw.zip
+
+
+
+============================
+
+当当当当，build成功
+
+
+

@@ -1,0 +1,186 @@
+1、文章
+https://forum.mongoose-os.com/index.php?p=/discussion/comment/2215/#Comment_2215
+
+2、需要干嘛
+这个人想引用：
+https://github.com/cesanta/mongoose-os/blob/master/fw/src/mgos_timers.h
+里的：
+void mgos_clear_timer(mgos_timer_id id);
+这个函数，给mjs用
+
+然后报错了；
+
+项目组的人回答了：
+参考：
+https://github.com/cesanta/mongoose-os/tree/master/fw/examples/mjs_base.
+
+你必须rebuild固件：
+在mos.yml
+当中加入
+ffi_symbols:
+  - mgos_clear_timer
+
+然后
+mos build --arch esp8266
+mos flash
+
+就可以开用了；
+
+3、那么接下来的事情就变得简单了
+解读mongoose的代码要这样读：
+从fw/platforms开始读，进入esp32/src目录
+然后打开main.c就可以开始了
+
+实际上，这是一个标准的idf程序
+
+反过来，由idf--->init了mogs的内核
+
+void app_main(void) {
+  nvs_flash_init();
+  tcpip_adapter_init();
+  ets_install_putc1(sdk_putc);
+  ets_install_putc2(NULL);
+  ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
+  s_mgos_mux = xSemaphoreCreateRecursiveMutex();
+  xTaskCreate(mgos_task, "mgos", MGOS_TASK_STACK_SIZE, NULL, MGOS_TASK_PRIORITY,
+              NULL);
+}
+
+而mongs的init的c里面的引用
+
+#include "fw/src/Arduino/mgos_arduino.h"
+#include "fw/src/mgos_app.h"
+#include "fw/src/mgos_atca.h"
+#include "fw/src/mgos_console.h"
+#include "fw/src/mgos_dns_sd.h"
+#include "fw/src/mgos_gpio.h"
+#include "fw/src/mgos_gpio_service.h"
+#include "fw/src/mgos_hal.h"
+#include "fw/src/mgos_i2c.h"
+#include "fw/src/mgos_i2c_service.h"
+#include "fw/src/mgos_mdns.h"
+#include "fw/src/mgos_mongoose.h"
+#include "fw/src/mgos_mqtt.h"
+#include "fw/src/mgos_rpc.h"
+#include "fw/src/mgos_service_config.h"
+#include "fw/src/mgos_service_filesystem.h"
+#include "fw/src/mgos_sntp.h"
+#include "fw/src/mgos_sys_config.h"
+#include "fw/src/mgos_timers.h"
+#include "fw/src/mgos_updater_rpc.h"
+#include "fw/src/mgos_updater_http.h"
+#include "fw/src/mgos_wifi.h"
+
+一看就知道了，几乎全部都初始化了
+
+我们随便跟一个进去：
+
+enum mgos_init_result mgos_gpio_init() {
+  return mgos_gpio_hal_init();
+}
+
+返回的是叫：mgos_gpio_hal_init();
+
+然后你发现最终的实现，其实是在每个平台之下
+fw/platforms/esp32/src/esp32_gpio.c
+但是，令我不解的地方是
+
+这其实是一个典型的JAVA语言的一个多态，当然这是个链接时的问题
+
+具体链接的时候，我的C文件实现了你mogos_init.c里
+所引用的mgos_gpio_init()--->mgos_gpio_hal_init()
+而mgos_gpio_hal_init具体实际的实现地方却另有其它
+
+这就得再去看makefile那边的技巧了
+
+4、梳理一下，那么如果你想增加功能，按照mogs的方法，你应该干嘛？
+你应该增加对应的mogs文件和h头文件，虚出来一堆函数；
+然后在platforms里，写好对应的C实现
+
+上面则需要在：
+在mos.yml
+当中加入
+ffi_symbols:
+  - mgos_clear_timer
+
+当中暴露ffi给js引擎，最后js才能调用
+
+5、这整个构建和链接的过程，是由make在控制的
+当然，它用了一个后缀为mk的构建系统
+
+入口是：从build/go来看
+	makeArgs := []string{
+		"-j",
+		"-f", filepath.Join(mosDirEffective, "fw/platforms", archEffective, "Makefile"),
+
+也就是说：入口是--->fw/platforms/Makefile
+然后，会看到，引用了：fw/docker_common.mk
+
+APP ?= mongoose-os
+APP_PLATFORM = esp32
+ifeq "$(APP)" "mongoose-os"
+MGOS_PATH = ../../..
+endif
+
+# This defines "all" and "clean" targets.
+include $(MGOS_PATH)/fw/docker_common.mk
+
+# This actually overlaps with IRAM. But the ESP32 binary image includes both,
+# so it's ok. Actual IRAM from the CD is then overlayed on top.
+IROM_MAP_ADDR = 0x400a0000
+GDB = xtensa-esp32-elf-gdb
+include $(MGOS_PATH)/common/platforms/esp/debug_coredump.mk
+
+--------------------
+所以说，真正重要的入口，其实就是：fw/docker_common.mk
+
+然后这个docker_common绕了一个大圈，看完之后你会发现其实就一句话是重要的：
+
+它在容器内部会运行一个make
+
+MAKE_CMD=$(INNER_MAKE) -j4 \
+      -C $(MAKE_APP_PATH) -f $(MAKEFILE_BUILD) \
+      -$(MAKEFLAGS) \
+      APP=$(APP) \
+      APP_VERSION=$(APP_VERSION) \
+      APP_BUILD_ID=$(APP_BUILD_ID) \
+      MGOS_PATH=$(MAKE_MGOS_PATH) \
+      PLATFORM=$(PLATFORM) \
+      $@
+
+然后这个命令最重要的其实就是这个变量：
+MAKEFILE_BUILD ?= $(MAKE_MGOS_PATH)/fw/platforms/$(APP_PLATFORM)/Makefile.build
+
+-f是指定make要去读取的文件名；
+
+他在docker内部挂在了host的一个文件夹给容器，然后运行了一个make命令
+
+但这个命令在操作的全部都是host的文件，读取的是host上的mongoose-os的git目录
+生成的文件也在host之上
+
+而且这是一个用make，调用docker，再在容器里再运行make的程序
+
+哈哈哈哈，够绕的，好吧
+
+那么真正的入口就是：
+MAKEFILE_BUILD ?= $(MAKE_MGOS_PATH)/fw/platforms/$(APP_PLATFORM)/Makefile.build
+
+打开：Makefile.build
+
+然后这个文件就复杂多了：
+
+先看看all目标
+all: $(FW_STAGING_DIR) $(FW_DIR) $(GEN_DIR) $(FW_ZIP) $(BREAKDOWN_FILE)
+
+没啥意义，只能从include入手了：
+
+	include $(MGOS_PATH)/fw/src/mgos_features.mk----------主要的特性开关
+	include $(IDF_PATH)/make/project.mk-------------------IDF框架的build系统，关键
+	include $(MGOS_PATH)/fw/common.mk---------------------定义了最小系统的一些开关
+	include $(MGOS_PATH)/common/scripts/fw_meta.mk--------ZIP和FW_MANIFEST的规则
+	include $(MGOS_PATH)/fw/src/spiffs.mk-----------------这个文件系统的部分
+
+然后，看来不得不去读idf的部分了：
+
+大致猜一下就能看到：
+build/objs目录下的所有目录结构和idf的components目录基本上是一致的
