@@ -1,0 +1,25 @@
+脚本修改自：
+
+https://gist.github.com/olasd/9841772
+
+暂时还没做优化，是可以做到摄像头+桌面+麦克风的，有些东西还没摸，另外，应该是可以设置为低清晰度的....都还没试，这个东西能把我的CPU搞到100%
+
+太变态了
+
+
+#! /bin/bash
+#
+# 推送到 bilibili 使用 ffmpeg
+# Configurer youtube avec une résolution 720p. La vidéo n'est pas scalée.
+VBR="2500k"                                    # Bitrate de la vidéo en sortie
+FPS="30"                                       # FPS de la vidéo en sortie
+QUAL="medium"                                  # Preset de qualité FFMPEG
+YOUTUBE_URL="rtmp://dl.live-send.acg.tv/live-dl/"  # URL de base RTMP youtube
+SOURCE="1"              # Source UDP (voir les annonces SAP)
+KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" # Clé à récupérer sur l'event youtube
+ffmpeg \
+	-f avfoundation \
+    -i "$SOURCE" -deinterlace \
+    -vcodec libx264 -pix_fmt yuv420p -preset $QUAL -r $FPS -g $(($FPS * 2)) -b:v $VBR \
+    -acodec libmp3lame -ar 44100 -threads 6 -qscale 3 -b:a 712000 -bufsize 512k \
+    -f flv "$YOUTUBE_URL$KEY"

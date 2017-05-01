@@ -1,0 +1,31 @@
+1、第一步：
+用附加工具里的脚本编辑器编辑并保存为：工作日设置音量脚本
+
+set w to weekday of (current date)
+if (w = Monday) or (w = Tuesday) or (w = Wednesday) or (w = Thursday) or (w = Friday) then
+        set volume output volume 0 --100%
+        return "I have set volume to 0"
+else
+        set volume output volume 100 --100%
+        return "I have set volume to 100, because it sunday~~~~"
+end if
+
+=============================================================
+
+2、打开命令行
+然后使用crontab来安装自动运行
+输入：
+crontab -e
+进入了vi模式
+按下i，进入编辑模式
+粘贴
+10 10 * * * osascript /Users/lemonhall/Documents/工作日设置音量脚本.scpt
+然后按下:wq
+做保存文件
+
+每天10：10分，运行该脚本
+
+=============================================================
+
+3、验证方法
+每天会给你发mail，命令行里运行mail会看到脚本运行的结果

@@ -1,0 +1,33 @@
+gcc-6 hackplayer.c -lm -O3 -o hackplayer
+
+git clone https://github.com/mossmann/hackrf.git
+
+cd hackrf
+cd host/
+cd libhackrf/
+cmake ./
+make
+make install
+
+lemonhall@HalldeMacBook-Pro:~/hackrf/host/libhackrf$ make install
+[ 50%] Built target hackrf-static
+[100%] Built target hackrf
+Install the project...
+-- Install configuration: ""
+-- Up-to-date: /usr/local/lib/pkgconfig/libhackrf.pc
+-- Installing: /usr/local/lib/libhackrf.0.4.0.dylib
+-- Up-to-date: /usr/local/lib/libhackrf.0.dylib
+-- Up-to-date: /usr/local/lib/libhackrf.dylib
+-- Installing: /usr/local/lib/libhackrf.a
+-- Up-to-date: /usr/local/include/libhackrf/hackrf.h
+
+C_INCLUDE_PATH=/usr/local/include/libhackrf/
+export C_INCLUDE_PATH
+
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
+export LD_LIBRARY_PATH
+
+LIBRARY_PATH=$LIBRARY_PATH:/usr/local/lib/
+export LIBRARY_PATH
+
+gcc-6 hackplayer.c -lhackrf -O3 -o hackplayer

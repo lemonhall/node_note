@@ -1,0 +1,30 @@
+参考：
+
+http://askubuntu.com/questions/716424/how-to-convert-ts-file-into-main-stream-file-losslessly
+
+I think there are two issues here, and also the input looks truncated or damaged, so results may vary.
+
+1. avconv is buggy (as usual)
+
+It shows the input audio stream having 0 channels which is wrong.
+
+Get a recent build of ffmpeg. I don't know what Ubuntu version you're using, so the easiest method is to use a recent static build. Just download, extract, and run. Also, you tagged your question with ffmpeg, so I assume you would be willing to use it instead (avconv != ffmpeg). It should show the proper number of audio channels.
+
+2. Use a compatible output container format
+
+Matroska
+
+This will stream copy (re-mux) the video and re-encode the audio:
+
+ffmpeg -i input -c:v copy -c:a aac output.mkv
+
+Re-encoding the audio is probably required in this case because the Matroska muxer will refuse to mux an audio stream with invalid extradata.
+Older ffmpeg builds will require -strict experimental for the AAC encoder.
+MP4
+
+This will re-encode the video and stream copy the audio:
+
+ffmpeg -i input -c:v libx264 -c:a copy -bsf:a aac_adtstoasc output.mp4
+
+In this case the aac_adtstoasc bitstream filter is required. Newer ffmpeg builds may add this automatically.
+shareimprove this answer

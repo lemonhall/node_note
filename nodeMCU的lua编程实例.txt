@@ -1,0 +1,305 @@
+前置注意点：
+
+https://github.com/espressif/esptool
+
+pip install esptool
+
+安装esptool
+
+esptool.py --port /dev/tty.SLAB_USBtoUART write_flash -fm dio 0x00000 nodemcu-master-7-modules-2017-04-28-13-19-59-float.bin
+
+一定要走DIO，另外32Mb是小b，除以8，其实就是4M，然后就是1M，3M的flash分布
+
+这个ESP-12E实际上内存是非常小的，我这次就启wifi/net/mdns三个就可以了，能小一点就小一点儿吧
+
+串口调试工具，驱动是CP2102的，这个mac下的驱动很好，装好后插入设备就能看到/dev/tty.SLAB_USBtoUART
+
+这个设备了
+
+然后写入的时候不用去管波特率，那个是esptool.py自动
+
+和设备交互的时候要用9600、启动新行
+
+一、启动wifi
+
+这个是2.4g，802.11n的
+
+wifi.sta.config("lemon_2.4g", "密码")
+
+拿到wifi的模式：
+
+print(wifi.getmode())
+
+station是1
+
+拿到wifi的物理模式:
+
+print(wifi.getphymode())
+
+802.11n是3
+
+拿到当前的channle()
+
+l=wifi.getchannel()print(l)
+
+拿到当前的hostname
+
+print(wifi.sta.gethostname())
+
+我的是：NODE-17A01E
+
+设置当前模式为station:
+
+wifi.setmode(wifi.STATION)
+
+设置为802.11n模式
+
+wifi.setphymode(wifi.PHYMODE_N)
+
+打开自动连接模式:
+
+wifi.sta.autoconnect(1)
+
+wifi.sta.connect()
+
+然后打印ip地址信息：
+
+print(wifi.sta.getip())
+
+然后就拿到了：
+
+> print(wifi.sta.getip())
+
+192.168.1.112	255.255.255.0	192.168.1.1
+
+要求列印当前wifi状态：
+
+print(wifi.sta.status())
+
+> print(wifi.sta.status())
+
+5
+
+print(wifi.sta.getmac())
+
+问题在于。。。。tp-link里，能看到这家伙，但是没办法帮它去绑定一个IP地址。。。
+
+好奇怪啊
+
+二、通用的一些判断系统是否正常的lua语句
+
+打印 node.info()
+
+majorVer, minorVer, devVer, chipid, flashid, flashsize, flashmode, flashspeed = node.info()print("NodeMCU "..majorVer.."."..minorVer.."."..devVer)
+
+Hello World:
+
+tmr.alarm(0, 1000, tmr.ALARM_AUTO, function()print("Hello NodeMCU!\n")end)
+
+三、实战代码部分：
+
+https://nodemcu.readthedocs.io/en/master/en/modules/net/#netcreateserver
+
+1、搞个server出来，10秒超时
+
+-- creates a server
+
+sv = net.createServer(net.TCP, 10)
+
+-- closes the server
+
+sv:close()
+
+2、搞个server出来，然后接受数据
+
+-- server listens on 80, if data received, print data to console and send "hello world" back to caller
+
+-- 30s time out for a inactive client
+
+sv = net.createServer(net.TCP, 30)
+
+function receiver(sck, data)
+
+  print(data)
+
+  sck:close()
+
+end
+
+if sv then
+
+  sv:listen(80, function(conn)
+
+    conn:on("receive", receiver)
+
+    conn:send("hello world")
+
+  end)
+
+end
+
+3、搞个server出来，而且还有res
+
+srv = net.createServer(net.TCP)
+
+function receiver(sck, data)
+
+  local response = {}
+
+  -- if you're sending back HTML over HTTP you'll want something like this instead
+
+  -- local response = {"HTTP/1.0 200 OK\r\nServer: NodeMCU on ESP8266\r\nContent-Type: text/html\r\n\r\n"}
+
+  response[#response + 1] = "lots of data"
+
+  response[#response + 1] = "even more data"
+
+  response[#response + 1] = "e.g. content read from a file"
+
+  -- sends and removes the first element from the 'response' table
+
+  local function send(localSocket)
+
+    if #response > 0 then
+
+      localSocket:send(table.remove(response, 1))
+
+    else
+
+      localSocket:close()
+
+      response = nil
+
+    end
+
+  end
+
+  -- triggers the send() function again once the first chunk of data was sent
+
+  sck:on("sent", send)
+
+  send(sck)
+
+end
+
+srv:listen(80, function(conn)
+
+  conn:on("receive", receiver)
+
+end)
+
+If you do not or can not keep all the data you send back in memory at one time (remember that  response is an aggregation) you may use explicit callbacks instead of building up a table like so:
+
+sck:send(header, function() 
+
+  local data1 = "some large chunk of dynamically loaded data"
+
+  sck:send(data1, function()
+
+    local data2 = "even more dynamically loaded data"
+
+    sck:send(data2, function(sk) 
+
+      sk:close()
+
+    end)
+
+  end)
+
+end)
+
+4、搞个udp的server出来
+
+Example:
+
+udpSocket = net.createUDPSocket()
+
+udpSocket:listen(5000)
+
+udpSocket:on("receive", function(s, data, port, ip)
+
+    print(string.format("received '%s' from %s:%d", data, ip, port))
+
+    s:send(port, ip, "echo: " .. data)
+
+end)
+
+port, ip = udpSocket:getaddr()
+
+print(string.format("local UDP socket address / port: %s:%d", ip, port))
+
+On *nix systems that can then be tested by issuing
+
+echo -n "foo" | nc -w1 -u <device-IP-address> 5000
+
+5、读取dnt
+
+https://nodemcu.readthedocs.io/en/master/en/modules/dht/
+
+pin = 5
+
+status, temp, humi, temp_dec, humi_dec = dht.read(pin)
+
+if status == dht.OK then
+
+    -- Float firmware using this example
+
+    print("DHT Temperature:"..temp..";".."Humidity:"..humi)
+
+elseif status == dht.ERROR_CHECKSUM then
+
+    print( "DHT Checksum error." )
+
+elseif status == dht.ERROR_TIMEOUT then
+
+    print( "DHT timed out." )
+
+end
+
+6、结合udp和dht
+
+pin = 5
+
+udpSocket = net.createUDPSocket()
+
+udpSocket:listen(5000)
+
+udpSocket:on("receive", function(s, data, port, ip)
+
+	status, temp, humi, temp_dec, humi_dec = dht.read(pin)
+
+    print(string.format("received '%s' from %s:%d", data, ip, port))
+
+    if status == dht.OK then
+
+	    -- Float firmware using this example
+
+	    print("DHT Temperature:"..temp..";".."Humidity:"..humi)
+
+	    res = "DHT Temperature:"..temp..";".."Humidity:"..humi
+
+	elseif status == dht.ERROR_CHECKSUM then
+
+	    print( "DHT Checksum error." )
+
+	    res = "DHT Checksum error."
+
+	elseif status == dht.ERROR_TIMEOUT then
+
+	    print( "DHT timed out." )
+
+	    res = "DHT timed out."
+
+	end
+
+    s:send(port, ip, "echo: " .. res)
+
+end)
+
+7、再高级一点，搞个mDns吧
+
+https://nodemcu.readthedocs.io/en/master/en/modules/mdns/
+
+mdns.register("dht", { description="temp service", service="udp", port=5000, location='Living Room' })
+
+8、把前面调试好的东西都写入文件，并且让系统boot的时候就去跑

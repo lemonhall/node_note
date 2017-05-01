@@ -1,0 +1,359 @@
+版权归作者所有，任何形式转载请联系作者。
+作者：邻家の柠檬叔（来自豆瓣）
+来源：https://www.douban.com/note/590952095/
+
+1、官网
+https://swift.org/
+
+==================================================
+
+2、安装依赖
+ubuntu 16.04 LTS
+
+sudo apt-get install clang libicu-dev
+
+==================================================
+
+3、下载
+到download环节去
+
+wget https://swift.org/builds/swift-3.0.1-release/ubuntu1604/swift-3.0.1-RELEASE/swift-3.0.1-RELEASE-ubuntu16.04.tar.gz
+
+==================================================
+
+4、导入GPG的key
+
+wget -q -O - https://swift.org/keys/all-keys.asc | \
+  gpg --import -
+
+==================================================
+
+5、下载key
+wget https://swift.org/builds/swift-3.0.1-release/ubuntu1604/swift-3.0.1-RELEASE/swift-3.0.1-RELEASE-ubuntu16.04.tar.gz.sig
+
+==================================================
+
+6、验证key
+先刷新key
+gpg --keyserver hkp://pool.sks-keyservers.net --refresh-keys Swift
+
+验证：
+gpg --verify  swift-3.0.1-RELEASE-ubuntu16.04.tar.gz.sig
+
+输出如下：
+root@lemon:~# gpg --verify  swift-3.0.1-RELEASE-ubuntu16.04.tar.gz.sig 
+gpg: assuming signed data in `swift-3.0.1-RELEASE-ubuntu16.04.tar.gz'
+gpg: Signature made Wed 02 Nov 2016 12:47:00 AM UTC using RSA key ID 91D306C6
+gpg: Good signature from "Swift 3.x Release Signing Key <swift-infrastructure@swift.org>"
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: A3BA FD35 56A5 9079 C068  94BD 63BC 1CFE 91D3 06C6
+
+
+==================================================
+
+
+7、配置PATH
+/root/swift-3.0.1-RELEASE-ubuntu16.04/usr/bin
+
+给bashrc里加入
+export PATH=/root/swift-3.0.1-RELEASE-ubuntu16.04/usr/bin:"${PATH}"
+
+然后source之
+
+==================================================
+
+
+8、问题
+
+运行报错：
+root@lemon:~# swift
+/root/swift-3.0.1-RELEASE-ubuntu16.04/usr/bin/lldb: error while loading shared libraries: libpython2.7.so.1.0: cannot open shared object file: No such file or directory
+
+解决：
+apt-get install libpython2.7
+
+==================================================
+
+9、验证安装
+root@lemon:~# swift
+Welcome to Swift version 3.0.1 (swift-3.0.1-RELEASE). Type :help for assistance.
+  1>  
+
+==================================================
+
+10、开始使用
+https://swift.org/getting-started/#using-the-repl
+使用交互式命令行
+:help是帮助
+:quit是退出
+
+On Linux
+        1> import Glibc
+        2> random() % 10
+        $R0: Int32 = 4
+
+==================================================
+
+11、包管理器
+Package Manager
+
+11.1 安装问题：
+root@lemon:~# swift package --help
+/root/swift-3.0.1-RELEASE-ubuntu16.04/usr/bin/swift-package: error while loading shared libraries: libcurl.so.4: cannot open shared object file: No such file or directory
+
+11.2 解决问题：
+apt-get install libcurl3
+
+11.3 OK继续
+
+root@lemon:~# swift package --help
+OVERVIEW: Perform operations on Swift packages
+
+USAGE: swift package [command] [options]
+
+COMMANDS:
+  init [--type <type>]                   Initialize a new package
+      (type: empty|library|executable|system-module)
+  fetch                                  Fetch package dependencies
+  update                                 Update package dependencies
+  generate-xcodeproj [--output <path>]   Generates an Xcode project
+  show-dependencies [--format <format>]  Print the resolved dependency graph
+      (format: text|dot|json)
+  dump-package [--input <path>]          Print parsed Package.swift as JSON
+
+OPTIONS:
+  -C, --chdir <path>        Change working directory before any other operation
+  --build-path <path>       Specify build/cache directory [default: ./.build]
+  --color <mode>            Specify color mode (auto|always|never)
+  --enable-code-coverage    Enable code coverage in generated Xcode projects
+  -v, --verbose             Increase verbosity of informational output
+  --version                 Print the Swift Package Manager version
+  -Xcc <flag>               Pass flag through to all C compiler invocations
+  -Xlinker <flag>           Pass flag through to all linker invocations
+  -Xswiftc <flag>           Pass flag through to all Swift compiler invocations
+
+NOTE: Use `swift build` to build packages, and `swift test` to test packages
+root@lemon:~# 
+
+==================================================
+
+11.4 创建一个包
+$ mkdir Hello
+$ cd Hello
+
+swift package init
+        Creating library package: hello
+        Creating Package.swift
+        Creating .gitignore
+        Creating Sources/
+        Creating Sources/hello.swift
+        Creating Tests/
+        Creating Tests/LinuxMain.swift
+        Creating Tests/helloTests/
+        Creating Tests/helloTests/helloTests.swift
+
+==================================================
+11.5 编译包
+swift build
+
+主控文件是：Package.swift
+
+==================================================
+11.6 测试包
+
+swift test
+
+root@lemon:~/hello# swift test
+Compile Swift Module 'helloTests' (1 sources)
+Linking ./.build/debug/helloPackageTests.xctest
+Test Suite 'All tests' started at 04:54:55.763
+Test Suite 'debug.xctest' started at 04:54:55.777
+Test Suite 'helloTests' started at 04:54:55.777
+Test Case 'helloTests.testExample' started at 04:54:55.777
+Test Case 'helloTests.testExample' passed (0.0 seconds).
+Test Suite 'helloTests' passed at 04:54:55.778
+         Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'debug.xctest' passed at 04:54:55.778
+         Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'All tests' passed at 04:54:55.778
+         Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+root@lemon:~/hello# 
+
+
+==================================================
+
+12、kitura
+https://github.com/ibm-swift/kitura
+这个东西就是IBM给的HTTP框架
+
+官网：http://www.kitura.io/
+
+12.1 安装依赖
+$ sudo apt-get update
+$ sudo apt-get install clang libicu-dev libcurl4-openssl-dev libssl-dev
+
+==================================================
+
+12.2 第一个例子
+http://www.kitura.io/en/starter/gettingstarted.html
+
+
+$ cd myFirstProject
+$ swift package init --type executable
+
+==================================================
+12.2.1 编辑依赖包：
+vim Package.swift
+
+import PackageDescription
+
+let package = Package(
+    name: "myFirstProject",
+    dependencies: [
+        .Package(url: "https://github.com/IBM-Swift/Kitura.git", majorVersion: 1, minor: 1)
+    ])
+
+==================================================
+12.2.2 加入主程序
+In Sources/main.swift
+
+import Kitura
+
+// Create a new router
+let router = Router()
+
+// Handle HTTP GET requests to /
+router.get("/") {
+    request, response, next in
+    response.send("Hello, World!")
+    next()
+}
+
+// Add an HTTP server and connect it to the router
+Kitura.addHTTPServer(onPort: 8090, with: router)
+
+// Start the Kitura runloop (this call never returns)
+Kitura.run()
+
+编辑完之后回到主目录
+
+==================================================
+12.2.3 编译
+swift build
+
+==================================================
+12.2.4 运行
+.build/debug/myFirstProject
+
+==================================================
+12.2.5 验证
+w3m http://localhost:8090/
+
+能看到Hello World
+
+==================================================
+
+12.2.6 增强Log
+vim Package.swift
+加入依赖
+
+.Package(url: "https://github.com/IBM-Swift/HeliumLogger.git", majorVersion: 1, minor: 1)
+
+==================================================
+12.2.7 增加输出
+Sources/main.swift.
+
+import HeliumLogger
+
+// Initialize HeliumLogger
+HeliumLogger.use()
+
+==================================================
+
+12.2.8 解析输入
+http://www.kitura.io/en/resources/tutorials/parsingrequests.html
+
+不翻译了，很简单
+
+==================================================
+
+12.2.8.1 Parsing URL Encoded Parameters
+You can specify matching to a URL parameter by starting the path name with a “:”. The name afterwards is the key to the parameter dictionary
+
+router.get("/name/:name") { request, response, _ in
+    let name = request.parameters["name"] ?? ""
+    try response.send("Hello \(name)").end()
+}
+This will match to /name/Bob, /name/Joe but not /name
+
+==================================================
+
+12.2.8.2 Parsing Query Parameters
+You can access query parameters through the queryParameters dictionary in RouterRequest
+
+router.get("/name") { request, response, _ in
+    let name = request.queryParameters["name"] ?? ""
+    try response.send("Hello \(name)").end()
+}
+In this example, if the incoming URL /name?name=Dan, then the output will be “Hello Dan”.
+
+==================================================
+
+12.2.8.3 Parsing String Posts
+For post requests, the post body can be read as a string with the readString method.
+
+router.post("/name") { request, response, _ in
+    let name = try request.readString() ?? ""
+    try response.send("Hello \(name)").end()
+}
+
+==================================================
+
+12.2.8.4 Parsing JSON Posts
+The built in body parsing middleware can parse a variety of body types including JSON.
+
+‣ Import SwiftyJSON by adding it to your Package.swift file and by adding import SwiftyJSON to the top of your file.
+
+‣ Specify that the body parser should be run on all paths starting with /name
+
+router.all("/name", middleware: BodyParser())
+‣ Specify your path, retrieving the parsed body from the body property.
+
+router.post("/name") { request, response, next in
+    guard let parsedBody = request.body else {
+        next()
+        return
+    }
+
+    switch(parsedBody) {
+    case .json(let jsonBody):
+            let name = jsonBody["name"].string ?? ""
+            try response.send("Hello \(name)").end()
+    default:
+        break
+    }
+    next()
+}
+Fork this website on GitHub.
+
+==================================================
+
+12.2.9 使用模板引擎
+http://www.kitura.io/en/resources/tutorials/templating.html
+
+略，只看看文档吧，也很简单
+
+==================================================
+
+12.2.10 FastCGI
+
+准生产的要素之一
+
+http://www.kitura.io/en/resources/tutorials/fastcgi.html
+
+==================================================
+
+12.2.xxx
+
+其余的文档包含SSL，session的plugin，以及一个OAuth的例子

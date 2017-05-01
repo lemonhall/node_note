@@ -1,0 +1,160 @@
+版权归作者所有，任何形式转载请联系作者。
+作者：邻家の柠檬叔（来自豆瓣）
+来源：https://www.douban.com/note/618278955/
+
+1、mJS的项目地址
+
+https://github.com/cesanta/mjs
+
+默认的mos init项目并不会引用这个mjs包；
+
+你需要的是，找到mongoose-os/fw/examples下面的：mjs_base包
+
+拷贝文件到空目录；
+
+然后打开：mos.yml
+
+name: mjs_base
+arch: esp32
+version: 1.0
+skeleton_version: 2017-03-17
+sources:
+  - src
+  - ${mjs_path}/mjs.c
+filesystem:
+  - fs
+  - ${mjs_path}/mjs/lib/api_*.js
+  - ${mongoose_os_path}/fw/mjs_api/api_*.js
+  - ${mongoose_os_path}/fw/platforms/${arch}/mjs_api/api_*.js
+modules:
+  - origin: https://github.com/cesanta/mjs
+build_vars:
+  MGOS_ENABLE_MQTT: 1
+  MGOS_ENABLE_AWS_SHADOW: 1
+  SSL: mbedTLS
+  APP_CONF_SCHEMA: src/conf_schema.yaml
+  MGOS_ENABLE_ONEWIRE: 1
+主要就是修改这一行：arch: esp32
+
+然后接下来是一样的：
+
+build：
+
+~/.mos/bin/mos build --local --repo /Users/lemonhall/Downloads/mongoose-os --verbose
+
+flash：
+
+~/.mos/bin/mos flash
+
+记得串口工具使用115200波特率；
+
+另外：${mjs_path}这个东西，它用了一个约定俗成，就是https://github.com/cesanta/mjs
+
+的path最后的/之后的东西再加上_path；
+
+好吧，你高兴就好；
+
+然后，工具会自动拖下来git目录，和src平齐；
+
+2、最基础的写法
+
+let floor = ffi('double floor(double)');
+print(floor(1.23456));
+接受的参数为：int, double, char *, void *
+
+除此之外你就自己想办法包装吧，这需要一些技巧，之后在实践当中慢慢来；
+
+3、Callbacks
+
+也简单，看下面；
+
+void timer(int seconds, void (*callback)(int, void *), void *user_data);
+let Timer = {
+  set: ffi('void timer(int, void (*)(int, userdata), userdata)')
+};
+
+Timer.set(200, function(t) {
+  print('Time now: ', t);
+}, null);
+4、进一步的例子
+
+mongoose-os的项目结构是这样的：
+
+src/main.c
+fs/init.js
+
+简要的说，如果你吐省事儿；
+
+很简单，两步走：
+
+在main.c中声明函数：
+
+int bt_controller_init(){
+  esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+  if (esp_bt_controller_init(&bt_cfg) != ESP_OK) {
+    LOG(LL_ERROR, ("Bluetooth controller initialize failed"));
+    return -1;
+  }else{
+    return 0;
+  }}
+然后，在init.js当中：
+
+let bt_controller_init=ffi('int bt_controller_init()'); 
+于是就初始化了这个刚才那个C函数；
+
+之后调用：
+
+  let init_ret = bt_controller_init();
+  print('Init:', init_ret ? 'SUC' : 'FAIL');
+三步就可以完成这个过程；
+
+5、长久之计
+
+问题在于实际上最好别这么做，因为这是暴露少量功能给上层的做法；
+
+正途是，写api_xxxx.js来包装C，
+
+C然后在调用platforms下实际的ESP32的idf框架的程序；
+
+最后，生成一个js文件，两个C文件，若干h文件来包装底层给的API
+
+这是mongoose-os自己的做法；
+
+当然，这种做法略微有些啰嗦，也实在是像极了当初在ubuntu下玩gjs时候的问题；
+
+幻想着能有自动扫描技术，自动暴露；
+
+再说吧，这个方式还有一个问题，就是会动mongoose-os目录下的代码
+
+并不是一个什么好主意；
+
+所以，看看能否有用户自定义C文件并暴露且，更为完美的方案；
+
+待续....
+
+我想了想，这样，建一个新的h文件
+
+然后在main里面引用这个文件；
+
+建立一个js文件，在js里面包装这个c文件里所有的函数
+
+js里则暴露所有c文件的函数并包装；
+
+明天实验一个这个方法；
+
+这样就可以不用动mongoose-os的目录
+
+而只是在用户app程序的目录下暴露对应的模块；
+
+甚至以后可以学mJS的做法
+
+将暴露ble的模块单独抽取出来，js文件和c文件混杂在一起；
+
+实现，这样这可以是一个独立工程；
+
+然后在init.js里，我只需要load(''xxxx.js")
+
+即可；
+
+很方便.....就看对方支不支持啦；
+

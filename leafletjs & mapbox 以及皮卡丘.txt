@@ -1,0 +1,128 @@
+
+
+
+比我想象的要简单一些：
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+  </head>
+ <script type="text/javascript" src='./jquery-3.1.0.min.js'></script>
+ <link rel="stylesheet" href="leaflet.css" />
+ <script src="leaflet.js"></script>
+
+  <body>
+    <p id="test">TEST</p>
+
+   <div id="mapid" style="height: 380px;"></div>
+
+<script type="text/javascript">
+  var mymap = L.map('mapid').setView([51.50534,-0.08909], 22);
+  
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', 
+    {
+    attribution: '',
+    maxZoom: 22,
+    id: 'mapbox.streets',
+    accessToken: 'xxxxxxxxxxxxxxxxxxxxxxxxxxx'
+}).addTo(mymap);
+
+  var myMarker = L.marker([51.50534,-0.08909]).addTo(mymap);
+
+  setTimeout(function(){
+      myMarker.setLatLng([51.50534,-0.089089]);
+
+  },2000);
+  var lat = 51.50534;
+  var lng = -0.089089;
+  var walk_step = 0.000001;
+
+$(document).keydown(function(event){
+//三、实例（当按下键盘上的左右方面键时）38,40,37,39；
+//判断当event.keyCode 为37时（即左方面键），执行函数to_left();
+//判断当event.keyCode 为39时（即右方面键），执行函数to_right();
+          if(event.keyCode == 37){
+            console.log("←");
+            lng = lng - walk_step;
+            myMarker.setLatLng([lat,lng]);
+          }else if (event.keyCode == 39){
+            console.log("→");
+            lng = lng + walk_step;
+            myMarker.setLatLng([lat,lng]);
+          }else if (event.keyCode == 38){
+            console.log("↑");
+            lat = lat + walk_step;
+            myMarker.setLatLng([lat,lng]);
+          }else if (event.keyCode == 40){
+            console.log("↓");
+            lat = lat - walk_step;
+            myMarker.setLatLng([lat,lng]);
+          }
+});
+
+
+</script>
+  </body>
+</html>
+
+
+==========================================
+
+1、leafletjs
+http://leafletjs.com/index.html
+
+2、先下载，里面有一个js，一个css，一个images目录，里面有若干图片
+
+3、引用：
+<link rel="stylesheet" href="leaflet.css" />
+ <script src="leaflet.js"></script>
+
+4、加容器
+<div id="mapid" style="height: 380px;"></div>
+
+5、加地图
+ var mymap = L.map('mapid').setView([51.50534,-0.08909], 22);
+
+6、加图像
+ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', 
+    {
+    attribution: '',
+    maxZoom: 22,
+    id: 'mapbox.streets',
+    accessToken: 'xxxxxxxxxxxx'
+}).addTo(mymap);
+
+7、mapbox
+需要申请账号
+选择id为：'mapbox.streets'，还有dark，light，卫星图都ok，这个id特么是猜出来的
+accessToken为mapbox申请出来的key
+
+8、加入marker
+var myMarker = L.marker([51.50534,-0.08909]).addTo(mymap);
+
+9、监听键盘操作，并做好步进
+
+$(document).keydown(function(event){
+//三、实例（当按下键盘上的左右方面键时）38,40,37,39；
+//判断当event.keyCode 为37时（即左方面键），执行函数to_left();
+//判断当event.keyCode 为39时（即右方面键），执行函数to_right();
+          if(event.keyCode == 37){
+            console.log("←");
+            lng = lng - walk_step;
+            myMarker.setLatLng([lat,lng]);
+          }else if (event.keyCode == 39){
+            console.log("→");
+            lng = lng + walk_step;
+            myMarker.setLatLng([lat,lng]);
+          }else if (event.keyCode == 38){
+            console.log("↑");
+            lat = lat + walk_step;
+            myMarker.setLatLng([lat,lng]);
+          }else if (event.keyCode == 40){
+            console.log("↓");
+            lat = lat - walk_step;
+            myMarker.setLatLng([lat,lng]);
+          }
+});

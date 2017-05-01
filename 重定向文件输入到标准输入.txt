@@ -1,0 +1,50 @@
+#include <errno.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+        printf("I am here");
+        
+        if(  -1==dup2(0, fileno(fd))  ){
+            printf("can't redirect fd error\n");  
+                    if (errno) {
+                        printf("errno = %d\n", errno); // errno = 33
+                        printf("error: %s\n", strerror(errno)); // error: Numerical argument out of domain
+                    }
+            exit(1);  
+        }
+
+====================================
+
+与昨天一样的写法
+
+这写法其实不优美，但是先这样吧；
+
+./gps-sdr-sim -e brdc3540.14n -l 31.603202,120.466576,100 -b 8 | ./hackplayer -t gpssim.bin.bak
+
+经过改造的程序就可以这么流式的跑了
+
+当然，还有很多问题，比如不太好定位是哪些流的数据引起了后面的hackplayer当掉，另外因为使用的是stdin和stdout来做管道；
+
+所以同时想让第一个程序输出一些进度信息到stdout的时候就变得很麻烦，得想个办法改进；
+
+这个改造总得来说，确实不如有命名管道来的方便，但是也算是练习了一下；
+
+接下来是改造./gps-sdr-sim
+
+看看怎么让其接受坐标点的输入，并产生正确的流，并关掉300的那个限制；
+
+最后，需要再写一个node的程序，产生实时可以移动的坐标点经纬度数据；
+
+并输出到经过改造的gps-sdr-sim里面去
+
+再进一步是，将整个程序清理过后
+
+想办法兼容windows
+
+最最后就是打包，提pull request，或者fork了；
+
+地图===>经纬度===>gps-sdr-sim===>hackplayer===>>>hackrf硬件===>射频====>手机
+
+这个流程即可以彻底打通；

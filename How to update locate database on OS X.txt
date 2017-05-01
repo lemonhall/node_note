@@ -1,0 +1,21 @@
+locate is a great tool both on Linux and Mac when searching for files in the terminal. But sometimes the database will be out of sync with whats really on the hard drives. On Linux you typically can use the commands updatedb orlocate -u (-u as in update) to update it. These commands are not available on OS X though.
+
+The feature it self is not gone of course. To update the database on OS X you have to run:
+
+sudo /usr/libexec/locate.updatedb
+
+This will take a few minutes but when it's done your database is up to date. This will also work to build the database if you didn't had one before.
+
+If you would like to have the command updatedb to get a more consistent behavior between your Linux and Mac environment you can symlink it to/usr/local/bin.
+
+cd /usr/local/bin
+ln -s /usr/libexec/locate.updatedb updatedb
+
+Now you can restart the terminal and have updatedb available.
+
+If it is not available you may not have /usr/local/bin in your $PATH variable. Lets then add it to your ~/.bashrc file.
+
+# ~/.bashrc
+export PATH="/usr/local/bin:$PATH"
+
+Read some more?

@@ -1,0 +1,308 @@
+【hackrf mac下安装】
+
+1、网址
+参考文档
+https://github.com/robotastic/homebrew-hackrf
+
+2、安装brew
+略过
+
+3、依赖
+brew install python gcc swig
+pip install numpy Cheetah lxml
+pip install scipy
+pip install matplotlib
+
+4、安装wxmac
+brew install wxmac --python
+
+5、私有
+brew tap robotastic/homebrew-hackrf
+
+6、安装libhackrf
+brew install hackrf
+
+7、这一步很重要
+Create the ~/.gnuradio/config.conf config file for custom block support and add this into it
+
+[grc]
+local_blocks_path=/usr/local/share/gnuradio/grc/blocks
+
+没建立这个东西，gr-osmosdr这个东西的blocks就没地方放
+
+8、安装普通的brew上的
+brew install gnuradio
+
+9、安装rtlsdr的驱动
+brew install rtlsdr --HEAD
+
+10、安装中间件，最关键的一个组件
+brew install gr-osmosdr --HEAD
+
+11、gnuradio的附加组件包，没有安装成功过
+brew install gr-baz --HEAD
+
+12、从官网上安装gqrx
+gqrx
+
+============================
+
+13、其中hackrf
+hackrf_info可以用来验证是否成功安装了hackrf
+
+14、rtl_sdr是自动的
+关键工具之一是rtl_tcp
+
+15、可以监听1090Mhz的飞机卫星信号
+
+============================
+
+16、这两个可以实验一下
+
+gnuradio-companion
+osmocom_fft -a hackrf
+
+17、界面
+gqrx
+
+gqrx很奇怪，必须做偏移才能监听成功
+
+
+============================================================================================================
+
+
+【gps欺骗】
+
+1、安装gps-sdr-sim
+https://github.com/osqzss/gps-sdr-sim
+
+git clone https://github.com/osqzss/gps-sdr-sim.git
+
+cd gps-sdr-sim
+
+gcc gpssim.c -lm -O3 -o gps-sdr-sim
+
+
+2、解决gcc的问题
+参考：http://stackoverflow.com/questions/20340117/omp-h-library-isnt-found-in-the-gcc-version-4-2-1-in-mavericks
+
+
+I got this message when I tried to reinstall GCC via Homebrew.
+
+GCC has been built with multilib support. Notably, OpenMP may not work: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60670
+
+If you need OpenMP support you may want to brew reinstall gcc --without-multilib
+So, if you have Homebrew installed, you could try (on the terminal):
+
+brew reinstall gcc --without-multilib
+This process may take a while !
+
+
+brew reinstall gcc --without-multilib
+
+需要编译很久，另外想告诉你，没什么卵用
+纠正：gcc-6 gpssim.c -lm -O3 -o gps-sdr-sim
+也许是这个问题
+
+
+4、继续
+  508  brew remove libivmp
+  509  brew install libiomp
+  brew install clang-omp
+  clang-omp gpssim.c -lm -O3 -o gps-sdr-sim
+
+
+gcc gpssim.c -lm -O3 -o gps-sdr-sim
+
+
+5、录制
+参考文献：http://blog.csdn.net/opensourcesdr/article/details/51968678
+
+./gps-sdr-sim -e brdc3540.14n -l 31.603202,120.466576,100 -b 8
+
+步骤3：在网站http://www.gpsspg.com/maps.htm上查询一个你感兴趣的地方的GPS经纬度信息（例如我选了个如图3所示的无锡东站：百度地图：31.6032020000,120.4665760000），然后按照这个经纬度信息来通过GPS仿真器生成GPS仿真数据
+gps-sdr-sim -e brdc3540.14n -l 31.603202,120.466576,100 -b 8
+等待执行上述命令，执行结束后，你会发现你的文件夹中多了一个gpssim.bin文件，这个文件保存的就是我们模拟生成的GPS数据。在接下来的步骤中，我们就要用HackRF把伪造的GPS数据发送出去。
+
+
+6、文件
+-rw-r--r--   1 lemonhall  staff   1.5G  7 25 23:58 gpssim.bin
+
+1.5G的大小，我去
+
+
+7、发射
+
+注意：网上之前的教程大部分都是用BladeRF来做的，用的-b的参数都是16，而HackRF的芯片是8位的，因此，我刚开始的时候怎么也不能GPS欺骗，后来改为-b 8后就欺骗成功了，这也算是一个小插曲。
+步骤4：用HackRF来发射我们在步骤3中模拟生成的伪造数据
+打开手机中的高德地图或者百度地图APP，你会看到你现在所在的真实位置，然后开始执行以下命令：
+hackrf_transfer -t gpssim.bin -f 1575420000 -s 2600000 -a 1 -x 0
+（命令参数解析：指定GPS数据，用-f来指定频率为1575420000 ，即民用GPS L1波段频率，用-s来指定采样速率2.6Msps，开启天线增益，指定TX VGA(IF)为0）
+等待几分钟后（可能一两分钟，也可能是三四分钟具体情况不同），你就会发现你的高德地图或百度地图发生变化了，从原来你所在的位置变成了在无锡东站附近了。如下图5,6,7所示。我按照手机是3G信号、WiFi信号和飞行模式三种模式来分别进行了验证，结果依次如图5、6和7所示。
+
+
+8、成功
+
+============================================================================================================
+
+【改造gps-sdr-sim使其输出到标准输出】
+
+
+版权归作者所有，任何形式转载请联系作者。
+作者：邻家の柠檬叔（来自豆瓣）
+来源：https://www.douban.com/note/572588515/
+
+1、include的东西有哪些？
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+#include <omp.h>
+#include <errno.h>
+#ifdef _WIN32
+#include "getopt.h"
+#else
+#include <unistd.h>
+#endif
+#include "gpssim.h"
+
+2、打开文件的方式	
+// Open output file
+if (NULL==(fp=fopen(outfile,"wb")))
+{
+printf("ERROR: Failed to open output file.\n");
+if (errno) {
+printf("errno = %d\n", errno); // errno = 33
+printf("error: %s\n", strerror(errno)); // error: Numerical argument out of domain
+}
+exit(1);
+}
+
+//重定向到标准输出
+// /* 重定向 */  
+// if(freopen(stdout,"w",fp) == NULL){
+//         printf("can't redirect fd error\n");  
+//   if (errno) {
+//       printf("errno = %d\n", errno); // errno = 33
+//       printf("error: %s\n", strerror(errno)); // error: Numerical argument out of domain
+//   }
+//         exit(1);  
+// }  
+
+
+3、重定向fopen的文件流，到标准输出
+//实验第二种重定向
+if(  -1==dup2(1, fileno(fp))  ){
+printf("can't redirect fd error\n");  
+if (errno) {
+printf("errno = %d\n", errno); // errno = 33
+printf("error: %s\n", strerror(errno)); // error: Numerical argument out of domain
+}
+exit(1);  
+}
+
+
+4、技巧
+打印标准错误：
+
+if (errno) {
+printf("errno = %d\n", errno); // errno = 33
+printf("error: %s\n", strerror(errno)); // error: Numerical argument out of domain
+}
+
+
+============================================================================================================
+
+【编译libhackrf】
+
+gcc-6 hackplayer.c -lm -O3 -o hackplayer
+
+git clone https://github.com/mossmann/hackrf.git
+
+cd hackrf
+cd host/
+cd libhackrf/
+cmake ./
+make
+make install
+
+lemonhall@HalldeMacBook-Pro:~/hackrf/host/libhackrf$ make install
+[ 50%] Built target hackrf-static
+[100%] Built target hackrf
+Install the project...
+-- Install configuration: ""
+-- Up-to-date: /usr/local/lib/pkgconfig/libhackrf.pc
+-- Installing: /usr/local/lib/libhackrf.0.4.0.dylib
+-- Up-to-date: /usr/local/lib/libhackrf.0.dylib
+-- Up-to-date: /usr/local/lib/libhackrf.dylib
+-- Installing: /usr/local/lib/libhackrf.a
+-- Up-to-date: /usr/local/include/libhackrf/hackrf.h
+
+C_INCLUDE_PATH=/usr/local/include/libhackrf/
+export C_INCLUDE_PATH
+
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
+export LD_LIBRARY_PATH
+
+LIBRARY_PATH=$LIBRARY_PATH:/usr/local/lib/
+export LIBRARY_PATH
+
+gcc-6 hackplayer.c -lhackrf -O3 -o hackplayer
+
+
+============================================================================================================
+
+【改造hackplayer，使其可以接受标准输入】
+
+
+#include <errno.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+        printf("I am here");
+        
+        if(  -1==dup2(0, fileno(fd))  ){
+            printf("can't redirect fd error\n");  
+                    if (errno) {
+                        printf("errno = %d\n", errno); // errno = 33
+                        printf("error: %s\n", strerror(errno)); // error: Numerical argument out of domain
+                    }
+            exit(1);  
+        }
+
+====================================
+
+与昨天一样的写法
+
+这写法其实不优美，但是先这样吧；
+
+./gps-sdr-sim -e brdc3540.14n -l 31.603202,120.466576,100 -b 8 | ./hackplayer -t gpssim.bin.bak
+
+经过改造的程序就可以这么流式的跑了
+
+当然，还有很多问题，比如不太好定位是哪些流的数据引起了后面的hackplayer当掉，另外因为使用的是stdin和stdout来做管道；
+
+所以同时想让第一个程序输出一些进度信息到stdout的时候就变得很麻烦，得想个办法改进；
+
+这个改造总得来说，确实不如有命名管道来的方便，但是也算是练习了一下；
+
+接下来是改造./gps-sdr-sim
+
+看看怎么让其接受坐标点的输入，并产生正确的流，并关掉300的那个限制；
+
+最后，需要再写一个node的程序，产生实时可以移动的坐标点经纬度数据；
+
+并输出到经过改造的gps-sdr-sim里面去
+
+再进一步是，将整个程序清理过后
+
+想办法兼容windows
+
+最最后就是打包，提pull request，或者fork了；
+
+地图===>经纬度===>gps-sdr-sim===>hackplayer===>>>hackrf硬件===>射频====>手机
+
+这个流程即可以彻底打通；

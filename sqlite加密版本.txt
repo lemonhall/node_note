@@ -1,0 +1,241 @@
+1、下载安装
+git clone https://github.com/sqlcipher/sqlcipher.git
+
+2、安装xcode
+需要安装xcode和对应的command tools
+brew install openssl
+xcode-select --install
+
+[参考资料]
+https://github.com/phusion/passenger/issues/1630
+
+
+3、安装brew
+略过
+
+
+4、编译
+https://github.com/sqlcipher/sqlcipher/blob/master/README.md
+
+
+5、编译安装
+$ ./configure --enable-tempstore=yes CFLAGS="-DSQLITE_HAS_CODEC" \
+    LDFLAGS="-lcrypto"
+$ make
+
+
+6、运行
+使用SQLCipher加密已存在的数据库
+SQLCipher提供了sqlcipher_export()函数，该函数可以方便的对一个普通数据库导入到SQLCipher加密加密的数据库中，操作方式如下：
+$ ./sqlcipher services.db
+sqlite> ATTACH DATABASE 'encrypted.db' AS encrypted KEY 'testkey';  
+sqlite> SELECT sqlcipher_export('encrypted');  
+sqlite> DETACH DATABASE encrypted;  
+ 
+解除使用SQLCipher加密的数据库密码
+sqlcipher_export()函数同样可以将SQLCipher加密后的数据库内容导入到未加密的数据库中，从而实现解密，操作方式如下：
+$ ./sqlcipher encrypted.db  
+sqlite> PRAGMA key = 'testkey';  
+sqlite> ATTACH DATABASE 'plaintext.db' AS plaintext KEY '';  -- empty key will disable encryption 
+sqlite> SELECT sqlcipher_export('plaintext');  
+sqlite> DETACH DATABASE plaintext;  
+
+
+
+7、加解密后数据库大小
+199MB--->200.1MB
+
+
+8、Android版本使用说明
+https://www.zetetic.net/sqlcipher/sqlcipher-for-android/
+
+
+8.1 编译Android对应二进制文件
+https://www.zetetic.net/sqlcipher/sqlcipher-for-android/#build-tutorial
+
+
+8.1.1 安装NDK
+下载NDK
+http://developer.android.com/ndk/downloads/index.html
+
+
+export ANDROID_NDK_ROOT=/Users/lemonhall/Downloads/android-ndk-r11
+export PATH=$ANDROID_NDK_ROOT:$PATH
+
+8.1.2 安装ADK
+/Users/lemonhall/Library/Android/sdk/tools
+安装好Android之后，默认就有了SDK了
+
+所以就是需要设置一下PATH
+
+8.1.3 编译时出现的问题1---android命令行接受参数改变问题
+
+make init 阶段里
+android update project -p .
+这个命令一定会报错，从而没有生成对应的很多文件
+手工运行后发现了问题，并修正了，android命令行工具需要更多的参数
+
+
+android list targets
+列出对应平台的id
+
+lemonhall@HalldeMacBook-Pro:~/android-database-sqlcipher$ android list targets
+Available Android targets:
+----------
+id: 1 or "android-23"
+     Name: Android 6.0
+     Type: Platform
+     API level: 23
+     Revision: 2
+     Skins: HVGA, QVGA, WQVGA400, WQVGA432, WSVGA, WVGA800 (default), WVGA854, WXGA720, WXGA800, WXGA800-7in
+ Tag/ABIs : no ABIs.
+lemonhall@HalldeMacBook-Pro:~/android-database-sqlcipher$ vim AndroidManifest.xml
+lemonhall@HalldeMacBook-Pro:~/android-database-sqlcipher$ android update project -p . -t 1
+Updated project.properties
+Updated local.properties
+No project name specified, using project folder name 'android-database-sqlcipher'.
+If you wish to change it, edit the first line of build.xml.
+Added file ./build.xml
+Updated file ./proguard-project.txt
+lemonhall@HalldeMacBook-Pro:~/android-database-sqlcipher$
+
+8.1.4 编译时出现问题2---makestandalonetoolchain.sh 入参改变问题
+
+/Users/lemonhall/android-database-sqlcipher/build-openssl-libraries.sh
+文件内参数问题导致
+
+ 64     #armv7 build
+ 65     ${ANDROID_NDK_ROOT}/build/tools/make-standalone-toolchain.sh \
+ 66         --platform=${ANDROID_PLATFORM_VERSION} \
+ 67         --install-dir=${ANDROID_TOOLCHAIN_DIR} \
+ 68         #--system=${TOOLCHAIN_SYSTEM} \
+ 69         --arch=arm
+
+ 删除掉三个--system 入参才可以建立独立的工具链
+
+ ~/Downloads/android-ndk-r11/build/tools/make-standalone-toolchain.sh 
+
+ /Downloads/android-ndk-r11/build/tools/make-standalone-toolchain.sh --platform=android-19 --install-dir=/tmp/sqlcipher-android-toolchain --arch=arm
+
+查看对应目录工具链：
+
+ lemonhall@HalldeMacBook-Pro:/tmp/sqlcipher-android-toolchain$ ll
+total 240
+-rw-r--r--@  1 lemonhall  staff  18002  3  3 16:24 COPYING
+-rw-r--r--@  1 lemonhall  staff  26527  3  3 16:24 COPYING.LIB
+-rw-r--r--@  1 lemonhall  staff   3324  3  3 16:24 COPYING.RUNTIME
+-rw-r--r--@  1 lemonhall  staff  35147  3  3 16:24 COPYING3
+-rw-r--r--@  1 lemonhall  staff   7639  3  3 16:24 COPYING3.LIB
+-rw-r--r--@  1 lemonhall  staff      0  3  3 16:24 MODULE_LICENSE_GPL
+-rw-r--r--@  1 lemonhall  staff  18002  3  3 16:24 NOTICE
+drwxr-xr-x@  4 lemonhall  staff    136  3 17 13:34 arm-linux-androideabi
+drwxr-xr-x@ 33 lemonhall  staff   1122  3 17 13:34 bin
+drwxr-xr-x   4 lemonhall  staff    136  3 17 13:34 include
+drwxr-xr-x@  4 lemonhall  staff    136  3 17 13:34 lib
+drwxr-xr-x@  3 lemonhall  staff    102  3 17 13:34 libexec
+-rw-r--r--@  1 lemonhall  staff   1092  3  3 16:24 repo.prop
+drwxr-xr-x   3 lemonhall  staff    102  3 17 13:34 sysroot
+lemonhall@HalldeMacBook-Pro:/tmp/sqlcipher-android-toolchain$
+
+8.1.5 JDK版本问题
+
+-compile:
+    [javac] Compiling 43 source files to /Users/lemonhall/android-database-sqlcipher/bin/classes
+    [javac] 警告: [options] 源值1.5已过时, 将在未来所有发行版中删除
+    [javac] 警告: [options] 目标值1.5已过时, 将在未来所有发行版中删除
+    [javac] 警告: [options] 要隐藏有关已过时选项的警告, 请使用 -Xlint:-options。
+    [javac] /Users/lemonhall/android-database-sqlcipher/src/net/sqlcipher/BulkCursorToCursorAdaptor.java:35: 错误: BulkCursorToCursorAdaptor不是抽象的, 并且未覆盖Cursor中的抽象方法setExtras(Bundle)
+    [javac] public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
+    [javac]              ^
+    [javac] /Users/lemonhall/android-database-sqlcipher/src/net/sqlcipher/MatrixCursor.java:29: 错误: MatrixCursor不是抽象的, 并且未覆盖Cursor中的抽象方法setExtras(Bundle)
+    [javac] public class MatrixCursor extends AbstractCursor {
+    [javac]        ^
+    [javac] /Users/lemonhall/android-database-sqlcipher/src/net/sqlcipher/database/SQLiteCursor.java:44: 错误: SQLiteCursor不是抽象的, 并且未覆盖Cursor中的抽象方法setExtras(Bundle)
+    [javac] public class SQLiteCursor extends AbstractWindowedCursor {
+    [javac]        ^
+    [javac] 注: 某些输入文件使用或覆盖了已过时的 API。
+    [javac] 注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+    [javac] 注: 某些输入文件使用了未经检查或不安全的操作。
+    [javac] 注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+    [javac] 3 个错误
+    [javac] 3 个警告
+
+
+修改了：    
+/Users/lemonhall/android-database-sqlcipher/src/net/sqlcipher/BulkCursorToCursorAdaptor.java
+加入的一个空的方法后即可编译通过。
+
+        @Override
+    public void setExtras(Bundle bundle) {
+            
+    }
+
+暂时不知道这块用来做什么；
+
+编译完成后：
+
+% tree libs
+libs
+├── armeabi
+│   ├── libdatabase_sqlcipher.so
+│   ├── libsqlcipher_android.so
+│   └── libstlport_shared.so
+└── sqlcipher.jar
+
+
+8.2、 下载对应源码
+
+git clone git://github.com/sqlcipher/android-database-sqlcipher.git
+
+make init
+
+make
+
+============================================================================
+
+9、建立示例项目
+
+将
+libs
+├── armeabi
+│   ├── libdatabase_sqlcipher.so
+│   ├── libsqlcipher_android.so
+│   └── libstlport_shared.so
+└── sqlcipher.jar
+
+拷贝到：
+/Users/lemonhall/AndroidStudioProjects/MyApplication/app/libs
+去
+lemonhall@HalldeMacBook-Pro:~/AndroidStudioProjects/MyApplication/app/libs$ pwd
+/Users/lemonhall/AndroidStudioProjects/MyApplication/app/libs
+lemonhall@HalldeMacBook-Pro:~/AndroidStudioProjects/MyApplication/app/libs$ ls
+armeabi       armeabi-v7a   sqlcipher.jar
+lemonhall@HalldeMacBook-Pro:~/AndroidStudioProjects/MyApplication/app/libs$ ll
+total 128
+drwxr-xr-x  5 lemonhall  staff    170  3 17 14:36 armeabi
+drwxr-xr-x  5 lemonhall  staff    170  3 17 14:36 armeabi-v7a
+-rw-r--r--  1 lemonhall  staff  61958  3 17 14:36 sqlcipher.jar
+lemonhall@HalldeMacBook-Pro:~/AndroidStudioProjects/MyApplication/app/libs$
+
+
+10、快速搞定的方法
+https://bintray.com/bintray/jcenter/net.zetetic%3Aandroid-database-sqlcipher/3.3.1-2/view
+
+这里去直接引用jar包
+
+然后从github上下载二进制zip包，里面就是缺少了对应libs，拷贝libs下的so文件
+
+接着按照教程来做示例项目，省去编译SO和jar包的繁琐过程
+
+对应3.3.1-2版本
+
+验证成功。
+
+11、下一步
+从实际工程中抽取测试用例，在X86下跑，写出完整文档，并上传示例工程；整合SO存储秘钥方案；
+
+编译出可以在windows/mac下用的pc版本
+
+配合android版本
+
+以及，测试iOS版本
